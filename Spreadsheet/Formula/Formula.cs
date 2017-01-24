@@ -37,6 +37,29 @@ namespace Formulas
         /// </summary>
         public Formula(String formula)
         {
+            var Operators = new List<string>();
+            var Values = new List<string>();
+            bool ValuePrior = false;
+            string nothing = "No Input";
+            string MissingOperator = "Missing Operator";
+
+            if (formula == null)
+            {
+                throw new FormulaFormatException(nothing);
+            }
+
+            for (int i = 0; i < formula.Length; i++)
+            {
+                if (ValuePrior == false ) //&& formula[i] == opPattern)
+                {
+
+                }
+
+            }
+            if (Operators.Count != (Values.Count - 1))
+            {
+                throw new FormulaFormatException(MissingOperator);
+            }
         }
         /// <summary>
         /// Evaluates this Formula, using the Lookup delegate to determine the values of variables.  (The
