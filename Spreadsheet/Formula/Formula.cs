@@ -38,13 +38,18 @@ namespace Formulas
         /// </summary>
         public Formula(String formula)
         {
+            if (formula == "")
+            {
+                throw new FormulaFormatException("No Input");
+            }
+
             var Operators = new List<string>();
             var Values = new List<string>();
             IEnumerable<string> tokens = Formula.GetTokens(formula);
 
             string previous =  null;
 
-            int pcount = 0;
+            int parcount = 0;
 
             string first = tokens.First<string>();
             string last = tokens.Last<string>();
@@ -54,10 +59,6 @@ namespace Formulas
             String varPattern = @"[a-zA-Z][0-9a-zA-Z]*";
             String doublePattern = @"(?: \d+\.\d* | \d*\.\d+ | \d+ ) (?: e[\+-]?\d+)?";
 
-            if (formula == null)
-            {
-                throw new FormulaFormatException("No Input");
-            }
             if (first != lpPattern || first != varPattern || first != doublePattern)
             {
                 throw new FormulaFormatException("The first element of the formula is not either a (, number, or variable.");
@@ -73,14 +74,14 @@ namespace Formulas
                 if (t.Equals(lpPattern))
                 {
                     Operators.Add(t);
-                    pcount += 1;
+                    parcount += 1;
                 }
 
                 //Checks token for ) and adds to Operator list.
                 else if (t.Equals(rpPattern))
                 {
                     Operators.Add(t);
-                    pcount -= 1;
+                    parcount -= 1;
                 }
 
                 //Checks token for valid operators and adds to Operator list.
@@ -114,7 +115,7 @@ namespace Formulas
                 }
 
                 //Checks relative parenthesis count.
-                else if (pcount < 1)
+                else if (parcount < 1)
                 {
                     throw new FormulaFormatException("Parenthesis mismatch: Formula contains More ) than ( .");
                 }
@@ -129,7 +130,7 @@ namespace Formulas
                 previous = t;
                
             }
-            if (pcount != 0)
+            if (parcount != 0)
             {
                 throw new FormulaFormatException("Parenthesis mismatch: Formula contains More ( than ) .");
             }

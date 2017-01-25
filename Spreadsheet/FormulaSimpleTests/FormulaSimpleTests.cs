@@ -47,16 +47,37 @@ namespace FormulaTestCases
             Formula f = new Formula("2 3");
         }
 
-        //[TestMethod]
-        //public static void Construct4()
-        //{
-        //    string f = ("( 2 + 3 + 4 + 5 * 8 - 9)");
-        //    IEnumerable<string> tokens = Formula.GetTokens(f);
-        //    foreach (string t in tokens)
-        //    {
-        //        Console.WriteLine(t);
-        //    }
-        //}
+        /// <summary>
+        /// Unexpected input parameter.
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(FormulaFormatException))]
+        public void Construct4()
+        {
+            Formula f = new Formula("3 + 4%");
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(FormulaFormatException))]
+        public void Construct5()
+        {
+            Formula f = new Formula("");
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(FormulaFormatException))]
+        public void Construct6()
+        {
+            Formula f = new Formula("(6*(5-4)");
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(FormulaFormatException))]
+        public void Construct7()
+        {
+            Formula f = new Formula("(6 * (5))) - 4");
+        }
+
 
 
         /// <summary>
