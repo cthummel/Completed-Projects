@@ -3,6 +3,7 @@
 using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Formulas;
+using System.Collections.Generic;
 
 namespace FormulaTestCases
 {
@@ -45,6 +46,18 @@ namespace FormulaTestCases
         {
             Formula f = new Formula("2 3");
         }
+
+        //[TestMethod]
+        //public static void Construct4()
+        //{
+        //    string f = ("( 2 + 3 + 4 + 5 * 8 - 9)");
+        //    IEnumerable<string> tokens = Formula.GetTokens(f);
+        //    foreach (string t in tokens)
+        //    {
+        //        Console.WriteLine(t);
+        //    }
+        //}
+
 
         /// <summary>
         /// Makes sure that "2+3" evaluates to 5.  Since the Formula
@@ -123,5 +136,7 @@ namespace FormulaTestCases
                 default: throw new UndefinedVariableException(v);
             }
         }
+        
+        
     }
 }

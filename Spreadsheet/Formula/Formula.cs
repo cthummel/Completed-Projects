@@ -3,6 +3,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using System.Linq;
 
 namespace Formulas
 {
@@ -40,22 +41,58 @@ namespace Formulas
             var Operators = new List<string>();
             var Values = new List<string>();
             IEnumerable<string> tokens = Formula.GetTokens(formula);
+
             bool ValuePrior = false;
 
+            string first = tokens.First<string>();
+            string last = tokens.Last<string>();
+            String lpPattern = @"\(";
+            String rpPattern = @"\)";
+            String opPattern = @"[\+\-*/]";
+            String varPattern = @"[a-zA-Z][0-9a-zA-Z]*";
+            String doublePattern = @"(?: \d+\.\d* | \d*\.\d+ | \d+ ) (?: e[\+-]?\d+)?";
 
             if (formula == null)
             {
                 throw new FormulaFormatException("No Input");
             }
+            if (first != lpPattern || first != varPattern || first != doublePattern)
+            {
+                throw new FormulaFormatException("The first element of the formula is not either a (, number, or variable.");
+            }
+            if (last != rpPattern || last != varPattern || last != doublePattern)
+            {
+                throw new FormulaFormatException("The last element of the formula is not either a ), number, or variable.");
+            }
+            
 
-            //Console.WriteLine(formula);
-            //foreach (string t in tokens)
+
+            foreach (string t in tokens)
+            {
+                if (t.Equals(lpPattern) || t.Equals(rpPattern) || t.Equals(opPattern))
+                {
+                    Operators.Add(t);
+                }
+                if (t == doublePattern || t == varPattern)
+                {
+                    Values.Add(t);
+                }
+                else
+                {
+                    throw new FormulaFormatException("Unexpected object in formula: " + t);
+                }
+               
+            }
+
+
+
+
+            //if (!(tokens.Equals("(") ))
             //{
-            //    Console.WriteLine(t);
+
             //}
 
-
-            for (int i = 0; i < formula.Length; i++)
+            for (int i = 0; i < (formula.Length - 1); i++)
             {
                 if (ValuePrior == false ) //&& formula[i] == opPattern)
                 {
@@ -67,6 +104,7 @@ namespace Formulas
                 }
 
             }
+
             if (Operators.Count >= Values.Count)
             {
                 throw new FormulaFormatException("1 or more extra operators.");
