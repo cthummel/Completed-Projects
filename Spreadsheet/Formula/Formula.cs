@@ -42,7 +42,9 @@ namespace Formulas
             var Values = new List<string>();
             IEnumerable<string> tokens = Formula.GetTokens(formula);
 
-            bool ValuePrior = false;
+            string previous =  null;
+
+            int pcount = 0;
 
             string first = tokens.First<string>();
             string last = tokens.Last<string>();
@@ -64,46 +66,74 @@ namespace Formulas
             {
                 throw new FormulaFormatException("The last element of the formula is not either a ), number, or variable.");
             }
-            
-
 
             foreach (string t in tokens)
             {
-                if (t.Equals(lpPattern) || t.Equals(rpPattern) || t.Equals(opPattern))
+                //Checks token for ( and adds to Operator list.
+                if (t.Equals(lpPattern))
+                {
+                    Operators.Add(t);
+                    pcount += 1;
+                }
+
+                //Checks token for ) and adds to Operator list.
+                else if (t.Equals(rpPattern))
+                {
+                    Operators.Add(t);
+                    pcount -= 1;
+                }
+
+                //Checks token for valid operators and adds to Operator list.
+                else if (t.Equals(opPattern))
                 {
                     Operators.Add(t);
                 }
-                if (t == doublePattern || t == varPattern)
+
+                //Checks token for numbers or variables and adds to Values list.
+                else if (t == doublePattern || t == varPattern)
                 {
                     Values.Add(t);
                 }
+
+                //Checks proper formatting following ( and operators.
+                else if (previous.Equals(lpPattern) || previous.Equals(opPattern))
+                {
+                    if (!t.Equals(varPattern) && !t.Equals(doublePattern) && !t.Equals(lpPattern))
+                    {
+                        throw new FormulaFormatException("Formula containing " + previous + "followed by " + t + " is invalid.");
+                    }
+                }
+
+                //Checks proper formatting following ), numbers, and variables.
+                else if (previous.Equals(rpPattern) || previous.Equals(doublePattern) || previous.Equals(varPattern))
+                {
+                    if (!t.Equals(opPattern)  && !t.Equals(rpPattern))
+                    {
+                        throw new FormulaFormatException("Formula containing " + previous + "followed by " + t + " is invalid.");
+                    }
+                }
+
+                //Checks relative parenthesis count.
+                else if (pcount < 1)
+                {
+                    throw new FormulaFormatException("Parenthesis mismatch: Formula contains More ) than ( .");
+                }
+
+                //Checks for invalid input tokens.
                 else
                 {
                     throw new FormulaFormatException("Unexpected object in formula: " + t);
                 }
+
+                
+                previous = t;
                
             }
-
-
-
-
-            //if (!(tokens.Equals("(") ))
-            //{
-
-            //}
-
-            for (int i = 0; i < (formula.Length - 1); i++)
+            if (pcount != 0)
             {
-                if (ValuePrior == false ) //&& formula[i] == opPattern)
-                {
-
-                }
-                if (formula[i] == 1)
-                {
-
-                }
-
+                throw new FormulaFormatException("Parenthesis mismatch: Formula contains More ( than ) .");
             }
+            
 
             if (Operators.Count >= Values.Count)
             {
