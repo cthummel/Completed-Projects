@@ -15,7 +15,9 @@ namespace Formulas
     /// are not allowed.)
     /// </summary>
     public class Formula
+
     {
+        private string output;
         /// <summary>
         /// Creates a Formula from a string that consists of a standard infix expression composed
         /// from non-negative floating-point numbers (using C#-like syntax for double/int literals), 
@@ -47,7 +49,7 @@ namespace Formulas
             var Values = new List<string>();
             IEnumerable<string> tokens = Formula.GetTokens(formula);
 
-            string previous =  null;
+            string previous = null;
 
             int parcount = 0;
 
@@ -108,7 +110,7 @@ namespace Formulas
                 //Checks proper formatting following ), numbers, and variables.
                 else if (previous.Equals(rpPattern) || previous.Equals(doublePattern) || previous.Equals(varPattern))
                 {
-                    if (!t.Equals(opPattern)  && !t.Equals(rpPattern))
+                    if (!t.Equals(opPattern) && !t.Equals(rpPattern))
                     {
                         throw new FormulaFormatException("Formula containing " + previous + "followed by " + t + " is invalid.");
                     }
@@ -126,15 +128,15 @@ namespace Formulas
                     throw new FormulaFormatException("Unexpected object in formula: " + t);
                 }
 
-                
+
                 previous = t;
-               
+
             }
             if (parcount != 0)
             {
                 throw new FormulaFormatException("Parenthesis mismatch: Formula contains More ( than ) .");
             }
-            
+
 
             if (Operators.Count >= Values.Count)
             {
@@ -144,7 +146,8 @@ namespace Formulas
             {
                 throw new FormulaFormatException("1 or more operators missing.");
             }
-            
+            output = formula;
+
         }
         /// <summary>
         /// Evaluates this Formula, using the Lookup delegate to determine the values of variables.  (The
@@ -157,6 +160,183 @@ namespace Formulas
         /// </summary>
         public double Evaluate(Lookup lookup)
         {
+            var Operators = new Stack<string>();
+            var Values = new Stack<string>();
+            IEnumerable<string> tokens = Formula.GetTokens(output);
+
+            String lpPattern = @"\(";
+            String rpPattern = @"\)";
+            String varPattern = @"[a-zA-Z][0-9a-zA-Z]*";
+            String doublePattern = @"(?: \d+\.\d* | \d*\.\d+ | \d+ ) (?: e[\+-]?\d+)?";
+
+            foreach (string t in tokens)
+            {
+                //Current item is a double.
+                if (t == doublePattern)
+                {
+                    if (Operators.Peek() == "*" || Operators.Peek() == "/")
+                    {
+                        if (Operators.Peek() == "*")
+                        {
+                            double result = double.Parse(Values.Pop()) * double.Parse(t);
+                            Values.Push(result.ToString());
+                            Operators.Pop();
+                        }
+                        else
+                        {
+                            if(double.Parse(t) == 0)
+                            {
+                                throw new FormulaEvaluationException("Cannot divide by zero.");
+                            }
+
+                            double result = double.Parse(Values.Pop()) / double.Parse(t);
+                            Values.Push(result.ToString());
+                            Operators.Pop();
+                        }
+                    }
+
+                    else
+                    {
+                        Values.Push(t);
+                    }
+                }
+                
+                if (t == varPattern)
+                {
+                   
+                    if (Operators.Peek() == "*" || Operators.Peek() == "/")
+                    {
+                        if (Operators.Peek() == "*")
+                        {
+                            double result = double.Parse(Values.Pop()) * lookup(t);
+                            Values.Push(result.ToString());
+                        }
+                        else
+                        {
+                            double result = double.Parse(Values.Pop()) / lookup(t);
+                            Values.Push(result.ToString());
+                        }
+                    }
+
+                    else
+                    {
+                        Values.Push(t);
+                    }
+                }
+
+                if (t == "+" || t == "-")
+                {
+                    if (Operators.Peek() == "+" || Operators.Peek() == "-")
+                    {
+                        if (Operators.Peek() == "+")
+                        {
+                            double second = double.Parse(Values.Pop());
+                            double first = double.Parse(Values.Pop());
+                            double result = first + second;
+                            Values.Push(result.ToString());
+                            Operators.Pop();
+                        }
+                        else
+                        {
+                            double second = double.Parse(Values.Pop());
+                            double first = double.Parse(Values.Pop());
+                            double result = first - second;
+                            Values.Push(result.ToString());
+                            Operators.Pop();
+                        }
+                        
+                    }
+
+                    Operators.Push(t);
+
+                }
+
+                if (t == "*" || t == "/")
+                {
+                    Operators.Push(t);
+                }
+
+                if (t == lpPattern)
+                {
+                    Operators.Push(t);
+                }
+
+                if (t == rpPattern)
+                {
+                    if (Operators.Peek() == "+" || Operators.Peek() == "-")
+                    {
+                        if (Operators.Peek() == "+")
+                        {
+                            double second = double.Parse(Values.Pop());
+                            double first = double.Parse(Values.Pop());
+                            double result = first + second;
+                            Values.Push(result.ToString());
+                            Operators.Pop();
+                        }
+                        else
+                        {
+                            double second = double.Parse(Values.Pop());
+                            double first = double.Parse(Values.Pop());
+                            double result = first - second;
+                            Values.Push(result.ToString());
+                            Operators.Pop();
+                        }
+
+                    }
+
+                    Operators.Pop();
+
+                    if (Operators.Peek() == "*" || Operators.Peek() == "/")
+                    {
+                        if (Operators.Peek() == "*")
+                        {
+                            double second = double.Parse(Values.Pop());
+                            double first = double.Parse(Values.Pop());
+                            double result = first * second;
+                            Values.Push(result.ToString());
+                            Operators.Pop();
+                        }
+                        else
+                        {
+                            double second = double.Parse(Values.Pop());
+
+                            if (second == 0)
+                            {
+                                throw new FormulaEvaluationException("Cannot divide by zero.");
+                            }
+
+                            double first = double.Parse(Values.Pop());
+                            double result = first * second;
+                            Values.Push(result.ToString());
+                            Operators.Pop();
+                        }
+                    }
+                }
+            }
+
+            if (Operators.Count == 0)
+            {
+                return double.Parse(Values.Pop());
+            }
+            if (Operators.Count == 1)
+            {
+                if (Operators.Peek() == "+")
+                {
+                    double second = double.Parse(Values.Pop());
+                    double first = double.Parse(Values.Pop());
+                    double result = first + second;
+                    return result;
+                    
+                }
+                else
+                {
+                    double second = double.Parse(Values.Pop());
+                    double first = double.Parse(Values.Pop());
+                    double result = first - second;
+                    return result;
+                }
+            }
+            
             return 0;
         }
 
@@ -195,6 +375,17 @@ namespace Formulas
                 }
             }
         }
+        public void SetValue(string key, double value)
+        {
+            var list = new List<KeyValuePair<string, double>>();
+
+        }
+        public double FindValue(string input)
+        {
+
+            return 0;
+
+        }
     }
 
     /// <summary>
@@ -205,6 +396,8 @@ namespace Formulas
     /// don't is up to the implementation of the method.
     /// </summary>
     public delegate double Lookup(string var);
+
+    
 
     /// <summary>
     /// Used to report that a Lookup delegate is unable to determine the value
