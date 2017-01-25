@@ -39,14 +39,21 @@ namespace Formulas
         {
             var Operators = new List<string>();
             var Values = new List<string>();
+            IEnumerable<string> tokens = Formula.GetTokens(formula);
             bool ValuePrior = false;
-            string nothing = "No Input";
-            string MissingOperator = "Missing Operator";
+
 
             if (formula == null)
             {
-                throw new FormulaFormatException(nothing);
+                throw new FormulaFormatException("No Input");
             }
+
+            //Console.WriteLine(formula);
+            //foreach (string t in tokens)
+            //{
+            //    Console.WriteLine(t);
+            //}
+
 
             for (int i = 0; i < formula.Length; i++)
             {
@@ -54,12 +61,21 @@ namespace Formulas
                 {
 
                 }
+                if (formula[i] == 1)
+                {
+
+                }
 
             }
-            if (Operators.Count != (Values.Count - 1))
+            if (Operators.Count >= Values.Count)
             {
-                throw new FormulaFormatException(MissingOperator);
+                throw new FormulaFormatException("1 or more extra operators.");
             }
+            else if (Operators.Count < (Values.Count - 1))
+            {
+                throw new FormulaFormatException("1 or more operators missing.");
+            }
+            
         }
         /// <summary>
         /// Evaluates this Formula, using the Lookup delegate to determine the values of variables.  (The
