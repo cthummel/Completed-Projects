@@ -182,9 +182,15 @@ namespace FormulaTestCases
         public void Evaluate5a()
         {
             Formula f = new Formula("(x * y) * (z / x)");
-            Assert.AreEqual(f.Evaluate(Lookup4), 20.0, 1e-6);
+            Assert.AreEqual(f.Evaluate(Lookup4), 48.0, 1e-6);
         }
 
+        [TestMethod]
+        public void Evaluate5b()
+        {
+            Formula f = new Formula("(x + y) / (z - x)");
+            Assert.AreEqual(f.Evaluate(Lookup4), 2.5, 1e-6);
+        }
         /// <summary>
         /// A Lookup method that maps x to 4.0, y to 6.0, and z to 8.0.
         /// All other variables result in an UndefinedVariableException.
