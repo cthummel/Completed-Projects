@@ -54,7 +54,7 @@ namespace FormulaTestCases
         [ExpectedException(typeof(FormulaFormatException))]
         public void Construct4()
         {
-            Formula f = new Formula("3 + 4%");
+            Formula f = new Formula("3 + 4(");
         }
 
         [TestMethod]
@@ -68,16 +68,21 @@ namespace FormulaTestCases
         [ExpectedException(typeof(FormulaFormatException))]
         public void Construct6()
         {
-            Formula f = new Formula("(6*(5-4)");
+            Formula f = new Formula("((6*(5-4)");
         }
 
         [TestMethod]
         [ExpectedException(typeof(FormulaFormatException))]
         public void Construct7()
         {
-            Formula f = new Formula("(6 * (5))) - 4");
+            Formula f = new Formula("(6 * (5.0))) - 4");
         }
-
+        [TestMethod]
+        [ExpectedException(typeof(FormulaFormatException))]
+        public void Construct8()
+        {
+            Formula f = new Formula(")+0");
+        }
 
 
         /// <summary>
@@ -89,8 +94,29 @@ namespace FormulaTestCases
         [TestMethod]
         public void Evaluate1()
         {
-            Formula f = new Formula("2+3");
+            Formula f = new Formula("2 + 3");
             Assert.AreEqual(f.Evaluate(v => 0), 5.0, 1e-6);
+        }
+
+        [TestMethod]
+        public void Evaluate1a()
+        {
+            Formula f = new Formula("2 + 3 + 4 - 5 + 5 + 6");
+            Assert.AreEqual(f.Evaluate(v => 0), 15.0, 1e-6);
+        }
+        [TestMethod]
+        public void Evaluate1b()
+        {
+            Formula f = new Formula("10*10/100*90 / 3");
+            Assert.AreEqual(f.Evaluate(v => 0), 30.0, 1e-6);
+        }
+        [TestMethod]
+        [ExpectedException(typeof(FormulaEvaluationException))]
+        public void Evaluate1c()
+        {
+            Formula f = new Formula("3 * 3 / 0");
+            f.Evaluate(v => 0);
+            
         }
 
         /// <summary>
@@ -130,6 +156,18 @@ namespace FormulaTestCases
             Formula f = new Formula("x + y");
             Assert.AreEqual(f.Evaluate(Lookup4), 10.0, 1e-6);
         }
+        [TestMethod]
+        public void Evaluate4a()
+        {
+            Formula f = new Formula("x * y");
+            Assert.AreEqual(f.Evaluate(Lookup4), 24.0, 1e-6);
+        }
+        [TestMethod]
+        public void Evaluate4b()
+        {
+            Formula f = new Formula("x / y");
+            Assert.AreEqual(f.Evaluate(Lookup4), .66, .1);
+        }
 
         /// <summary>
         /// This uses one of each kind of token.
@@ -138,6 +176,12 @@ namespace FormulaTestCases
         public void Evaluate5 ()
         {
             Formula f = new Formula("(x + y) * (z / x) * 1.0");
+            Assert.AreEqual(f.Evaluate(Lookup4), 20.0, 1e-6);
+        }
+        [TestMethod]
+        public void Evaluate5a()
+        {
+            Formula f = new Formula("(x * y) * (z / x)");
             Assert.AreEqual(f.Evaluate(Lookup4), 20.0, 1e-6);
         }
 

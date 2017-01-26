@@ -18,6 +18,13 @@ namespace Formulas
 
     {
         private string output;
+        private String lpPattern = @"\(";
+        private String rpPattern = @"\)";
+        private String opPattern = @"[\+\-*/]";
+        private String varPattern = @"[a-zA-Z][0-9a-zA-Z]*";
+        private String doublePattern = @"(?: \d+\.\d* | \d*\.\d+ | \d+ ) (?: e[\+-]?\d+)?";
+        private String altdouble = @"^\d+(,\d+)*(\.\d+(e\d+)?)?$";
+
         /// <summary>
         /// Creates a Formula from a string that consists of a standard infix expression composed
         /// from non-negative floating-point numbers (using C#-like syntax for double/int literals), 
@@ -49,85 +56,88 @@ namespace Formulas
             var Values = new List<string>();
             IEnumerable<string> tokens = Formula.GetTokens(formula);
 
-            string previous = null;
-
+            bool failure = true;
             int parcount = 0;
 
-            string first = tokens.First<string>();
-            string last = tokens.Last<string>();
-            String lpPattern = @"\(";
-            String rpPattern = @"\)";
-            String opPattern = @"[\+\-*/]";
-            String varPattern = @"[a-zA-Z][0-9a-zA-Z]*";
-            String doublePattern = @"(?: \d+\.\d* | \d*\.\d+ | \d+ ) (?: e[\+-]?\d+)?";
+            string first = tokens.ElementAt<string>(0);
+            string last = tokens.ElementAt<string>(tokens.Count()-1);
+            string previous = "";
 
-            if (first != lpPattern || first != varPattern || first != doublePattern)
+            //Checks first element in formula.
+            if (Regex.IsMatch(first, rpPattern) || Regex.IsMatch(first, opPattern))
             {
                 throw new FormulaFormatException("The first element of the formula is not either a (, number, or variable.");
             }
-            if (last != rpPattern || last != varPattern || last != doublePattern)
+            
+            //Checks last element in formula.
+            if (Regex.IsMatch(last, lpPattern) || Regex.IsMatch(last, opPattern))
             {
                 throw new FormulaFormatException("The last element of the formula is not either a ), number, or variable.");
             }
 
+           
+
+
             foreach (string t in tokens)
             {
+                //Checks for invalid input tokens.
+                if (!Regex.IsMatch(t, lpPattern) && !Regex.IsMatch(t, rpPattern) && !Regex.IsMatch(t, altdouble)
+                    && !Regex.IsMatch(t, varPattern) && !Regex.IsMatch(t, opPattern))
+                {
+                    throw new FormulaFormatException("Unexpected object in formula: " + t);
+                }
+
                 //Checks token for ( and adds to Operator list.
-                if (t.Equals(lpPattern))
+                if (Regex.IsMatch(t,lpPattern))
                 {
                     Operators.Add(t);
                     parcount += 1;
                 }
 
                 //Checks token for ) and adds to Operator list.
-                else if (t.Equals(rpPattern))
+                if (Regex.IsMatch(t, rpPattern))
                 {
                     Operators.Add(t);
                     parcount -= 1;
                 }
 
                 //Checks token for valid operators and adds to Operator list.
-                else if (t.Equals(opPattern))
+                if (Regex.IsMatch(t, opPattern))
                 {
                     Operators.Add(t);
                 }
 
                 //Checks token for numbers or variables and adds to Values list.
-                else if (t == doublePattern || t == varPattern)
+                if (Regex.IsMatch(t, altdouble) || Regex.IsMatch(t, varPattern))
                 {
                     Values.Add(t);
                 }
 
                 //Checks proper formatting following ( and operators.
-                else if (previous.Equals(lpPattern) || previous.Equals(opPattern))
+                if (Regex.IsMatch(previous, lpPattern) || Regex.IsMatch(previous, opPattern))
                 {
-                    if (!t.Equals(varPattern) && !t.Equals(doublePattern) && !t.Equals(lpPattern))
+                    if (!Regex.IsMatch(t, varPattern) && !Regex.IsMatch(t, altdouble) && !Regex.IsMatch(t, lpPattern))
                     {
-                        throw new FormulaFormatException("Formula containing " + previous + "followed by " + t + " is invalid.");
+                        throw new FormulaFormatException("Check 5: Formula containing " + previous + " followed by " + t + " is invalid.");
                     }
                 }
 
                 //Checks proper formatting following ), numbers, and variables.
-                else if (previous.Equals(rpPattern) || previous.Equals(doublePattern) || previous.Equals(varPattern))
+                if (Regex.IsMatch(previous, rpPattern) || Regex.IsMatch(previous, altdouble) || Regex.IsMatch(previous, varPattern))
                 {
-                    if (!t.Equals(opPattern) && !t.Equals(rpPattern))
+                    if (!Regex.IsMatch(t, opPattern) && !Regex.IsMatch(t, rpPattern))
                     {
-                        throw new FormulaFormatException("Formula containing " + previous + "followed by " + t + " is invalid.");
+                        throw new FormulaFormatException("Check 6: `Formula containing " + previous + " followed by " + t + " is invalid.");
                     }
+
+                    
                 }
 
                 //Checks relative parenthesis count.
-                else if (parcount < 1)
+                if (parcount < 0)
                 {
-                    throw new FormulaFormatException("Parenthesis mismatch: Formula contains More ) than ( .");
+                    throw new FormulaFormatException("Parenthesis mismatch: Formula contains " + parcount + " More ) than ( .");
                 }
-
-                //Checks for invalid input tokens.
-                else
-                {
-                    throw new FormulaFormatException("Unexpected object in formula: " + t);
-                }
-
 
                 previous = t;
 
@@ -137,15 +147,6 @@ namespace Formulas
                 throw new FormulaFormatException("Parenthesis mismatch: Formula contains More ( than ) .");
             }
 
-
-            if (Operators.Count >= Values.Count)
-            {
-                throw new FormulaFormatException("1 or more extra operators.");
-            }
-            else if (Operators.Count < (Values.Count - 1))
-            {
-                throw new FormulaFormatException("1 or more operators missing.");
-            }
             output = formula;
 
         }
@@ -159,93 +160,149 @@ namespace Formulas
         /// with an explanatory Message.
         /// </summary>
         public double Evaluate(Lookup lookup)
-        {
+        { 
             var Operators = new Stack<string>();
             var Values = new Stack<string>();
             IEnumerable<string> tokens = Formula.GetTokens(output);
 
-            String lpPattern = @"\(";
-            String rpPattern = @"\)";
-            String varPattern = @"[a-zA-Z][0-9a-zA-Z]*";
-            String doublePattern = @"(?: \d+\.\d* | \d*\.\d+ | \d+ ) (?: e[\+-]?\d+)?";
+            double FinalAnswer = 0;
+            bool keepgoing = true;
+
+            
 
             foreach (string t in tokens)
             {
+                
                 //Current item is a double.
-                if (t == doublePattern)
+                if (Regex.IsMatch(t, altdouble))
                 {
-                    if (Operators.Peek() == "*" || Operators.Peek() == "/")
-                    {
-                        if (Operators.Peek() == "*")
-                        {
-                            double result = double.Parse(Values.Pop()) * double.Parse(t);
-                            Values.Push(result.ToString());
-                            Operators.Pop();
-                        }
-                        else
-                        {
-                            if(double.Parse(t) == 0)
-                            {
-                                throw new FormulaEvaluationException("Cannot divide by zero.");
-                            }
-
-                            double result = double.Parse(Values.Pop()) / double.Parse(t);
-                            Values.Push(result.ToString());
-                            Operators.Pop();
-                        }
-                    }
-
-                    else
+                    if (Operators.Count == 0)
                     {
                         Values.Push(t);
                     }
+
+                    if (Operators.Count != 0)
+                    {
+                        if (Operators.Peek() == "*" || Operators.Peek() == "/")
+                        {
+                            if (Operators.Peek() == "*")
+                            {
+                                double result = double.Parse(Values.Pop()) * double.Parse(t);
+                                Values.Push(result.ToString());
+                                Operators.Pop();
+                            }
+                            else
+                            {
+                                if (double.Parse(t) == 0)
+                                {
+                                    throw new FormulaEvaluationException("Cannot divide by zero.");
+                                }
+
+                                double result = double.Parse(Values.Pop()) / double.Parse(t);
+                                Values.Push(result.ToString());
+                                Operators.Pop();
+                                
+                            }
+                        }
+                        else
+                        {
+                            Values.Push(t);
+                        }
+                    }                  
+
+                    
                 }
                 
-                if (t == varPattern)
+                if (Regex.IsMatch(t, varPattern))
                 {
-                   
-                    if (Operators.Peek() == "*" || Operators.Peek() == "/")
+                    if (double.IsNaN(lookup(t)))
                     {
-                        if (Operators.Peek() == "*")
-                        {
-                            double result = double.Parse(Values.Pop()) * lookup(t);
-                            Values.Push(result.ToString());
-                        }
-                        else
-                        {
-                            double result = double.Parse(Values.Pop()) / lookup(t);
-                            Values.Push(result.ToString());
-                        }
+                        throw new UndefinedVariableException("No specification for variable values.");
                     }
 
-                    else
+                    if (Operators.Count == 0)
                     {
                         Values.Push(t);
                     }
+
+                    if (Operators.Count != 0)
+                    {
+                        if (Operators.Peek() == "*" || Operators.Peek() == "/")
+                        {
+                            if (Operators.Peek() == "*")
+                            {
+                                if (Regex.IsMatch(Values.Peek(), varPattern))
+                                {
+                                    double first = lookup(Values.Pop());
+                                    double second = lookup(t);
+                                    double result = first * second;
+                                    Values.Push(result.ToString());
+                                    Operators.Pop();
+                                }
+                                else
+                                {
+                                    double result = double.Parse(Values.Pop()) * lookup(t);
+                                    Values.Push(result.ToString());
+                                    Operators.Pop();
+                                }
+                                
+                            }
+                            else
+                            {
+                                if (Regex.IsMatch(Values.Peek(), varPattern))
+                                {
+                                    double first = lookup(Values.Pop());
+                                    double second = lookup(t);
+                                    double result = first / second;
+                                    Values.Push(result.ToString());
+                                    Operators.Pop();
+                                }
+                                else
+                                {
+                                    double result = double.Parse(Values.Pop()) / lookup(t);
+                                    Values.Push(result.ToString());
+                                    Operators.Pop();
+                                }
+                                
+                            }
+                        }
+
+                        else
+                        {
+                            Values.Push(t);
+                        }
+                    }
+
+                    
+
                 }
 
                 if (t == "+" || t == "-")
                 {
-                    if (Operators.Peek() == "+" || Operators.Peek() == "-")
+                    if (Operators.Count != 0)
                     {
-                        if (Operators.Peek() == "+")
+                        if (Operators.Peek() == "+" || Operators.Peek() == "-")
                         {
-                            double second = double.Parse(Values.Pop());
-                            double first = double.Parse(Values.Pop());
-                            double result = first + second;
-                            Values.Push(result.ToString());
-                            Operators.Pop();
+                            if (Operators.Peek() == "+")
+                            {
+                                double second = double.Parse(Values.Pop());
+                                double first = double.Parse(Values.Pop());
+                                double result = first + second;
+                                Values.Push(result.ToString());
+                                Operators.Pop();
+                            }
+                            else
+                            {
+                                double second = double.Parse(Values.Pop());
+                                double first = double.Parse(Values.Pop());
+                                double result = first - second;
+                                Values.Push(result.ToString());
+                                Operators.Pop();
+                            }
+
                         }
-                        else
-                        {
-                            double second = double.Parse(Values.Pop());
-                            double first = double.Parse(Values.Pop());
-                            double result = first - second;
-                            Values.Push(result.ToString());
-                            Operators.Pop();
-                        }
-                        
                     }
+                    
 
                     Operators.Push(t);
 
@@ -256,89 +313,319 @@ namespace Formulas
                     Operators.Push(t);
                 }
 
-                if (t == lpPattern)
+                if (Regex.IsMatch(t, lpPattern))
                 {
                     Operators.Push(t);
                 }
 
-                if (t == rpPattern)
+                if (Regex.IsMatch(t, rpPattern))
                 {
-                    if (Operators.Peek() == "+" || Operators.Peek() == "-")
+                    if (Regex.IsMatch(Operators.Peek(), lpPattern))
                     {
-                        if (Operators.Peek() == "+")
-                        {
-                            double second = double.Parse(Values.Pop());
-                            double first = double.Parse(Values.Pop());
-                            double result = first + second;
-                            Values.Push(result.ToString());
-                            Operators.Pop();
-                        }
-                        else
-                        {
-                            double second = double.Parse(Values.Pop());
-                            double first = double.Parse(Values.Pop());
-                            double result = first - second;
-                            Values.Push(result.ToString());
-                            Operators.Pop();
-                        }
-
+                        Operators.Pop();
+                        keepgoing = false;
                     }
-
-                    Operators.Pop();
-
-                    if (Operators.Peek() == "*" || Operators.Peek() == "/")
+                    //4 cases. Value contains 2 variables, 1 variable and 1 value, 1 value and 1 variable, or 2 values.
+                    while (keepgoing == true)
                     {
-                        if (Operators.Peek() == "*")
+                        if (Operators.Peek() == "+" || Operators.Peek() == "-")
                         {
-                            double second = double.Parse(Values.Pop());
-                            double first = double.Parse(Values.Pop());
-                            double result = first * second;
-                            Values.Push(result.ToString());
+                            if (Operators.Peek() == "+")
+                            {
+                                while (keepgoing == true)
+                                {
+                                    if (Regex.IsMatch(Values.Peek(), varPattern) && Regex.IsMatch(Values.ElementAt<string>(Values.Count - 2), varPattern))
+                                    {
+                                        double second = lookup(Values.Pop());
+                                        double first = lookup(Values.Pop());
+                                        double result = first + second;
+                                        Values.Push(result.ToString());
+                                        //Operators.Pop();
+                                        keepgoing = false;
+                                        break;
+                                    }
+                                    if (Regex.IsMatch(Values.Peek(), varPattern) && Regex.IsMatch(Values.ElementAt<string>(Values.Count - 2), altdouble))
+                                    {
+                                        double second = lookup(Values.Pop());
+                                        double first = double.Parse(Values.Pop());
+                                        double result = first + second;
+                                        Values.Push(result.ToString());
+                                        //Operators.Pop();
+                                        keepgoing = false;
+                                        break;
+                                    }
+                                    if (Regex.IsMatch(Values.Peek(), altdouble) && Regex.IsMatch(Values.ElementAt<string>(Values.Count - 2), varPattern))
+                                    {
+                                        double second = double.Parse(Values.Pop());
+                                        double first = lookup(Values.Pop());
+                                        double result = first + second;
+                                        Values.Push(result.ToString());
+                                        //Operators.Pop();
+                                        keepgoing = false;
+                                        break;
+                                    }
+                                    if (Regex.IsMatch(Values.Peek(), altdouble) && Regex.IsMatch(Values.ElementAt<string>(Values.Count - 2), altdouble))
+                                    {
+                                        double second = double.Parse(Values.Pop());
+                                        double first = double.Parse(Values.Pop());
+                                        double result = first + second;
+                                        Values.Push(result.ToString());
+                                        //Operators.Pop();
+                                        keepgoing = false;
+                                        break;
+                                    }
+                                }
+
+                            }
+                            else
+                            {
+                                while (keepgoing == true)
+                                {
+                                    if (Regex.IsMatch(Values.Peek(), varPattern) && Regex.IsMatch(Values.ElementAt<string>(Values.Count - 2), varPattern))
+                                    {
+                                        double second = lookup(Values.Pop());
+                                        double first = lookup(Values.Pop());
+                                        double result = first - second;
+                                        Values.Push(result.ToString());
+                                        //Operators.Pop();
+                                        keepgoing = false;
+                                        break;
+                                    }
+                                    if (Regex.IsMatch(Values.Peek(), varPattern) && Regex.IsMatch(Values.ElementAt<string>(Values.Count - 2), altdouble))
+                                    {
+                                        double second = lookup(Values.Pop());
+                                        double first = double.Parse(Values.Pop());
+                                        double result = first - second;
+                                        Values.Push(result.ToString());
+                                        //Operators.Pop();
+                                        keepgoing = false;
+                                        break;
+                                    }
+                                    if (Regex.IsMatch(Values.Peek(), altdouble) && Regex.IsMatch(Values.ElementAt<string>(Values.Count - 2), varPattern))
+                                    {
+                                        double second = double.Parse(Values.Pop());
+                                        double first = lookup(Values.Pop());
+                                        double result = first - second;
+                                        Values.Push(result.ToString());
+                                        //Operators.Pop();
+                                        keepgoing = false;
+                                        break;
+                                    }
+                                    if (Regex.IsMatch(Values.Peek(), altdouble) && Regex.IsMatch(Values.ElementAt<string>(Values.Count - 2), altdouble))
+                                    {
+                                        double second = double.Parse(Values.Pop());
+                                        double first = double.Parse(Values.Pop());
+                                        double result = first - second;
+                                        Values.Push(result.ToString());
+                                        //Operators.Pop();
+                                        keepgoing = false;
+                                        break;
+                                    }
+                                }
+                            }
                             Operators.Pop();
                         }
-                        else
-                        {
-                            double second = double.Parse(Values.Pop());
 
-                            if (second == 0)
+                        if (Operators.Peek() == "*" || Operators.Peek() == "/")
+                        {
+                            if (Operators.Peek() == "*")
                             {
-                                throw new FormulaEvaluationException("Cannot divide by zero.");
+                                while (keepgoing == true)
+                                {
+                                    if (Regex.IsMatch(Values.Peek(), varPattern) && Regex.IsMatch(Values.ElementAt<string>(Values.Count - 2), varPattern))
+                                    {
+                                        double second = lookup(Values.Pop());
+                                        double first = lookup(Values.Pop());
+                                        double result = first * second;
+                                        Values.Push(result.ToString());
+                                        //Operators.Pop();
+                                        keepgoing = false;
+                                        break;
+                                    }
+                                    if (Regex.IsMatch(Values.Peek(), varPattern) && Regex.IsMatch(Values.ElementAt<string>(Values.Count - 2), altdouble))
+                                    {
+                                        double second = lookup(Values.Pop());
+                                        double first = double.Parse(Values.Pop());
+                                        double result = first * second;
+                                        Values.Push(result.ToString());
+                                        //Operators.Pop();
+                                        keepgoing = false;
+                                        break;
+                                    }
+                                    if (Regex.IsMatch(Values.Peek(), altdouble) && Regex.IsMatch(Values.ElementAt<string>(Values.Count - 2), varPattern))
+                                    {
+                                        double second = double.Parse(Values.Pop());
+                                        double first = lookup(Values.Pop());
+                                        double result = first * second;
+                                        Values.Push(result.ToString());
+                                        //Operators.Pop();
+                                        keepgoing = false;
+                                        break;
+                                    }
+                                    if (Regex.IsMatch(Values.Peek(), altdouble) && Regex.IsMatch(Values.ElementAt<string>(Values.Count - 2), altdouble))
+                                    {
+                                        double second = double.Parse(Values.Pop());
+                                        double first = double.Parse(Values.Pop());
+                                        double result = first * second;
+                                        Values.Push(result.ToString());
+                                        //Operators.Pop();
+                                        keepgoing = false;
+                                        break;
+                                    }
+                                }
+
+
                             }
 
-                            double first = double.Parse(Values.Pop());
-                            double result = first * second;
-                            Values.Push(result.ToString());
-                            Operators.Pop();
+                            else
+                            {
+                                while (keepgoing == true)
+                                {
+                                    if (Regex.IsMatch(Values.Peek(), varPattern) && Regex.IsMatch(Values.ElementAt<string>(Values.Count - 2), varPattern))
+                                    {
+                                        double second = lookup(Values.Pop());
+                                        if (second == 0)
+                                        {
+                                            throw new FormulaEvaluationException("Cannot divide by zero.");
+                                        }
+
+                                        double first = lookup(Values.Pop());
+                                        double result = first / second;
+                                        Values.Push(result.ToString());
+                                        //Operators.Pop();
+                                        keepgoing = false;
+                                    }
+                                    if (Regex.IsMatch(Values.Peek(), varPattern) && Regex.IsMatch(Values.ElementAt<string>(Values.Count - 2), altdouble))
+                                    {
+                                        double second = lookup(Values.Pop());
+
+                                        if (second == 0)
+                                        {
+                                            throw new FormulaEvaluationException("Cannot divide by zero.");
+                                        }
+                                        double first = double.Parse(Values.Pop());
+                                        double result = first / second;
+                                        Values.Push(result.ToString());
+                                        //Operators.Pop();
+                                        keepgoing = false;
+                                    }
+                                    if (Regex.IsMatch(Values.Peek(), altdouble) && Regex.IsMatch(Values.ElementAt<string>(Values.Count - 2), varPattern))
+                                    {
+                                        double second = double.Parse(Values.Pop());
+                                        if (second == 0)
+                                        {
+                                            throw new FormulaEvaluationException("Cannot divide by zero.");
+                                        }
+
+                                        double first = lookup(Values.Pop());
+                                        double result = first / second;
+                                        Values.Push(result.ToString());
+                                        //Operators.Pop();
+                                        keepgoing = false;
+                                    }
+                                    if (Regex.IsMatch(Values.Peek(), altdouble) && Regex.IsMatch(Values.ElementAt<string>(Values.Count - 2), altdouble))
+                                    {
+                                        double second = double.Parse(Values.Pop());
+                                        if (second == 0)
+                                        {
+                                            throw new FormulaEvaluationException("Cannot divide by zero.");
+                                        }
+
+                                        double first = double.Parse(Values.Pop());
+                                        double result = first / second;
+                                        Values.Push(result.ToString());
+                                        //Operators.Pop();
+                                        keepgoing = false;
+                                    }
+                                }
+
+                            }
                         }
                     }
+                    
+                    
+                    
                 }
+                keepgoing = true;
+
             }
 
             if (Operators.Count == 0)
             {
-                return double.Parse(Values.Pop());
+                if (Regex.IsMatch(Values.Peek(), varPattern))
+                {
+                    FinalAnswer = lookup(Values.Pop());
+                }
+                else
+                {
+                    FinalAnswer = double.Parse(Values.Pop());
+                }
+                
             }
+            //4 cases. Value contains 2 variables, 1 variable and 1 value, 1 value and 1 variable, or 2 values.
             if (Operators.Count == 1)
             {
                 if (Operators.Peek() == "+")
                 {
-                    double second = double.Parse(Values.Pop());
-                    double first = double.Parse(Values.Pop());
-                    double result = first + second;
-                    return result;
-                    
+                    if(Regex.IsMatch(Values.Peek(), varPattern) && Regex.IsMatch(Values.ElementAt<string>(0), varPattern))
+                    {
+                        double second = lookup(Values.Pop());
+                        double first = lookup(Values.ElementAt<string>(0));
+                        FinalAnswer = first + second;
+                    }
+                    if(Regex.IsMatch(Values.Peek(), varPattern) && Regex.IsMatch(Values.ElementAt<string>(0), altdouble))
+                    {
+                        double second = lookup(Values.Pop());
+                        double first = double.Parse(Values.ElementAt<string>(0));
+                        FinalAnswer = first + second;
+                    }
+                    if (Regex.IsMatch(Values.Peek(), altdouble) && Regex.IsMatch(Values.ElementAt<string>(0), varPattern))
+                    {
+                        double second = double.Parse(Values.Pop());
+                        double first = lookup(Values.ElementAt<string>(0));
+                        FinalAnswer = first + second;
+                    }
+                    if (Regex.IsMatch(Values.Peek(), altdouble) && Regex.IsMatch(Values.ElementAt<string>(0), altdouble))
+                    {
+                        double second = double.Parse(Values.Pop());
+                        double first = double.Parse(Values.ElementAt<string>(0));
+                        FinalAnswer = first + second;
+                    }
                 }
                 else
                 {
-                    double second = double.Parse(Values.Pop());
-                    double first = double.Parse(Values.Pop());
-                    double result = first - second;
-                    return result;
+                    if (Regex.IsMatch(Values.Peek(), varPattern) && Regex.IsMatch(Values.ElementAt<string>(0), varPattern))
+                    {
+                        double second = lookup(Values.Pop());
+                        double first = lookup(Values.ElementAt<string>(0));
+                        FinalAnswer = first - second;
+                    }
+                    if (Regex.IsMatch(Values.Peek(), varPattern) && Regex.IsMatch(Values.ElementAt<string>(0), altdouble))
+                    {
+                        double second = lookup(Values.Pop());
+                        double first = double.Parse(Values.ElementAt<string>(0));
+                        FinalAnswer = first - second;
+                    }
+                    if (Regex.IsMatch(Values.Peek(), altdouble) && Regex.IsMatch(Values.ElementAt<string>(0), varPattern))
+                    {
+                        double second = double.Parse(Values.Pop());
+                        double first = lookup(Values.ElementAt<string>(0));
+                        FinalAnswer = first - second;
+                    }
+                    if (Regex.IsMatch(Values.Peek(), altdouble) && Regex.IsMatch(Values.ElementAt<string>(0), altdouble))
+                    {
+                        double second = double.Parse(Values.Pop());
+                        double first = double.Parse(Values.ElementAt<string>(0));
+                        FinalAnswer = first - second;
+                    }
                 }
+                
             }
             
-            return 0;
+            return FinalAnswer;
         }
+        
+
 
         /// <summary>
         /// Given a formula, enumerates the tokens that compose it.  Tokens are left paren,
@@ -375,16 +662,12 @@ namespace Formulas
                 }
             }
         }
-        public void SetValue(string key, double value)
+        
+        public double Looker(string var)
         {
-            var list = new List<KeyValuePair<string, double>>();
+            
 
-        }
-        public double FindValue(string input)
-        {
-
-            return 0;
-
+            return 5;
         }
     }
 
@@ -396,7 +679,7 @@ namespace Formulas
     /// don't is up to the implementation of the method.
     /// </summary>
     public delegate double Lookup(string var);
-
+    
     
 
     /// <summary>
