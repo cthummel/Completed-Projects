@@ -198,7 +198,7 @@ namespace Formulas
                                     Values.Push(result.ToString());
                                     Operators.Pop();
                                 }
-                                
+
                             }
                             else
                             {
@@ -230,7 +230,7 @@ namespace Formulas
                         }
                     }
                 }
-
+                //Checks token for variable and performs * or / as necessary.
                 if (Regex.IsMatch(t, varPattern))
                 {
                     try
@@ -242,7 +242,7 @@ namespace Formulas
                         throw new FormulaEvaluationException("Value of variable" + t + " is undefined.");
                     }
 
-                    
+
 
                     if (Operators.Count == 0)
                     {
@@ -312,29 +312,112 @@ namespace Formulas
                         {
                             if (Operators.Peek() == "+")
                             {
-                                double second = double.Parse(Values.Pop());
-                                double first = double.Parse(Values.Pop());
-                                double result = first + second;
-                                Values.Push(result.ToString());
-                                Operators.Pop();
+                                if (Regex.IsMatch(Values.Peek(), varPattern) && Regex.IsMatch(Values.ElementAt<string>(Values.Count - 2), varPattern))
+                                {
+                                    double second = lookup(Values.Pop());
+                                    double first = lookup(Values.Pop());
+                                    double result = first + second;
+                                    Values.Push(result.ToString());
+                                    keepgoing = false;
+                                    Operators.Pop();
+                                }
+
+                                if (keepgoing == true)
+                                {
+                                    if (Regex.IsMatch(Values.Peek(), varPattern) && Regex.IsMatch(Values.ElementAt<string>(Values.Count - 2), altdouble))
+                                    {
+                                        double second = lookup(Values.Pop());
+                                        double first = double.Parse(Values.Pop());
+                                        double result = first + second;
+                                        Values.Push(result.ToString());
+                                        keepgoing = false;
+                                        Operators.Pop();
+                                    }
+                                }
+                                if (keepgoing == true)
+                                {
+                                    if (Regex.IsMatch(Values.Peek(), altdouble) && Regex.IsMatch(Values.ElementAt<string>(Values.Count - 2), varPattern))
+                                    {
+                                        double second = double.Parse(Values.Pop());
+                                        double first = lookup(Values.Pop());
+                                        double result = first + second;
+                                        Values.Push(result.ToString());
+                                        keepgoing = false;
+                                        Operators.Pop();
+                                    }
+                                }
+                                if (keepgoing == true)
+                                {
+                                    if (Regex.IsMatch(Values.Peek(), altdouble) && Regex.IsMatch(Values.ElementAt<string>(Values.Count - 2), altdouble))
+                                    {
+                                        double second = double.Parse(Values.Pop());
+                                        double first = double.Parse(Values.Pop());
+                                        double result = first + second;
+                                        Values.Push(result.ToString());
+                                        keepgoing = false;
+                                        Operators.Pop();
+                                    }
+                                }
                             }
+
                             else
                             {
-                                double second = double.Parse(Values.Pop());
-                                double first = double.Parse(Values.Pop());
-                                double result = first - second;
-                                Values.Push(result.ToString());
-                                Operators.Pop();
+                                if (keepgoing == true)
+                                {
+                                    if (Regex.IsMatch(Values.Peek(), varPattern) && Regex.IsMatch(Values.ElementAt<string>(Values.Count - 2), varPattern))
+                                    {
+                                        double second = lookup(Values.Pop());
+                                        double first = lookup(Values.Pop());
+                                        double result = first - second;
+                                        Values.Push(result.ToString());
+                                        keepgoing = false;
+                                        Operators.Pop();
+                                    }
+                                }
+                                if (keepgoing == true)
+                                {
+                                    if (Regex.IsMatch(Values.Peek(), varPattern) && Regex.IsMatch(Values.ElementAt<string>(Values.Count - 2), altdouble))
+                                    {
+                                        double second = lookup(Values.Pop());
+                                        double first = double.Parse(Values.Pop());
+                                        double result = first - second;
+                                        Values.Push(result.ToString());
+                                        keepgoing = false;
+                                        Operators.Pop();
+                                    }
+                                }
+                                if (keepgoing == true)
+                                {
+                                    if (Regex.IsMatch(Values.Peek(), altdouble) && Regex.IsMatch(Values.ElementAt<string>(Values.Count - 2), varPattern))
+                                    {
+                                        double second = double.Parse(Values.Pop());
+                                        double first = lookup(Values.Pop());
+                                        double result = first - second;
+                                        Values.Push(result.ToString());
+                                        keepgoing = false;
+                                        Operators.Pop();
+                                    }
+                                }
+                                if (keepgoing == true)
+                                {
+                                    if (Regex.IsMatch(Values.Peek(), altdouble) && Regex.IsMatch(Values.ElementAt<string>(Values.Count - 2), altdouble))
+                                    {
+                                        double second = double.Parse(Values.Pop());
+                                        double first = double.Parse(Values.Pop());
+                                        double result = first - second;
+                                        Values.Push(result.ToString());
+                                        keepgoing = false;
+                                        Operators.Pop();
+                                    }
+                                }
                             }
-
                         }
                     }
-
-
+                    keepgoing = true;
                     Operators.Push(t);
-
                 }
 
+                
                 if (t == "*" || t == "/")
                 {
                     Operators.Push(t);
@@ -447,6 +530,7 @@ namespace Formulas
                         keepgoing = true;
                         Operators.Pop();
                     }
+
                     //Always removes the ) on the top of the stack.
                     Operators.Pop();
 
@@ -577,60 +661,91 @@ namespace Formulas
             {
                 if (Operators.Peek() == "+")
                 {
-                    if (Regex.IsMatch(Values.Peek(), varPattern) && Regex.IsMatch(Values.ElementAt<string>(0), varPattern))
+                    if (keepgoing == true)
                     {
-                        double second = lookup(Values.Pop());
-                        double first = lookup(Values.ElementAt<string>(0));
-                        FinalAnswer = first + second;
+                        if (Regex.IsMatch(Values.ElementAt<string>(1), varPattern) && Regex.IsMatch(Values.ElementAt<string>(0), varPattern))
+                        {
+                            double second = lookup(Values.Pop());
+                            double first = lookup(Values.Pop());
+                            FinalAnswer = first + second;
+                            keepgoing = false;
+                        }
                     }
-                    if (Regex.IsMatch(Values.Peek(), varPattern) && Regex.IsMatch(Values.ElementAt<string>(0), altdouble))
+                    if (keepgoing == true)
                     {
-                        double second = lookup(Values.Pop());
-                        double first = double.Parse(Values.ElementAt<string>(0));
-                        FinalAnswer = first + second;
+                        if (Regex.IsMatch(Values.Peek(), varPattern) && Regex.IsMatch(Values.ElementAt<string>(0), altdouble))
+                        {
+                            double second = lookup(Values.Pop());
+                            double first = double.Parse(Values.Pop());
+                            FinalAnswer = first + second;
+                            keepgoing = false;
+                        }
                     }
-                    if (Regex.IsMatch(Values.Peek(), altdouble) && Regex.IsMatch(Values.ElementAt<string>(0), varPattern))
+                    if (keepgoing == true)
                     {
-                        double second = double.Parse(Values.Pop());
-                        double first = lookup(Values.ElementAt<string>(0));
-                        FinalAnswer = first + second;
+                        if (Regex.IsMatch(Values.Peek(), altdouble) && Regex.IsMatch(Values.ElementAt<string>(0), varPattern))
+                        {
+                            double second = double.Parse(Values.Pop());
+                            double first = lookup(Values.Pop());
+                            FinalAnswer = first + second;
+                            keepgoing = false;
+                        }
                     }
-                    if (Regex.IsMatch(Values.Peek(), altdouble) && Regex.IsMatch(Values.ElementAt<string>(0), altdouble))
+                    if (keepgoing == true)
                     {
-                        double second = double.Parse(Values.Pop());
-                        double first = double.Parse(Values.ElementAt<string>(0));
-                        FinalAnswer = first + second;
-                    }
-                }
-                
-                else
-                {
-                    if (Regex.IsMatch(Values.Peek(), varPattern) && Regex.IsMatch(Values.ElementAt<string>(0), varPattern))
-                    {
-                        double second = lookup(Values.Pop());
-                        double first = lookup(Values.ElementAt<string>(0));
-                        FinalAnswer = first - second;
-                    }
-                    if (Regex.IsMatch(Values.Peek(), varPattern) && Regex.IsMatch(Values.ElementAt<string>(0), altdouble))
-                    {
-                        double second = lookup(Values.Pop());
-                        double first = double.Parse(Values.ElementAt<string>(0));
-                        FinalAnswer = first - second;
-                    }
-                    if (Regex.IsMatch(Values.Peek(), altdouble) && Regex.IsMatch(Values.ElementAt<string>(0), varPattern))
-                    {
-                        double second = double.Parse(Values.Pop());
-                        double first = lookup(Values.ElementAt<string>(0));
-                        FinalAnswer = first - second;
-                    }
-                    if (Regex.IsMatch(Values.Peek(), altdouble) && Regex.IsMatch(Values.ElementAt<string>(0), altdouble))
-                    {
-                        double second = double.Parse(Values.Pop());
-                        double first = double.Parse(Values.ElementAt<string>(0));
-                        FinalAnswer = first - second;
+                        if (Regex.IsMatch(Values.Peek(), altdouble) && Regex.IsMatch(Values.ElementAt<string>(0), altdouble))
+                        {
+                            double second = double.Parse(Values.Pop());
+                            double first = double.Parse(Values.Pop());
+                            FinalAnswer = first + second;
+                            keepgoing = false;
+                        }
                     }
                 }
 
+                else
+                {
+                    if(keepgoing == true)
+                    {
+                        if (Regex.IsMatch(Values.Peek(), varPattern) && Regex.IsMatch(Values.ElementAt<string>(0), varPattern))
+                        {
+                            double second = lookup(Values.Pop());
+                            double first = lookup(Values.Pop());
+                            FinalAnswer = first - second;
+                            keepgoing = false;
+                        }
+                    }
+                    if (keepgoing == true)
+                    {
+                        if (Regex.IsMatch(Values.Peek(), varPattern) && Regex.IsMatch(Values.ElementAt<string>(0), altdouble))
+                        {
+                            double second = lookup(Values.Pop());
+                            double first = double.Parse(Values.Pop());
+                            FinalAnswer = first - second;
+                            keepgoing = false;
+                        }
+                    }
+                    if (keepgoing == true)
+                    {
+                        if (Regex.IsMatch(Values.Peek(), altdouble) && Regex.IsMatch(Values.ElementAt<string>(0), varPattern))
+                        {
+                            double second = double.Parse(Values.Pop());
+                            double first = lookup(Values.Pop());
+                            FinalAnswer = first - second;
+                            keepgoing = false;
+                        }
+                    }
+                    if (keepgoing == true)
+                    {
+                        if (Regex.IsMatch(Values.Peek(), altdouble) && Regex.IsMatch(Values.ElementAt<string>(0), altdouble))
+                        {
+                            double second = double.Parse(Values.Pop());
+                            double first = double.Parse(Values.Pop());
+                            FinalAnswer = first - second;
+                            keepgoing = false;
+                        }
+                    }
+                }
             }
 
             return FinalAnswer;
