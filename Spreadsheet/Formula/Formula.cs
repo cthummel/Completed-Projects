@@ -18,11 +18,14 @@ namespace Formulas
 
     {
         private string output;
+
+        /// <summary>
+        /// The following are all patterns which Evaluate and Formula use for recognizing function components.
+        /// </summary>
         private const String lpPattern = @"\(";
         private const String rpPattern = @"\)";
         private const String opPattern = @"[\+\-*/]";
         private const String varPattern = @"[a-zA-Z][0-9a-zA-Z]*";
-        //private String doublePattern = @"(?: \d+\.\d* | \d*\.\d+ | \d+ ) (?: e[\+-]?\d+)?";
         private const String altdouble = @"^\d+(,\d+)*(\.\d+(e\d+)?)?$";
 
         /// <summary>
@@ -59,7 +62,7 @@ namespace Formulas
             int parcount = 0;
 
             string first = tokens.ElementAt<string>(0);
-            string last = tokens.ElementAt<string>(tokens.Count()-1);
+            string last = tokens.ElementAt<string>(tokens.Count() - 1);
             string previous = "";
 
             //Checks first element in formula.
@@ -67,15 +70,12 @@ namespace Formulas
             {
                 throw new FormulaFormatException("The first element of the formula is not either a (, number, or variable.");
             }
-            
+
             //Checks last element in formula.
             if (Regex.IsMatch(last, lpPattern) || Regex.IsMatch(last, opPattern))
             {
                 throw new FormulaFormatException("The last element of the formula is not either a ), number, or variable.");
             }
-
-           
-
 
             foreach (string t in tokens)
             {
@@ -87,7 +87,7 @@ namespace Formulas
                 }
 
                 //Checks token for ( and adds to Operator list.
-                if (Regex.IsMatch(t,lpPattern))
+                if (Regex.IsMatch(t, lpPattern))
                 {
                     Operators.Add(t);
                     parcount += 1;
@@ -128,8 +128,6 @@ namespace Formulas
                     {
                         throw new FormulaFormatException("Check 6: `Formula containing " + previous + " followed by " + t + " is invalid.");
                     }
-
-                    
                 }
 
                 //Checks relative parenthesis count.
@@ -159,7 +157,7 @@ namespace Formulas
         /// with an explanatory Message.
         /// </summary>
         public double Evaluate(Lookup lookup)
-        { 
+        {
             var Operators = new Stack<string>();
             var Values = new Stack<string>();
             IEnumerable<string> tokens = Formula.GetTokens(output);
@@ -167,11 +165,9 @@ namespace Formulas
             double FinalAnswer = 0;
             bool keepgoing = true;
 
-            
-
             foreach (string t in tokens)
             {
-                
+
                 //Current item is a double.
                 if (Regex.IsMatch(t, altdouble))
                 {
@@ -186,9 +182,23 @@ namespace Formulas
                         {
                             if (Operators.Peek() == "*")
                             {
-                                double result = double.Parse(Values.Pop()) * double.Parse(t);
-                                Values.Push(result.ToString());
-                                Operators.Pop();
+                                if (Regex.IsMatch(Values.Peek(), varPattern))
+                                {
+                                    double first = lookup(Values.Pop());
+                                    double second = double.Parse(t);
+                                    double result = first * second;
+                                    Values.Push(result.ToString());
+                                    Operators.Pop();
+                                }
+                                else
+                                {
+                                    double first = double.Parse(Values.Pop());
+                                    double second = double.Parse(t);
+                                    double result = first * second;
+                                    Values.Push(result.ToString());
+                                    Operators.Pop();
+                                }
+                                
                             }
                             else
                             {
@@ -196,28 +206,43 @@ namespace Formulas
                                 {
                                     throw new FormulaEvaluationException("Cannot divide by zero.");
                                 }
-
-                                double result = double.Parse(Values.Pop()) / double.Parse(t);
-                                Values.Push(result.ToString());
-                                Operators.Pop();
-                                
+                                if (Regex.IsMatch(Values.Peek(), varPattern))
+                                {
+                                    double first = lookup(Values.Pop());
+                                    double second = double.Parse(t);
+                                    double result = first / second;
+                                    Values.Push(result.ToString());
+                                    Operators.Pop();
+                                }
+                                else
+                                {
+                                    double first = double.Parse(Values.Pop());
+                                    double second = double.Parse(t);
+                                    double result = first / second;
+                                    Values.Push(result.ToString());
+                                    Operators.Pop();
+                                }
                             }
                         }
                         else
                         {
                             Values.Push(t);
                         }
-                    }                  
-
-                    
+                    }
                 }
-                
+
                 if (Regex.IsMatch(t, varPattern))
                 {
-                    if (lookup(t) == )
+                    try
                     {
-                        throw new UndefinedVariableException("No specification for variable values.");
+                        lookup(t);
                     }
+                    catch (UndefinedVariableException)
+                    {
+                        throw new FormulaEvaluationException("Value of variable" + t + " is undefined.");
+                    }
+
+                    
 
                     if (Operators.Count == 0)
                     {
@@ -244,10 +269,15 @@ namespace Formulas
                                     Values.Push(result.ToString());
                                     Operators.Pop();
                                 }
-                                
+
                             }
                             else
                             {
+                                if (lookup(t) == 0)
+                                {
+                                    throw new FormulaEvaluationException("Cannot divide by zero.");
+                                }
+
                                 if (Regex.IsMatch(Values.Peek(), varPattern))
                                 {
                                     double first = lookup(Values.Pop());
@@ -262,7 +292,7 @@ namespace Formulas
                                     Values.Push(result.ToString());
                                     Operators.Pop();
                                 }
-                                
+
                             }
                         }
 
@@ -271,8 +301,6 @@ namespace Formulas
                             Values.Push(t);
                         }
                     }
-
-                    
 
                 }
 
@@ -301,7 +329,7 @@ namespace Formulas
 
                         }
                     }
-                    
+
 
                     Operators.Push(t);
 
@@ -323,7 +351,7 @@ namespace Formulas
                     {
                         if (Operators.Peek() == "+")
                         {
-                            if (Values.Count > 1)
+                            if (keepgoing == true)
                             {
                                 if (Regex.IsMatch(Values.Peek(), varPattern) && Regex.IsMatch(Values.ElementAt<string>(Values.Count - 2), varPattern))
                                 {
@@ -332,7 +360,6 @@ namespace Formulas
                                     double result = first + second;
                                     Values.Push(result.ToString());
                                     keepgoing = false;
-                                    //break;
                                 }
                             }
                             if (keepgoing == true)
@@ -343,7 +370,6 @@ namespace Formulas
                                     double first = double.Parse(Values.Pop());
                                     double result = first + second;
                                     Values.Push(result.ToString());
-                                    //Operators.Pop();
                                     keepgoing = false;
 
                                 }
@@ -356,7 +382,6 @@ namespace Formulas
                                     double first = lookup(Values.Pop());
                                     double result = first + second;
                                     Values.Push(result.ToString());
-                                    //Operators.Pop();
                                     keepgoing = false;
                                 }
                             }
@@ -368,16 +393,9 @@ namespace Formulas
                                     double first = double.Parse(Values.Pop());
                                     double result = first + second;
                                     Values.Push(result.ToString());
-                                    //Operators.Pop();
                                     keepgoing = false;
                                 }
                             }
-
-
-
-
-
-
                         }
                         else
                         {
@@ -389,7 +407,6 @@ namespace Formulas
                                     double first = lookup(Values.Pop());
                                     double result = first - second;
                                     Values.Push(result.ToString());
-
                                     keepgoing = false;
                                 }
                             }
@@ -401,7 +418,6 @@ namespace Formulas
                                     double first = double.Parse(Values.Pop());
                                     double result = first - second;
                                     Values.Push(result.ToString());
-
                                     keepgoing = false;
                                 }
                             }
@@ -413,7 +429,6 @@ namespace Formulas
                                     double first = lookup(Values.Pop());
                                     double result = first - second;
                                     Values.Push(result.ToString());
-
                                     keepgoing = false;
                                 }
                             }
@@ -429,11 +444,13 @@ namespace Formulas
                                 }
                             }
                         }
+                        keepgoing = true;
                         Operators.Pop();
                     }
-
-                    keepgoing = true;
+                    //Always removes the ) on the top of the stack.
                     Operators.Pop();
+
+                    //Checks Operator stack for * or / and calculates if needed.
                     if (Operators.Count != 0)
                     {
                         if (Operators.Peek() == "*" || Operators.Peek() == "/")
@@ -463,7 +480,7 @@ namespace Formulas
 
                                     }
                                 }
-                                if (keepgoing == true)
+                                if (Values.Count > 1)
                                 {
                                     if (Regex.IsMatch(Values.Peek(), altdouble) && Regex.IsMatch(Values.ElementAt<string>(Values.Count - 2), varPattern))
                                     {
@@ -500,7 +517,7 @@ namespace Formulas
                                         keepgoing = false;
                                     }
                                 }
-                                if (keepgoing == true)
+                                if (Values.Count > 1)
                                 {
                                     if (Regex.IsMatch(Values.Peek(), varPattern) && Regex.IsMatch(Values.ElementAt<string>(Values.Count - 2), altdouble))
                                     {
@@ -537,6 +554,7 @@ namespace Formulas
                                 }
                             }
                             Operators.Pop();
+                            keepgoing = true;
                         }
                     }
                 }
@@ -552,20 +570,20 @@ namespace Formulas
                 {
                     FinalAnswer = double.Parse(Values.Pop());
                 }
-                
+
             }
-            //4 cases. Value contains 2 variables, 1 variable and 1 value, 1 value and 1 variable, or 2 values.
+            //4 cases for each operator. Value contains 2 variables, 1 variable and 1 value, 1 value and 1 variable, or 2 values.
             if (Operators.Count == 1)
             {
                 if (Operators.Peek() == "+")
                 {
-                    if(Regex.IsMatch(Values.Peek(), varPattern) && Regex.IsMatch(Values.ElementAt<string>(0), varPattern))
+                    if (Regex.IsMatch(Values.Peek(), varPattern) && Regex.IsMatch(Values.ElementAt<string>(0), varPattern))
                     {
                         double second = lookup(Values.Pop());
                         double first = lookup(Values.ElementAt<string>(0));
                         FinalAnswer = first + second;
                     }
-                    if(Regex.IsMatch(Values.Peek(), varPattern) && Regex.IsMatch(Values.ElementAt<string>(0), altdouble))
+                    if (Regex.IsMatch(Values.Peek(), varPattern) && Regex.IsMatch(Values.ElementAt<string>(0), altdouble))
                     {
                         double second = lookup(Values.Pop());
                         double first = double.Parse(Values.ElementAt<string>(0));
@@ -584,6 +602,7 @@ namespace Formulas
                         FinalAnswer = first + second;
                     }
                 }
+                
                 else
                 {
                     if (Regex.IsMatch(Values.Peek(), varPattern) && Regex.IsMatch(Values.ElementAt<string>(0), varPattern))
@@ -611,13 +630,11 @@ namespace Formulas
                         FinalAnswer = first - second;
                     }
                 }
-                
+
             }
-            
+
             return FinalAnswer;
         }
-        
-
 
         /// <summary>
         /// Given a formula, enumerates the tokens that compose it.  Tokens are left paren,
@@ -654,13 +671,6 @@ namespace Formulas
                 }
             }
         }
-        
-        public double Looker(string var)
-        {
-            
-
-            return 5;
-        }
     }
 
     /// <summary>
@@ -671,8 +681,8 @@ namespace Formulas
     /// don't is up to the implementation of the method.
     /// </summary>
     public delegate double Lookup(string var);
-    
-    
+
+
 
     /// <summary>
     /// Used to report that a Lookup delegate is unable to determine the value

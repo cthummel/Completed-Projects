@@ -118,6 +118,18 @@ namespace FormulaTestCases
             f.Evaluate(v => 0);
             
         }
+        [TestMethod]
+        public void Evaluate1d()
+        {
+            Formula f = new Formula("x * 5");
+            Assert.AreEqual(f.Evaluate(v => 5), 25.0, 1e-6);
+        }
+        [TestMethod]
+        public void Evaluate1e()
+        {
+            Formula f = new Formula("x / 5");
+            Assert.AreEqual(f.Evaluate(v => 5), 1.0, 1e-6);
+        }
 
         /// <summary>
         /// The Formula consists of a single variable (x5).  The value of
@@ -168,6 +180,7 @@ namespace FormulaTestCases
             Formula f = new Formula("x / y");
             Assert.AreEqual(f.Evaluate(Lookup4), .66, .1);
         }
+        
 
         /// <summary>
         /// This uses one of each kind of token.
