@@ -130,24 +130,6 @@ namespace FormulaTestCases
             Formula f = new Formula("x / 5");
             Assert.AreEqual(f.Evaluate(v => 5), 1.0, 1e-6);
         }
-        [TestMethod]
-        public void Evaluate1f()
-        {
-            Formula f = new Formula("x + y - z + 5 + 6");
-            Assert.AreEqual(f.Evaluate(Lookup4), 13.0, 1e-6);
-        }
-        [TestMethod]
-        public void Evaluate1g()
-        {
-            Formula f = new Formula("x + 2");
-            Assert.AreEqual(f.Evaluate(v => 4.0), 6.0, 1e-6);
-        }
-        [TestMethod]
-        public void Evaluate1h()
-        {
-            Formula f = new Formula("y + x");
-            Assert.AreEqual(f.Evaluate(v => 4.0), 8.0, 1e-6);
-        }
 
         /// <summary>
         /// The Formula consists of a single variable (x5).  The value of
