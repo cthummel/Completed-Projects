@@ -4,7 +4,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace DependencyGraphTestCases
 {
     [TestClass]
-    public class UnitTest1
+    public class DependancyGraphTestCases
     {
         [TestMethod]
         public void TestMethod1()
