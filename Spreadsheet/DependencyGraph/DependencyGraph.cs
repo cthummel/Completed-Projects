@@ -128,7 +128,11 @@ namespace Dependencies
             }
             else
             {
-                GetDependees(s);
+                if(GetDependees(s) == null)
+                {
+
+                }
+                
             }
         }
 
