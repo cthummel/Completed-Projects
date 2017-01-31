@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Dependencies
 {
@@ -48,11 +49,16 @@ namespace Dependencies
     /// </summary>
     public class DependencyGraph
     {
+        private List<string> Dependants;
+        private List<string> Dependees;
+
         /// <summary>
         /// Creates a DependencyGraph containing no dependencies.
         /// </summary>
         public DependencyGraph()
         {
+            Dependants = new List<string>();
+            Dependees = new List<string>();
         }
 
         /// <summary>
@@ -68,6 +74,20 @@ namespace Dependencies
         /// </summary>
         public bool HasDependents(string s)
         {
+            if (s == null)
+            {
+                throw new Exception(s + " is not in the dependancy graph.");
+            }
+            else
+            {
+                foreach (string dep in Dependants)
+                {
+                    if (dep.ElementAt(0) == s.First())
+                    {
+                        return true;
+                    }
+                }
+            }
             return false;
         }
 
@@ -102,6 +122,14 @@ namespace Dependencies
         /// </summary>
         public void AddDependency(string s, string t)
         {
+            if (s == null || t == null)
+            {
+                throw new Exception("Adding a dependancy requires a valid dependant and dependee.");
+            }
+            else
+            {
+                GetDependees(s);
+            }
         }
 
         /// <summary>
