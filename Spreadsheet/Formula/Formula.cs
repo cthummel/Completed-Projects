@@ -27,6 +27,7 @@ namespace Formulas
         private const String opPattern = @"[\+\-*/]";
         private const String varPattern = @"[a-zA-Z][0-9a-zA-Z]*";
         private const String altdouble = @"^\d+(,\d+)*(\.\d+(e\d+)?)?$";
+        private const String spacePattern = @"\s+";
 
         /// <summary>
         /// Creates a Formula from a string that consists of a standard infix expression composed
@@ -50,17 +51,17 @@ namespace Formulas
         /// </summary>
         public Formula(String formula)
         {
-            if (formula == "")
-            {
-                throw new FormulaFormatException("No Input");
-            }
+            
 
             var Operators = new List<string>();
             var Values = new List<string>();
             IEnumerable<string> tokens = Formula.GetTokens(formula);
 
             int parcount = 0;
-
+            if(tokens.ElementAt(0) == null)
+            {
+                throw new FormulaFormatException("No input detected.");
+            }
             string first = tokens.ElementAt<string>(0);
             string last = tokens.ElementAt<string>(tokens.Count() - 1);
             string previous = "";
