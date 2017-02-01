@@ -79,7 +79,7 @@ namespace Dependencies
         /// </summary>
         public bool HasDependents(string s)
         {
-            var value = new List<string>();
+            //var value = new List<string>();
             if (s == null)
             {
                 throw new Exception("Input is a null string.");
@@ -87,16 +87,16 @@ namespace Dependencies
             else
             {
                 //Potentially incorrect if the dependents of s is empty. Look over later.
-                if (Dependents.TryGetValue(s, out value))
+                if (Dependents.ContainsKey(s))
                 {
-                    if (value.Count != 0)
-                    {
+                    //if (value.Count != 0)
+                    //{
                         return true;
-                    }
-                    else
-                    {
-                        return false;
-                    }
+                    //}
+                    //else
+                    //{
+                    //    return false;
+                    //}
                 }
                 else
                 {
@@ -110,7 +110,7 @@ namespace Dependencies
         /// </summary>
         public bool HasDependees(string s)
         {
-            var value = new List<string>();
+            //var value = new List<string>();
             if (s == null)
             {
                 throw new Exception("Input is a null string.");
@@ -118,16 +118,16 @@ namespace Dependencies
             else
             {
                 //Potentially incorrect if the dependents of s is empty. Look over later.
-                if (Dependees.TryGetValue(s, out value))
+                if (Dependees.ContainsKey(s))
                 {
-                    if(value.Count != 0)
-                    {
+                    //if(value.Count != 0)
+                    //{
                         return true;
-                    }
-                    else
-                    {
-                        return false;
-                    }
+                    //}
+                    //else
+                    //{
+                    //    return false;
+                    //}
                 }
                 else
                 {
@@ -185,9 +185,10 @@ namespace Dependencies
         /// </summary>
         public void AddDependency(string s, string t)
         {
-            
+
             var dependent = new List<string>();
             var dependee = new List<string>();
+            var temp = new List<string>();
 
             if (s == null || t == null)
             {
@@ -195,9 +196,11 @@ namespace Dependencies
             }
             if (Dependents.TryGetValue(s, out dependent))
             {
+                
                 //If not included in the graph already
                 if (!dependent.Contains(t))
                 {
+
                     //Adding s to Dependents.
                     Dependents.Remove(s);
                     dependent.Add(t);
@@ -205,18 +208,58 @@ namespace Dependencies
 
                     //Adding t to Dependees.
                     Dependees.TryGetValue(t, out dependee);
-                    Dependees.Remove(t);
-                    dependee.Add(s);
-                    Dependees.Add(t, dependee);
+                    if (dependee == null)
+                    {
+                        dependee = new List<string>();
+                        Dependees.Remove(t);
+                        dependee.Add(s);
+                        Dependees.Add(t, dependee);
+                        graphsize += 1;
+                    }
+                    //else
+                    //{
+                    //    Dependees.Remove(t);
+                    //    dependee.Add(s);
+                    //    Dependees.Add(t, dependee);
+                    //    graphsize += 1;
+                    //}
+                    
                 }
                 
             }
             else
             {
-                dependent.Add(t);
-                dependee.Add(s);
-                Dependents.Add(s, dependent);
-                Dependees.Add(t, dependee);
+                if (dependent == null)
+                {
+                    dependent = new List<string>();
+                    dependent.Add(t);
+                    dependee.Add(s);
+                    Dependents.Add(s, dependent);
+
+                    //If dependee is already in dictionary then we must deal with that before adding
+                    if(Dependees.TryGetValue(t, out temp))
+                    {
+                        Dependees.Remove(t);
+                        temp.Add(s);
+                        Dependees.Add(t, temp);
+                        graphsize += 1;
+                    }
+                    else
+                    {
+                        Dependees.Add(t, dependee);
+                        graphsize += 1;
+                    }
+                    
+                }
+                //else
+                //{
+                //    dependent.Add(t);
+                //    dependee.Add(s);
+                //    Dependents.Add(s, dependent);
+                //    Dependees.Add(t, dependee);
+                //    graphsize += 1;
+                //}
+                
             }
         }
 
@@ -227,6 +270,65 @@ namespace Dependencies
         /// </summary>
         public void RemoveDependency(string s, string t)
         {
+            var dependent = new List<string>();
+            var dependee = new List<string>();
+            var temp = new List<string>();
+
+            if (s == null || t == null)
+            {
+                throw new Exception("Adding a dependancy requires a non-null dependant and dependee.");
+            }
+            if (Dependents.TryGetValue(s, out dependent))
+            {
+
+                //If not included in the graph already
+                if (!dependent.Contains(t))
+                {
+
+                    //Adding s to Dependents.
+                    Dependents.Remove(s);
+                    dependent.Add(t);
+                    Dependents.Add(s, dependent);
+
+                    //Adding t to Dependees.
+                    Dependees.TryGetValue(t, out dependee);
+                    if (dependee == null)
+                    {
+                        dependee = new List<string>();
+                        Dependees.Remove(t);
+                        dependee.Add(s);
+                        Dependees.Add(t, dependee);
+                        graphsize += 1;
+                    }
+                    
+
+                }
+
+            }
+            else
+            {
+                if (dependent == null)
+                {
+                    dependent = new List<string>();
+                    dependent.Add(t);
+                    dependee.Add(s);
+                    Dependents.Add(s, dependent);
+
+                    //If dependee is already in dictionary then we must deal with that before adding
+                    if (Dependees.TryGetValue(t, out temp))
+                    {
+                        Dependees.Remove(t);
+                        temp.Add(s);
+                        Dependees.Add(t, temp);
+                        graphsize += 1;
+                    }
+                    else
+                    {
+                        Dependees.Add(t, dependee);
+                        graphsize += 1;
+                    }
+                }
+            }
         }
 
         /// <summary>
