@@ -51,8 +51,8 @@ namespace Dependencies
     {
         //private List<string> Dependents;
         //private List<string> Dependees;
-        private Dictionary<string, string> Dependents;
-        private Dictionary<string, string> Dependees;
+        private Dictionary<string, List<string>> Dependents;
+        private Dictionary<string, List<string>> Dependees;
         private int graphsize;
 
         /// <summary>
@@ -60,8 +60,8 @@ namespace Dependencies
         /// </summary>
         public DependencyGraph()
         {
-            Dependents = new Dictionary<string, string>();
-            Dependees = new Dictionary<string, string>();
+            Dependents = new Dictionary<string, List<string>>();
+            Dependees = new Dictionary<string, List<string>>();
             graphsize = 0;
             
         }
@@ -79,21 +79,30 @@ namespace Dependencies
         /// </summary>
         public bool HasDependents(string s)
         {
+            var value = new List<string>();
             if (s == null)
             {
                 throw new Exception("Input is a null string.");
             }
             else
             {
-                foreach (string dep in Dependents)
+                //Potentially incorrect if the dependents of s is empty. Look over later.
+                if (Dependents.TryGetValue(s, out value))
                 {
-                    if (dep.Substring(0,dep.IndexOf(' ')) == s)
+                    if (value.Count != 0)
                     {
                         return true;
                     }
+                    else
+                    {
+                        return false;
+                    }
+                }
+                else
+                {
+                    return false;
                 }
             }
-            return false;
         }
 
         /// <summary>
@@ -101,21 +110,30 @@ namespace Dependencies
         /// </summary>
         public bool HasDependees(string s)
         {
+            var value = new List<string>();
             if (s == null)
             {
                 throw new Exception("Input is a null string.");
             }
             else
             {
-                foreach (string dep in Dependees)
+                //Potentially incorrect if the dependents of s is empty. Look over later.
+                if (Dependees.TryGetValue(s, out value))
                 {
-                    if (dep.Substring(0, dep.IndexOf(' ')) == s)
+                    if(value.Count != 0)
                     {
                         return true;
                     }
+                    else
+                    {
+                        return false;
+                    }
+                }
+                else
+                {
+                    return false;
                 }
             }
-            return false;
         }
 
         /// <summary>
@@ -123,33 +141,16 @@ namespace Dependencies
         /// </summary>
         public IEnumerable<string> GetDependents(string s)
         {
+            var value = new List<string>();
             
-            string temp = "";
-            //Search dependents for matching 
-            foreach (string dep in Dependents)
+            if (Dependents.TryGetValue(s, out value))
             {
-                if (dep.Substring(0, dep.IndexOf(' ')) == s)
+                //Check whether this works on empty lists. Ex.   dependents("c") = {}
+                foreach (string str in value)
                 {
-                    temp = dep;
-                    break;
+                    yield return str;
                 }
             }
-            //If we never found a matching string then there is nothing to return.
-            if(temp == "")
-            {
-                yield break;
-            }
-            
-            string[] elements = temp.Split(' ');
-
-            if (elements[1] != null)
-            {
-                for (int i = 1; i < elements.Length; i++)
-                {
-                    yield return elements[i];
-                }
-            }
-            //In case there were no dependents.
             else
             {
                 yield break;
@@ -162,40 +163,19 @@ namespace Dependencies
         public IEnumerable<string> GetDependees(string s)
         {
             //first search the dependees master list for string s. pull that dependees list out and enumerate it.
-            string temp = "";
-            foreach (string dep in Dependees)
+            var value = new List<string>();
+            
+            if (Dependees.TryGetValue(s, out value))
             {
-                if (dep.Substring(0, dep.IndexOf(' ')) == s)
+                foreach (string str in value)
                 {
-                    temp = dep;
-                    break;
-                }
-            }
-            if (temp == "")
-            {
-                yield break;
-            }
-            string[] elements = temp.Split(' ');
-
-            if(elements[1] != null)
-            {
-                for (int i = 1; i < elements.Length; i++)
-                {
-                    yield return elements[i];
+                    yield return str;
                 }
             }
             else
             {
                 yield break;
             }
-            //foreach (String str in Regex.Split(s, pattern, RegexOptions.IgnorePatternWhitespace))
-            //{
-            //    if (!Regex.IsMatch(str, @"^\s*$", RegexOptions.Singleline))
-            //    {
-            //        yield return s;
-            //    }
-            //}
-            
         }
 
         /// <summary>
@@ -205,22 +185,38 @@ namespace Dependencies
         /// </summary>
         public void AddDependency(string s, string t)
         {
-            string temp;
+            
+            var dependent = new List<string>();
+            var dependee = new List<string>();
+
             if (s == null || t == null)
             {
-                throw new Exception("Adding a dependancy requires a valid dependant and dependee.");
+                throw new Exception("Adding a dependancy requires a non-null dependant and dependee.");
+            }
+            if (Dependents.TryGetValue(s, out dependent))
+            {
+                //If not included in the graph already
+                if (!dependent.Contains(t))
+                {
+                    //Adding s to Dependents.
+                    Dependents.Remove(s);
+                    dependent.Add(t);
+                    Dependents.Add(s, dependent);
+
+                    //Adding t to Dependees.
+                    Dependees.TryGetValue(t, out dependee);
+                    Dependees.Remove(t);
+                    dependee.Add(s);
+                    Dependees.Add(t, dependee);
+                }
+                
             }
             else
             {
-                foreach (string dep in Dependees)
-                {
-                    if (dep.Substring(0, dep.IndexOf(' ')) == s)
-                    {
-                        temp = dep;
-                        break;
-                    }
-                }
-
+                dependent.Add(t);
+                dependee.Add(s);
+                Dependents.Add(s, dependent);
+                Dependees.Add(t, dependee);
             }
         }
 

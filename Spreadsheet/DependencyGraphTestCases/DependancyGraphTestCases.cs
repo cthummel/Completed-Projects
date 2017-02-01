@@ -1,8 +1,7 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-//using Dependencies;
 
-namespace DependencyGraphTestCases
+namespace Dependencies
 {
     [TestClass]
     public class DependancyGraphTestCases
@@ -11,6 +10,9 @@ namespace DependencyGraphTestCases
         //Tests constructor
         public void Test1()
         {
+            Dep
         }
+        
+
     }
 }
