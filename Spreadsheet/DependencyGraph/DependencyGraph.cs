@@ -49,16 +49,21 @@ namespace Dependencies
     /// </summary>
     public class DependencyGraph
     {
-        private List<string> Dependants;
-        private List<string> Dependees;
+        //private List<string> Dependents;
+        //private List<string> Dependees;
+        private Dictionary<string, string> Dependents;
+        private Dictionary<string, string> Dependees;
+        private int graphsize;
 
         /// <summary>
         /// Creates a DependencyGraph containing no dependencies.
         /// </summary>
         public DependencyGraph()
         {
-            Dependants = new List<string>();
-            Dependees = new List<string>();
+            Dependents = new Dictionary<string, string>();
+            Dependees = new Dictionary<string, string>();
+            graphsize = 0;
+            
         }
 
         /// <summary>
@@ -66,7 +71,7 @@ namespace Dependencies
         /// </summary>
         public int Size
         {
-            get { return 0; }
+            get { return graphsize; }
         }
 
         /// <summary>
@@ -76,13 +81,13 @@ namespace Dependencies
         {
             if (s == null)
             {
-                throw new Exception(s + " is not in the dependancy graph.");
+                throw new Exception("Input is a null string.");
             }
             else
             {
-                foreach (string dep in Dependants)
+                foreach (string dep in Dependents)
                 {
-                    if (dep.ElementAt(0) == s.First())
+                    if (dep.Substring(0,dep.IndexOf(' ')) == s)
                     {
                         return true;
                     }
@@ -96,6 +101,20 @@ namespace Dependencies
         /// </summary>
         public bool HasDependees(string s)
         {
+            if (s == null)
+            {
+                throw new Exception("Input is a null string.");
+            }
+            else
+            {
+                foreach (string dep in Dependees)
+                {
+                    if (dep.Substring(0, dep.IndexOf(' ')) == s)
+                    {
+                        return true;
+                    }
+                }
+            }
             return false;
         }
 
@@ -104,7 +123,37 @@ namespace Dependencies
         /// </summary>
         public IEnumerable<string> GetDependents(string s)
         {
-            return null;
+            
+            string temp = "";
+            //Search dependents for matching 
+            foreach (string dep in Dependents)
+            {
+                if (dep.Substring(0, dep.IndexOf(' ')) == s)
+                {
+                    temp = dep;
+                    break;
+                }
+            }
+            //If we never found a matching string then there is nothing to return.
+            if(temp == "")
+            {
+                yield break;
+            }
+            
+            string[] elements = temp.Split(' ');
+
+            if (elements[1] != null)
+            {
+                for (int i = 1; i < elements.Length; i++)
+                {
+                    yield return elements[i];
+                }
+            }
+            //In case there were no dependents.
+            else
+            {
+                yield break;
+            }
         }
 
         /// <summary>
@@ -112,7 +161,41 @@ namespace Dependencies
         /// </summary>
         public IEnumerable<string> GetDependees(string s)
         {
-            return null;
+            //first search the dependees master list for string s. pull that dependees list out and enumerate it.
+            string temp = "";
+            foreach (string dep in Dependees)
+            {
+                if (dep.Substring(0, dep.IndexOf(' ')) == s)
+                {
+                    temp = dep;
+                    break;
+                }
+            }
+            if (temp == "")
+            {
+                yield break;
+            }
+            string[] elements = temp.Split(' ');
+
+            if(elements[1] != null)
+            {
+                for (int i = 1; i < elements.Length; i++)
+                {
+                    yield return elements[i];
+                }
+            }
+            else
+            {
+                yield break;
+            }
+            //foreach (String str in Regex.Split(s, pattern, RegexOptions.IgnorePatternWhitespace))
+            //{
+            //    if (!Regex.IsMatch(str, @"^\s*$", RegexOptions.Singleline))
+            //    {
+            //        yield return s;
+            //    }
+            //}
+            
         }
 
         /// <summary>
@@ -122,17 +205,22 @@ namespace Dependencies
         /// </summary>
         public void AddDependency(string s, string t)
         {
+            string temp;
             if (s == null || t == null)
             {
                 throw new Exception("Adding a dependancy requires a valid dependant and dependee.");
             }
             else
             {
-                if(GetDependees(s) == null)
+                foreach (string dep in Dependees)
                 {
-
+                    if (dep.Substring(0, dep.IndexOf(' ')) == s)
+                    {
+                        temp = dep;
+                        break;
+                    }
                 }
-                
+
             }
         }
 
