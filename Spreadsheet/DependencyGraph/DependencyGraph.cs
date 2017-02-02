@@ -49,8 +49,6 @@ namespace Dependencies
     /// </summary>
     public class DependencyGraph
     {
-        //private List<string> Dependents;
-        //private List<string> Dependees;
         private Dictionary<string, List<string>> Dependents;
         private Dictionary<string, List<string>> Dependees;
         private int graphsize;
@@ -259,7 +257,6 @@ namespace Dependencies
         {
             var dependent = new List<string>();
             var dependee = new List<string>();
-            //var temp = new List<string>();
 
             if (s == null || t == null)
             {
@@ -278,13 +275,7 @@ namespace Dependencies
                     if (dependent.Count != 0)
                     {
                         Dependents.Add(s, dependent);
-                        //graphsize -= 1;
                     }
-                    else
-                    {
-                        //graphsize -= 1;
-                    }
-                    
 
                     //Removing s from t's Dependees.
                     Dependees.TryGetValue(t, out dependee);
@@ -295,11 +286,6 @@ namespace Dependencies
                     if (dependee.Count != 0)
                     {
                         Dependees.Add(t, dependee);
-                        //graphsize -= 1;
-                    }
-                    else
-                    {
-                        //graphsize -= 1;
                     }
 
                     graphsize -= 1;
@@ -315,6 +301,14 @@ namespace Dependencies
         /// </summary>
         public void ReplaceDependents(string s, IEnumerable<string> newDependents)
         {
+            var values = new List<string>();
+
+            Dependents.Remove(s);
+            foreach (string dep in newDependents)
+            {
+                values.Add(dep);
+            }
+            Dependents.Add(s, values);
         }
 
         /// <summary>
@@ -324,6 +318,14 @@ namespace Dependencies
         /// </summary>
         public void ReplaceDependees(string t, IEnumerable<string> newDependees)
         {
+            var values = new List<string>();
+
+            Dependees.Remove(t);
+            foreach (string dep in newDependees)
+            {
+                values.Add(dep);
+            }
+            Dependents.Add(t, values);
         }
     }
 }
