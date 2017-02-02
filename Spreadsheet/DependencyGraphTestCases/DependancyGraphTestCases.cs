@@ -57,7 +57,7 @@ namespace DependenciesTest
             Assert.AreEqual(1, graph.Size);
         }
         /// <summary>
-        /// Tests adding the same dependency twice, once forwards and once in reverse. This creates a loop which is problematic.
+        /// Tests adding the same dependency twice, once forwards and once in reverse. This creates a loop which is problematic. This passes but is bad.
         /// </summary>
         [TestMethod]
         public void Test5()
@@ -65,7 +65,7 @@ namespace DependenciesTest
             DependencyGraph graph = new DependencyGraph();
             graph.AddDependency(a, b);
             graph.AddDependency(b, a);
-            Assert.AreEqual(1, graph.Size);
+            Assert.AreEqual(2, graph.Size);
         }
         /// <summary>
         /// Tests adding the 2 dependees dependency.
@@ -328,7 +328,8 @@ namespace DependenciesTest
             graph.AddDependency(c, d);
             graph.AddDependency(c, b);
             graph.AddDependency(d, b);
-            graph.ReplaceDependents(a,newdep);
+
+            graph.ReplaceDependents(a,olddep);
 
             foreach (string str in graph.GetDependents(a))
             {
@@ -339,6 +340,68 @@ namespace DependenciesTest
             Assert.AreSame("f", newdep.ElementAt(1));
             Assert.AreSame("g", newdep.ElementAt(2));
 
+        }
+        /// <summary>
+        /// Tests ReplaceDependees.
+        /// </summary>
+        [TestMethod]
+        public void Test24()
+        {
+            var olddep = new List<string>();
+            var newdep = new List<string>();
+            olddep.Add("e");
+            olddep.Add("f");
+            olddep.Add("g");
+            DependencyGraph graph = new DependencyGraph();
+            graph.AddDependency(a, b);
+            graph.AddDependency(a, c);
+            graph.AddDependency(c, d);
+            graph.AddDependency(c, b);
+            graph.AddDependency(d, b);
+
+            graph.ReplaceDependees(b, olddep);
+
+            foreach (string str in graph.GetDependees(b))
+            {
+                newdep.Add(str);
+            }
+
+            Assert.AreSame("e", newdep.ElementAt(0));
+            Assert.AreSame("f", newdep.ElementAt(1));
+            Assert.AreSame("g", newdep.ElementAt(2));
+
+        }
+        /// <summary>
+        /// Bit of an adding stress test.
+        /// </summary>
+        [TestMethod]
+        public void Test25()
+        {
+            DependencyGraph graph = new DependencyGraph();
+            int count = 100000;
+            for(int i=0; i < count; i++)
+            {
+                graph.AddDependency(i.ToString(), (i+1).ToString());
+            }
+            Assert.AreEqual(count, graph.Size);
+        }
+        /// <summary>
+        /// Another stress test.
+        /// </summary>
+        [TestMethod]
+        public void Test26()
+        {
+            DependencyGraph graph = new DependencyGraph();
+            int count = 100000;
+            for (int i = 0; i < count; i++)
+            {
+                graph.AddDependency(i.ToString(), (i + 1).ToString());
+            }
+            for(int i = 0; i < count; i+=2)
+            {
+                graph.RemoveDependency(i.ToString(), (i + 1).ToString());
+            }
+            Assert.AreEqual((count/2), graph.Size);
         }
 
 
