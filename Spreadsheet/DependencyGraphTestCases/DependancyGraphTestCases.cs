@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Dependencies;
 
@@ -226,6 +228,116 @@ namespace DependenciesTest
             graph.AddDependency(c, b);
             graph.RemoveDependency(a, b);
             Assert.AreEqual(1, graph.Size);
+
+        }
+        /// <summary>
+        /// Tests GetDependants.
+        /// </summary>
+        [TestMethod]
+        public void Test19()
+        {
+            var dependents = new List<string>();
+            DependencyGraph graph = new DependencyGraph();
+            graph.AddDependency(a, b);
+            graph.AddDependency(a, c);
+            graph.AddDependency(a, d);
+            foreach (string str in graph.GetDependents(a))
+            {
+                dependents.Add(str);
+            }
+
+            Assert.AreEqual("b", dependents.ElementAt(0));
+            Assert.AreEqual("c", dependents.ElementAt(1));
+            Assert.AreEqual("d", dependents.ElementAt(2));
+
+        }
+        /// <summary>
+        /// Tests GetDependents when there are none.
+        /// </summary>
+        [TestMethod]
+        public void Test20()
+        {
+            var dependents = new List<string>();
+            DependencyGraph graph = new DependencyGraph();
+            graph.AddDependency(a, b);
+            graph.AddDependency(a, c);
+            graph.AddDependency(a, d);
+            foreach (string str in graph.GetDependents(b))
+            {
+                dependents.Add(str);
+            }
+
+            Assert.AreEqual(0, dependents.Count);
+            //Assert.AreEqual("c", dependents.ElementAt(1));
+            //Assert.AreEqual("d", dependents.ElementAt(2));
+        }
+        /// <summary>
+        /// Tests GetDependees.
+        /// </summary>
+        [TestMethod]
+        public void Test21()
+        {
+            var dependees = new List<string>();
+            DependencyGraph graph = new DependencyGraph();
+            graph.AddDependency(a, b);
+            graph.AddDependency(c, b);
+            graph.AddDependency(d, b);
+            foreach (string str in graph.GetDependees(b))
+            {
+                dependees.Add(str);
+            }
+
+            Assert.AreEqual("a", dependees.ElementAt(0));
+            Assert.AreEqual("c", dependees.ElementAt(1));
+            Assert.AreEqual("d", dependees.ElementAt(2));
+
+        }
+        /// <summary>
+        /// Tests GetDependees when there are none.
+        /// </summary>
+        [TestMethod]
+        public void Test22()
+        {
+            var dependees = new List<string>();
+            DependencyGraph graph = new DependencyGraph();
+            graph.AddDependency(a, c);
+            graph.AddDependency(c, d);
+            graph.AddDependency(d, "e");
+            foreach (string str in graph.GetDependees(b))
+            {
+                dependees.Add(str);
+            }
+
+            Assert.AreEqual(0, dependees.Count);
+
+        }
+        /// <summary>
+        /// Tests ReplaceDependants.
+        /// </summary>
+        [TestMethod]
+        public void Test23()
+        {
+            var olddep = new List<string>();
+            var newdep = new List<string>();
+            olddep.Add("e");
+            olddep.Add("f");
+            olddep.Add("g");
+            DependencyGraph graph = new DependencyGraph();
+            graph.AddDependency(a, b);
+            graph.AddDependency(a, c);
+            graph.AddDependency(c, d);
+            graph.AddDependency(c, b);
+            graph.AddDependency(d, b);
+            graph.ReplaceDependents(a,newdep);
+
+            foreach (string str in graph.GetDependents(a))
+            {
+                newdep.Add(str);
+            }
+
+            Assert.AreSame("e", newdep.ElementAt(0));
+            Assert.AreSame("f", newdep.ElementAt(1));
+            Assert.AreSame("g", newdep.ElementAt(2));
 
         }
 
