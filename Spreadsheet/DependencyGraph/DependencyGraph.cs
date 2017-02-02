@@ -216,13 +216,7 @@ namespace Dependencies
                         Dependees.Add(t, dependee);
                         graphsize += 1;
                     }
-                    //else
-                    //{
-                    //    Dependees.Remove(t);
-                    //    dependee.Add(s);
-                    //    Dependees.Add(t, dependee);
-                    //    graphsize += 1;
-                    //}
+                    
                     
                 }
                 
@@ -251,14 +245,7 @@ namespace Dependencies
                     }
                     
                 }
-                //else
-                //{
-                //    dependent.Add(t);
-                //    dependee.Add(s);
-                //    Dependents.Add(s, dependent);
-                //    Dependees.Add(t, dependee);
-                //    graphsize += 1;
-                //}
+                
                 
             }
         }
@@ -272,7 +259,7 @@ namespace Dependencies
         {
             var dependent = new List<string>();
             var dependee = new List<string>();
-            var temp = new List<string>();
+            //var temp = new List<string>();
 
             if (s == null || t == null)
             {
@@ -281,53 +268,43 @@ namespace Dependencies
             if (Dependents.TryGetValue(s, out dependent))
             {
 
-                //If not included in the graph already
-                if (!dependent.Contains(t))
+                //If (s,t) is included in the graph already.
+                if (dependent.Contains(t))
                 {
 
-                    //Adding s to Dependents.
+                    //Removing t from s's Dependents.
                     Dependents.Remove(s);
-                    dependent.Add(t);
-                    Dependents.Add(s, dependent);
-
-                    //Adding t to Dependees.
-                    Dependees.TryGetValue(t, out dependee);
-                    if (dependee == null)
+                    dependent.Remove(t);
+                    if (dependent.Count != 0)
                     {
-                        dependee = new List<string>();
-                        Dependees.Remove(t);
-                        dependee.Add(s);
-                        Dependees.Add(t, dependee);
-                        graphsize += 1;
-                    }
-                    
-
-                }
-
-            }
-            else
-            {
-                if (dependent == null)
-                {
-                    dependent = new List<string>();
-                    dependent.Add(t);
-                    dependee.Add(s);
-                    Dependents.Add(s, dependent);
-
-                    //If dependee is already in dictionary then we must deal with that before adding
-                    if (Dependees.TryGetValue(t, out temp))
-                    {
-                        Dependees.Remove(t);
-                        temp.Add(s);
-                        Dependees.Add(t, temp);
-                        graphsize += 1;
+                        Dependents.Add(s, dependent);
+                        //graphsize -= 1;
                     }
                     else
                     {
-                        Dependees.Add(t, dependee);
-                        graphsize += 1;
+                        //graphsize -= 1;
                     }
+                    
+
+                    //Removing s from t's Dependees.
+                    Dependees.TryGetValue(t, out dependee);
+
+                    Dependees.Remove(t);
+                    dependee.Remove(s);
+
+                    if (dependee.Count != 0)
+                    {
+                        Dependees.Add(t, dependee);
+                        //graphsize -= 1;
+                    }
+                    else
+                    {
+                        //graphsize -= 1;
+                    }
+
+                    graphsize -= 1;
                 }
+                
             }
         }
 

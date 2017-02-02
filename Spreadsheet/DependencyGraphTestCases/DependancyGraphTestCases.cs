@@ -164,6 +164,71 @@ namespace DependenciesTest
             Assert.IsFalse(graph.HasDependees(a));
 
         }
+        /// <summary>
+        /// Test removing when graph is empty.
+        /// </summary>
+        [TestMethod]
+        public void Test14()
+        {
+            DependencyGraph graph = new DependencyGraph();
+            graph.RemoveDependency(a, b);
+            Assert.AreEqual(0, graph.Size);
+
+        }
+        /// <summary>
+        /// Test removing the graph's only element.
+        /// </summary>
+        [TestMethod]
+        public void Test15()
+        {
+            DependencyGraph graph = new DependencyGraph();
+            graph.AddDependency(a, b);
+            graph.RemoveDependency(a, b);
+            Assert.AreEqual(0, graph.Size);
+
+        }
+        /// <summary>
+        /// Test removing elements not in the graph.
+        /// </summary>
+        [TestMethod]
+        public void Test16()
+        {
+            DependencyGraph graph = new DependencyGraph();
+            graph.AddDependency(a, b);
+            graph.RemoveDependency(c, d);
+            graph.RemoveDependency(b, c);
+            graph.RemoveDependency(c, d);
+            graph.RemoveDependency(d, c);
+            Assert.AreEqual(1, graph.Size);
+
+        }
+        /// <summary>
+        /// Test removing a non-unique dependent.
+        /// </summary>
+        [TestMethod]
+        public void Test17()
+        {
+            DependencyGraph graph = new DependencyGraph();
+            graph.AddDependency(a, b);
+            graph.AddDependency(a, c);
+            graph.RemoveDependency(a, b);
+            Assert.AreEqual(1, graph.Size);
+
+        }
+        /// <summary>
+        /// Test removing a non-unique dependee.
+        /// </summary>
+        [TestMethod]
+        public void Test18()
+        {
+            DependencyGraph graph = new DependencyGraph();
+            graph.AddDependency(a, b);
+            graph.AddDependency(c, b);
+            graph.RemoveDependency(a, b);
+            Assert.AreEqual(1, graph.Size);
+
+        }
+
 
 
 
