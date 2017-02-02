@@ -369,6 +369,7 @@ namespace DependenciesTest
             Assert.AreSame("e", newdep.ElementAt(0));
             Assert.AreSame("f", newdep.ElementAt(1));
             Assert.AreSame("g", newdep.ElementAt(2));
+            Assert.AreEqual(5, graph.Size);
 
         }
         /// <summary>

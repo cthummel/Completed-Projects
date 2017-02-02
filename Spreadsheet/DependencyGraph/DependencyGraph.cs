@@ -61,7 +61,6 @@ namespace Dependencies
             Dependents = new Dictionary<string, List<string>>();
             Dependees = new Dictionary<string, List<string>>();
             graphsize = 0;
-            
         }
 
         /// <summary>
@@ -87,14 +86,7 @@ namespace Dependencies
                 //Potentially incorrect if the dependents of s is empty. Look over later.
                 if (Dependents.ContainsKey(s))
                 {
-                    //if (value.Count != 0)
-                    //{
-                        return true;
-                    //}
-                    //else
-                    //{
-                    //    return false;
-                    //}
+                    return true;
                 }
                 else
                 {
@@ -118,14 +110,7 @@ namespace Dependencies
                 //Potentially incorrect if the dependents of s is empty. Look over later.
                 if (Dependees.ContainsKey(s))
                 {
-                    //if(value.Count != 0)
-                    //{
-                        return true;
-                    //}
-                    //else
-                    //{
-                    //    return false;
-                    //}
+                    return true;
                 }
                 else
                 {
@@ -140,7 +125,7 @@ namespace Dependencies
         public IEnumerable<string> GetDependents(string s)
         {
             var value = new List<string>();
-            
+
             if (Dependents.TryGetValue(s, out value))
             {
                 //Check whether this works on empty lists. Ex.   dependents("c") = {}
@@ -162,7 +147,7 @@ namespace Dependencies
         {
             //first search the dependees master list for string s. pull that dependees list out and enumerate it.
             var value = new List<string>();
-            
+
             if (Dependees.TryGetValue(s, out value))
             {
                 foreach (string str in value)
@@ -194,7 +179,7 @@ namespace Dependencies
             }
             if (Dependents.TryGetValue(s, out dependent))
             {
-                
+
                 //If not included in the graph already
                 if (!dependent.Contains(t))
                 {
@@ -214,10 +199,7 @@ namespace Dependencies
                         Dependees.Add(t, dependee);
                         graphsize += 1;
                     }
-                    
-                    
                 }
-                
             }
             else
             {
@@ -229,7 +211,7 @@ namespace Dependencies
                     Dependents.Add(s, dependent);
 
                     //If dependee is already in dictionary then we must deal with that before adding
-                    if(Dependees.TryGetValue(t, out temp))
+                    if (Dependees.TryGetValue(t, out temp))
                     {
                         Dependees.Remove(t);
                         temp.Add(s);
@@ -241,10 +223,7 @@ namespace Dependencies
                         Dependees.Add(t, dependee);
                         graphsize += 1;
                     }
-                    
                 }
-                
-                
             }
         }
 
@@ -290,7 +269,6 @@ namespace Dependencies
 
                     graphsize -= 1;
                 }
-                
             }
         }
 
@@ -302,13 +280,19 @@ namespace Dependencies
         public void ReplaceDependents(string s, IEnumerable<string> newDependents)
         {
             var values = new List<string>();
+            var oldvalues = new List<string>();
 
+            Dependents.TryGetValue(s, out oldvalues);
+            graphsize -= oldvalues.Count;
             Dependents.Remove(s);
+
             foreach (string dep in newDependents)
             {
                 values.Add(dep);
             }
+
             Dependents.Add(s, values);
+            graphsize += values.Count;
         }
 
         /// <summary>
@@ -319,13 +303,19 @@ namespace Dependencies
         public void ReplaceDependees(string t, IEnumerable<string> newDependees)
         {
             var values = new List<string>();
+            var oldvalues = new List<string>();
 
+            Dependees.TryGetValue(t, out oldvalues);
+            graphsize -= oldvalues.Count;
             Dependees.Remove(t);
+
             foreach (string dep in newDependees)
             {
                 values.Add(dep);
             }
+
             Dependees.Add(t, values);
+            graphsize += values.Count;
         }
     }
 }
