@@ -79,7 +79,7 @@ namespace Dependencies
             //var value = new List<string>();
             if (s == null)
             {
-                throw new Exception("Input is a null string.");
+                throw new ArgumentNullException("Input is a null string.");
             }
             else
             {
@@ -103,7 +103,7 @@ namespace Dependencies
             //var value = new List<string>();
             if (s == null)
             {
-                throw new Exception("Input is a null string.");
+                throw new ArgumentNullException("Input is a null string.");
             }
             else
             {
@@ -124,6 +124,10 @@ namespace Dependencies
         /// </summary>
         public IEnumerable<string> GetDependents(string s)
         {
+            if (s == null)
+            {
+                throw new ArgumentNullException("Input is a null string.");
+            }
             var value = new List<string>();
 
             if (Dependents.TryGetValue(s, out value))
@@ -145,6 +149,10 @@ namespace Dependencies
         /// </summary>
         public IEnumerable<string> GetDependees(string s)
         {
+            if (s == null)
+            {
+                throw new ArgumentNullException("Input is a null string.");
+            }
             //first search the dependees master list for string s. pull that dependees list out and enumerate it.
             var value = new List<string>();
 
@@ -175,7 +183,7 @@ namespace Dependencies
 
             if (s == null || t == null)
             {
-                throw new Exception("Adding a dependancy requires a non-null dependant and dependee.");
+                throw new ArgumentNullException("Adding a dependancy requires a non-null dependant and dependee.");
             }
             if (Dependents.TryGetValue(s, out dependent))
             {
@@ -230,7 +238,6 @@ namespace Dependencies
         /// <summary>
         /// Removes the dependency (s,t) from this DependencyGraph.
         /// Does nothing if (s,t) doesn't belong to this DependencyGraph.
-        /// Requires s != null and t != null.
         /// </summary>
         public void RemoveDependency(string s, string t)
         {
@@ -239,8 +246,9 @@ namespace Dependencies
 
             if (s == null || t == null)
             {
-                throw new Exception("Adding a dependancy requires a non-null dependant and dependee.");
+                throw new ArgumentNullException("Removing a dependancy requires a non-null dependant and dependee.");
             }
+
             if (Dependents.TryGetValue(s, out dependent))
             {
 
@@ -279,11 +287,53 @@ namespace Dependencies
         /// </summary>
         public void ReplaceDependents(string s, IEnumerable<string> newDependents)
         {
+            if (s == null || newDependents == null)
+            {
+                throw new ArgumentNullException("Replacing requires a non-null string and IEnumerable.");
+            }
             var values = new List<string>();
             var oldvalues = new List<string>();
 
+
             Dependents.TryGetValue(s, out oldvalues);
+            if (oldvalues == null)
+            {
+                return;
+            }
             graphsize -= oldvalues.Count;
+
+
+            //Need to have dependents match the changes to dependees.
+            foreach (string dependee in oldvalues)
+            {
+                //Finds dependee t as a value in the Dependant dictionary and removes it from the right lists.
+                var tempdependents = new List<string>();
+                Dependees.TryGetValue(dependee, out tempdependents);
+                tempdependents.Remove(s);
+                Dependees.Remove(dependee);
+                Dependees.Add(dependee, tempdependents);
+            }
+
+            //Adds new Dependents to list with t as dependee as needed.
+            foreach (string dependee in newDependents)
+            {
+                var dependent = new List<string>();
+
+                if (Dependees.ContainsKey(dependee))
+                {
+                    Dependees.TryGetValue(dependee, out dependent);
+                    dependent.Add(s);
+                    Dependees.Remove(dependee);
+                    Dependees.Add(dependee, dependent);
+
+                }
+                else
+                {
+                    dependent.Add(s);
+                    Dependees.Add(dependee, dependent);
+                }
+            }
+
             Dependents.Remove(s);
 
             foreach (string dep in newDependents)
@@ -302,11 +352,55 @@ namespace Dependencies
         /// </summary>
         public void ReplaceDependees(string t, IEnumerable<string> newDependees)
         {
+            if (t == null || newDependees == null)
+            {
+                throw new ArgumentNullException("Replacing requires a non-null string and IEnumerable.");
+            }
+
             var values = new List<string>();
             var oldvalues = new List<string>();
 
             Dependees.TryGetValue(t, out oldvalues);
+
+            if (oldvalues == null)
+            {
+                return;
+            }
+            
             graphsize -= oldvalues.Count;
+
+            //Need to have dependents match the changes to dependees.
+            foreach (string dependent in oldvalues)
+            {
+                //Finds dependee t as a value in the Dependant dictionary and removes it from the right lists.
+                var tempdependees = new List<string>();
+                Dependents.TryGetValue(dependent, out tempdependees);
+                tempdependees.Remove(t);
+                Dependents.Remove(dependent);
+                Dependents.Add(dependent, tempdependees);
+            }
+
+            //Adds new Dependents to list with t as dependee as needed.
+            foreach(string dependent in newDependees)
+            {
+                var dependee = new List<string>();
+
+                if (Dependents.ContainsKey(dependent))
+                {
+                    Dependents.TryGetValue(dependent, out dependee);
+                    dependee.Add(t);
+                    Dependents.Remove(dependent);
+                    Dependents.Add(dependent, dependee);
+
+                }
+                else
+                {
+                    dependee.Add(t);
+                    Dependents.Add(dependent, dependee);
+                }
+            }
+
+
             Dependees.Remove(t);
 
             foreach (string dep in newDependees)
