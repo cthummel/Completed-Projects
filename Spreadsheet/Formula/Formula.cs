@@ -493,7 +493,20 @@ namespace Formulas
     /// </summary>
     public delegate double Lookup(string var);
 
+    /// <summary>
+    /// Converts variables to canonical form.
+    /// </summary>
+    /// <param name="s"></param>
+    /// <returns></returns>
+    public delegate string Normalizer(string s);
 
+
+    /// <summary>
+    /// Imposes extra restrictions upon the validity of a variable.
+    /// </summary>
+    /// <param name="s"></param>
+    /// <returns></returns>
+    public delegate bool Validator(string s);
 
     /// <summary>
     /// Used to report that a Lookup delegate is unable to determine the value
