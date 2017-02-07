@@ -198,6 +198,8 @@ namespace FormulaTestCases
             Assert.AreEqual(f.Evaluate(Lookup4), 48.0, 1e-6);
         }
 
+        
+
         [TestMethod]
         public void Evaluate5b()
         {
@@ -220,7 +222,14 @@ namespace FormulaTestCases
                 default: throw new UndefinedVariableException(v);
             }
         }
-        
-        
+
+        [TestMethod]
+        public void Evaluate5c()
+        {
+            Formula f = new Formula("(x * 5e2) * (3 / 3)");
+            Assert.AreEqual(f.Evaluate(v => 2), 1000.0, 1e-6);
+        }
+
+
     }
 }
