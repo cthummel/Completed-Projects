@@ -25,7 +25,7 @@ namespace Formulas
         private const String lpPattern = @"\(";
         private const String rpPattern = @"\)";
         private const String opPattern = @"[\+\-*/]";
-        private const String varPattern = @"[a-zA-Z][0-9a-zA-Z]*";
+        private const String varPattern = @"^[a-zA-Z][0-9a-zA-Z]*$";
         private const String powpattern = @"^(\.?\d+\.*\d*)(e)([\-+]?\d+)?$";
         private const String doublePattern = @"(?:\d+\.\d*|\d*\.\d+|\d+)(?:e[\+-]?\d+)?";
         private const String spacePattern = @"\s+";
@@ -171,7 +171,7 @@ namespace Formulas
             {
 
                 //Current item is a double.
-                if (Regex.IsMatch(t, doublePattern))
+                if (Regex.IsMatch(t, doublePattern) && !Regex.IsMatch(t, varPattern))
                 {
                     double exp = 0;
                     //If we found an exponential we should convert to a double then run through normal procedure.
@@ -253,8 +253,9 @@ namespace Formulas
                     }
                 }
 
-                if (Regex.IsMatch(t, varPattern) && foundexp == false)
+                if (Regex.IsMatch(t, varPattern))
                 {
+                    
                     try
                     {
                         lookup(t);
