@@ -72,7 +72,7 @@ namespace Dependencies
         }
 
         /// <summary>
-        /// Reports whether dependents(s) is non-empty.  Requires s != null.
+        /// Reports whether dependents(s) is non-empty.
         /// </summary>
         public bool HasDependents(string s)
         {
@@ -96,7 +96,7 @@ namespace Dependencies
         }
 
         /// <summary>
-        /// Reports whether dependees(s) is non-empty.  Requires s != null.
+        /// Reports whether dependees(s) is non-empty.
         /// </summary>
         public bool HasDependees(string s)
         {
@@ -120,7 +120,7 @@ namespace Dependencies
         }
 
         /// <summary>
-        /// Enumerates dependents(s).  Requires s != null.
+        /// Enumerates dependents(s).
         /// </summary>
         public IEnumerable<string> GetDependents(string s)
         {
@@ -145,7 +145,7 @@ namespace Dependencies
         }
 
         /// <summary>
-        /// Enumerates dependees(s).  Requires s != null.
+        /// Enumerates dependees(s).
         /// </summary>
         public IEnumerable<string> GetDependees(string s)
         {
@@ -172,7 +172,6 @@ namespace Dependencies
         /// <summary>
         /// Adds the dependency (s,t) to this DependencyGraph.
         /// This has no effect if (s,t) already belongs to this DependencyGraph.
-        /// Requires s != null and t != null.
         /// </summary>
         public void AddDependency(string s, string t)
         {
@@ -185,24 +184,28 @@ namespace Dependencies
             {
                 throw new ArgumentNullException("Adding a dependancy requires a non-null dependant and dependee.");
             }
-            if (Dependents.TryGetValue(s, out dependent))
+            if (Dependents.TryGetValue(s, out dependee))
             {
 
                 //If not included in the graph already
-                if (!dependent.Contains(t))
+                if (!dependee.Contains(t))
                 {
-
-                    //Adding s to Dependents.
                     Dependents.Remove(s);
-                    dependent.Add(t);
-                    Dependents.Add(s, dependent);
+                    dependee.Add(t);
+                    Dependents.Add(s, dependee);
 
                     //Adding t to Dependees.
-                    Dependees.TryGetValue(t, out dependee);
-                    if (dependee == null)
+                    if(Dependees.TryGetValue(t, out dependent))
+                    {
+                        Dependees.Remove(t);
+                        dependent.Add(s);
+                        Dependees.Add(t, dependent);
+                        graphsize += 1;
+                    }
+                    
+                    else
                     {
                         dependee = new List<string>();
-                        Dependees.Remove(t);
                         dependee.Add(s);
                         Dependees.Add(t, dependee);
                         graphsize += 1;
@@ -211,26 +214,23 @@ namespace Dependencies
             }
             else
             {
-                if (dependent == null)
-                {
-                    dependent = new List<string>();
-                    dependent.Add(t);
-                    dependee.Add(s);
-                    Dependents.Add(s, dependent);
+                dependee = new List<string>();
+                dependee.Add(t);
+                Dependents.Add(s, dependee);
 
-                    //If dependee is already in dictionary then we must deal with that before adding
-                    if (Dependees.TryGetValue(t, out temp))
-                    {
-                        Dependees.Remove(t);
-                        temp.Add(s);
-                        Dependees.Add(t, temp);
-                        graphsize += 1;
-                    }
-                    else
-                    {
-                        Dependees.Add(t, dependee);
-                        graphsize += 1;
-                    }
+                //If dependee is already in dictionary then we must deal with that before adding
+                if (Dependees.TryGetValue(t, out temp))
+                {
+                    Dependees.Remove(t);
+                    temp.Add(s);
+                    Dependees.Add(t, temp);
+                    graphsize += 1;
+                }
+                else
+                {
+                    dependent.Add(s);
+                    Dependees.Add(t, dependent);
+                    graphsize += 1;
                 }
             }
         }
@@ -283,7 +283,6 @@ namespace Dependencies
         /// <summary>
         /// Removes all existing dependencies of the form (s,r).  Then, for each
         /// t in newDependents, adds the dependency (s,t).
-        /// Requires s != null and t != null.
         /// </summary>
         public void ReplaceDependents(string s, IEnumerable<string> newDependents)
         {
@@ -294,13 +293,17 @@ namespace Dependencies
             var values = new List<string>();
             var oldvalues = new List<string>();
 
-
             Dependents.TryGetValue(s, out oldvalues);
+
             if (oldvalues == null)
             {
                 return;
             }
-            graphsize -= oldvalues.Count;
+            else
+            {
+                graphsize -= oldvalues.Count;
+            }
+           
 
 
             //Need to have dependents match the changes to dependees.
@@ -348,7 +351,6 @@ namespace Dependencies
         /// <summary>
         /// Removes all existing dependencies of the form (r,t).  Then, for each 
         /// s in newDependees, adds the dependency (s,t).
-        /// Requires s != null and t != null.
         /// </summary>
         public void ReplaceDependees(string t, IEnumerable<string> newDependees)
         {
@@ -356,60 +358,61 @@ namespace Dependencies
             {
                 throw new ArgumentNullException("Replacing requires a non-null string and IEnumerable.");
             }
-
             var values = new List<string>();
             var oldvalues = new List<string>();
-
             Dependees.TryGetValue(t, out oldvalues);
 
-            if (oldvalues == null)
+            if(oldvalues == null)
             {
-                return;
+                oldvalues = new List<string>();
             }
-            
             graphsize -= oldvalues.Count;
 
-            //Need to have dependents match the changes to dependees.
-            foreach (string dependent in oldvalues)
+
+
+            //Removes all (r,t) from Dependents dictionary.
+            foreach (string dep in oldvalues)
             {
-                //Finds dependee t as a value in the Dependant dictionary and removes it from the right lists.
                 var tempdependees = new List<string>();
-                Dependents.TryGetValue(dependent, out tempdependees);
+                Dependents.TryGetValue(dep, out tempdependees);
                 tempdependees.Remove(t);
-                Dependents.Remove(dependent);
-                Dependents.Add(dependent, tempdependees);
+                Dependents.Remove(dep);
+                Dependents.Add(dep, tempdependees);
             }
 
-            //Adds new Dependents to list with t as dependee as needed.
-            foreach(string dependent in newDependees)
-            {
-                var dependee = new List<string>();
+            
 
+            //Adds all new (s,t) to Dependents dictionary.
+            foreach (string dependent in newDependees)
+            {
+                var tempdependee = new List<string>();
+                //If s is in the dictionary already.
                 if (Dependents.ContainsKey(dependent))
                 {
-                    Dependents.TryGetValue(dependent, out dependee);
-                    dependee.Add(t);
+                    
+                    Dependents.TryGetValue(dependent, out tempdependee);
+                    tempdependee.Add(t);
                     Dependents.Remove(dependent);
-                    Dependents.Add(dependent, dependee);
-
+                    Dependents.Add(dependent, tempdependee);
                 }
                 else
                 {
-                    dependee.Add(t);
-                    Dependents.Add(dependent, dependee);
+                    tempdependee.Add(t);
+                    Dependents.Add(dependent, tempdependee);
                 }
             }
 
-
+            //Removes all (r,t) from Dependees dictionary.
             Dependees.Remove(t);
 
+            //Adds all new (s,t) to Dependees dictionary.
             foreach (string dep in newDependees)
             {
                 values.Add(dep);
             }
-
             Dependees.Add(t, values);
             graphsize += values.Count;
+
         }
     }
 }
