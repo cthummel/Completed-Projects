@@ -405,6 +405,38 @@ namespace DependenciesTest
             Assert.AreEqual((count/2), graph.Size);
         }
 
+        /// <summary>
+        /// PS4b constuctor test.
+        /// </summary>
+        [TestMethod]
+        public void Test27()
+        {
+            DependencyGraph graph = new DependencyGraph();
+            graph.AddDependency(a, b);
+            graph.AddDependency(c, b);
+            graph.AddDependency(d, c);
+            graph.AddDependency(b, d);
+            DependencyGraph graph2 = new DependencyGraph(graph);
+            Assert.AreEqual(4, graph2.Size);
+        }
+        /// <summary>
+        /// PS4b constuctor test.
+        /// </summary>
+        [TestMethod]
+        public void Test28()
+        {
+            DependencyGraph graph = new DependencyGraph();
+            graph.AddDependency(a, b);
+            graph.AddDependency(c, b);
+            graph.AddDependency(d, c);
+            graph.AddDependency(b, d);
+            DependencyGraph graph2 = new DependencyGraph(graph);
+            graph2.AddDependency("e", a);
+            graph2.AddDependency("e", c);
+            graph2.AddDependency("e", d);
+            Assert.AreEqual(4, graph.Size);
+            Assert.AreEqual(7, graph2.Size);
+        }
 
 
 
