@@ -62,6 +62,17 @@ namespace Dependencies
             Dependees = new Dictionary<string, List<string>>();
             graphsize = 0;
         }
+        /// <summary>
+        /// Creates a new Dependency Graph which is a copy of the inputed graph.
+        /// </summary>
+        /// <param name="dg2"></param>
+        public DependencyGraph(DependencyGraph dg1)
+        {
+            Dependents = dg1.Dependents;
+            Dependees = dg1.Dependees;
+            graphsize = dg1.Size;
+           
+        }
 
         /// <summary>
         /// The number of dependencies in the DependencyGraph.
