@@ -303,8 +303,6 @@ namespace Dependencies
             {
                 graphsize -= oldvalues.Count;
             }
-           
-
 
             //Need to have dependents match the changes to dependees.
             foreach (string dependee in oldvalues)
@@ -328,7 +326,6 @@ namespace Dependencies
                     dependent.Add(s);
                     Dependees.Remove(dependee);
                     Dependees.Add(dependee, dependent);
-
                 }
                 else
                 {
@@ -366,9 +363,10 @@ namespace Dependencies
             {
                 oldvalues = new List<string>();
             }
-            graphsize -= oldvalues.Count;
-
-
+            else
+            {
+                graphsize -= oldvalues.Count;
+            }
 
             //Removes all (r,t) from Dependents dictionary.
             foreach (string dep in oldvalues)
@@ -379,8 +377,6 @@ namespace Dependencies
                 Dependents.Remove(dep);
                 Dependents.Add(dep, tempdependees);
             }
-
-            
 
             //Adds all new (s,t) to Dependents dictionary.
             foreach (string dependent in newDependees)
