@@ -437,8 +437,42 @@ namespace DependenciesTest
             Assert.AreEqual(4, graph.Size);
             Assert.AreEqual(7, graph2.Size);
         }
+        [TestMethod]
+        public void Test29()
+        {
+            var newdep1 = new List<string>();
+            var newdep2 = new List<string>();
+
+            DependencyGraph graph = new DependencyGraph();
+            graph.AddDependency(a, b);
+            graph.AddDependency(c, b);
+            graph.AddDependency(d, c);
+            graph.AddDependency(b, d);
+            DependencyGraph graph2 = new DependencyGraph(graph);
+            graph2.AddDependency("e", a);
+            graph2.AddDependency("e", c);
+            graph2.AddDependency("e", d);
+
+            foreach (string str in graph.GetDependents("e"))
+            {
+                newdep1.Add(str);
+            }
+
+            foreach (string str in graph2.GetDependents("e"))
+            {
+                newdep2.Add(str);
+            }
+
+            Assert.IsFalse(graph.HasDependents("e"));
+            Assert.AreEqual(0, newdep1.Count);
+            Assert.AreSame(a, newdep2.ElementAt(0));
+            Assert.AreSame(c, newdep2.ElementAt(1));
+            Assert.AreSame(d, newdep2.ElementAt(2));
+            Assert.AreEqual(3, newdep2.Count);
+        }
+        
 
 
 
-    }
+}
 }

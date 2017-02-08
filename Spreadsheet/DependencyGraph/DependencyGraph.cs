@@ -63,13 +63,13 @@ namespace Dependencies
             graphsize = 0;
         }
         /// <summary>
-        /// Creates a new Dependency Graph which is a copy of the inputed graph.
+        /// Creates a new Dependency Graph which has a copy of the all the dependencies in the original graph.
         /// </summary>
         /// <param name="dg2"></param>
         public DependencyGraph(DependencyGraph dg1)
         {
-            Dependents = dg1.Dependents;
-            Dependees = dg1.Dependees;
+            Dependents = new Dictionary <string, List<string>> (dg1.Dependents);
+            Dependees = new Dictionary <string, List<string>> (dg1.Dependees);
             graphsize = dg1.Size;
            
         }
