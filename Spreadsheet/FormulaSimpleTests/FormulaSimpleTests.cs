@@ -4,6 +4,8 @@ using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Formulas;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
+using System.Linq;
 
 namespace FormulaTestCases
 {
@@ -230,6 +232,136 @@ namespace FormulaTestCases
             Assert.AreEqual(f.Evaluate(v => 2), 1000.0, 1e-6);
         }
 
+
+
+
+        /// <summary>
+        /// Basic checking of null arguments.
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void PS4aTest0a()
+        {
+            string form = null;
+            Formula f = new Formula(form);
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void PS4aTest0b()
+        {
+            string form = null;
+            Formula f = new Formula(form, s => s.ToUpper(), v => Regex.IsMatch(v, "^[A-Z][0-9]$"));
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void PS4aTest0c()
+        {
+            string form = "4 + 6 + 8 * 9";
+            Formula f = new Formula(form, null, v => Regex.IsMatch(v, "^[A-Z][0-9]$"));
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void PS4aTest0d()
+        {
+            string form = "4 + 6 + 8 * 9";
+            Formula f = new Formula(form, s => s.ToUpper(), null);
+        }
+
+        /// <summary>
+        /// Checking the empty constructor provided by compiler.
+        /// </summary>
+        [TestMethod]
+        public void PS4aTest1()
+        {
+            Formula f = new Formula();
+            Assert.AreEqual("0", f.ToString());
+        }
+        [TestMethod]
+        public void PS4aTest1a()
+        {
+            Formula f = new Formula();
+            var Variables = new List<string>();
+            foreach (string var in f.GetVariables())
+            {
+                Variables.Add(var);
+            }
+
+            Assert.AreEqual("0", f.ToString());
+            Assert.AreEqual(0, Variables.Count);
+        }
+
+        /// <summary>
+        /// Testing the 3 element constuctor works like the 1 element constructor with trivial N and V.
+        /// </summary>
+        [TestMethod]
+        public void PS4aTest2()
+        {
+            Formula f = new Formula("2 + 3 + 5", s => s, s => true);
+            Assert.AreEqual(f.Evaluate(v => 2), 10, 1e-6);
+        }
+        [TestMethod]
+        public void PS4aTest3()
+        {
+            Formula f = new Formula("2 + 3 + 5");
+            Assert.AreEqual(f.Evaluate(v => 2), 10, 1e-6);
+        }
+        
+        [TestMethod]
+        public void PS4aTest4()
+        {
+            Formula f = new Formula("0");
+            Formula f1 = new Formula();
+            
+            Assert.AreEqual(f.Evaluate(v => 2), 0, 1e-6);
+            Assert.AreEqual(f1.Evaluate(v => 2), 0, 1e-6);
+            
+        }
+        [TestMethod]
+        public void PS4aTest5()
+        {
+            Formula f = new Formula("x2+y3", s => s.ToUpper(), v => Regex.IsMatch(v, "^[A-Z][0-9]$"));
+
+            Assert.AreEqual("X2+Y3", f.ToString());
+            Assert.AreNotEqual("x2+Y3", f.ToString());
+            Assert.AreNotEqual("X2+y3", f.ToString());
+            Assert.AreNotEqual("x2+y3", f.ToString());
+            Assert.AreEqual(f.Evaluate(v => 2), 4, 1e-6);
+        }
+        [TestMethod]
+        public void PS4aTest6()
+        {
+            Formula f = new Formula("x2+y3", s => s.ToUpper(), v => Regex.IsMatch(v, "^[A-Z][0-9]$"));
+            var Variables = new List<string>();
+            foreach (string var in f.GetVariables())
+            {
+                Variables.Add(var);
+            }
+
+            Assert.AreEqual("X2+Y3", f.ToString());
+            Assert.AreNotEqual("x2+Y3", f.ToString());
+            Assert.AreNotEqual("X2+y3", f.ToString());
+            Assert.AreNotEqual("x2+y3", f.ToString());
+            Assert.AreEqual(f.Evaluate(v => 2), 4, 1e-6);
+            Assert.AreEqual(Variables.ElementAt(0), "X2");
+            Assert.AreEqual(Variables.ElementAt(1), "Y3");
+            Assert.AreNotEqual(Variables.ElementAt(0), "x2");
+            Assert.AreNotEqual(Variables.ElementAt(1), "y3");
+        }
+        [TestMethod]
+        [ExpectedException(typeof(FormulaFormatException))]
+        public void PS4aTest7()
+        {
+            Formula f = new Formula("x2+y3", s => s.ToUpper(), v => Regex.IsMatch(v, "^[a-z][0-9]$"));
+        }
+        [TestMethod]
+        [ExpectedException(typeof(FormulaFormatException))]
+        public void PS4aTest8()
+        {
+            Formula f = new Formula("x2+y3", s => "++++++", v => Regex.IsMatch(v, "^[A-Z][0-9]$"));
+        }
 
     }
 }

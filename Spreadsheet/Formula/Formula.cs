@@ -77,7 +77,16 @@ namespace Formulas
         /// <returns></returns>
         public IEnumerable<string> GetVariables()
         {
-            return Variables;
+            if(Variables == null)
+            {
+                var temp = new List<string>();
+                return temp;
+            }
+            else
+            {
+                return Variables;
+            }
+            
         }
 
         /// <summary>
@@ -86,7 +95,15 @@ namespace Formulas
         /// <returns></returns>
         public override string ToString()
         {
-            return output;
+            if(output == null)
+            {
+                return "0";
+            }
+            else
+            {
+                return output;
+            }
+            
         }
 
         /// <summary>
@@ -245,6 +262,13 @@ namespace Formulas
             {
                 throw new ArgumentNullException("Requires a non-null lookup delegate for evaluating variables.");
             }
+
+            //For the empty constructor case. We need it to behave like Formula("0") so evaluate should return 0.
+            if (output == null)
+            {
+                return 0;
+            }
+
 
             foreach (string t in tokens)
             {
