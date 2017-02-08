@@ -37,16 +37,40 @@ namespace Formulas
         /// <param name="V"></param>
         public Formula(string f, Normalizer N, Validator V)
         {
-            //Not yet implemented.
+            //Checks for null input to constuctor.
             if (f == null || N == null || V == null)
             {
                 throw new ArgumentNullException("Requires a non-null formula, Normalizer and Validator to constructor.");
             }
 
+            Formula newf = new Formula(f);
+            var normvar = new List<string>();
+            string final = newf.output;
 
-            output = f;
-            Variables = new List<string>();
+            //Runs checks on the variables of the formula f when normalized and validated.
+            foreach (string var in newf.GetVariables())
+            {
+
+                if (!Regex.IsMatch(N(var), varPattern))
+                {
+                    throw new FormulaFormatException("Normalized variables did not pass standard formula creation requirements for variables.");
+                }
+
+                if (!V(N(var)))
+                {
+                    throw new FormulaFormatException("Normalized variables did not pass Validator test.");
+                }
+                
+                normvar.Add(N(var));
+                final = final.Replace(var, N(var));
+                
+            }
+
+            //Final passing formula is created.
+            Variables = normvar;
+            output = final;
         }
+
         /// <summary>
         /// Enumerates the variables found in the formula.
         /// </summary>
@@ -54,6 +78,15 @@ namespace Formulas
         public IEnumerable<string> GetVariables()
         {
             return Variables;
+        }
+
+        /// <summary>
+        /// Returns a normalized formula string.
+        /// </summary>
+        /// <returns></returns>
+        public override string ToString()
+        {
+            return output;
         }
 
         /// <summary>
