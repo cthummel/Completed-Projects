@@ -14,14 +14,13 @@ namespace Formulas
     /// the four binary operator symbols +, -, *, and /.  (The unary operators + and -
     /// are not allowed.)
     /// </summary>
-    public class Formula
+    public struct Formula
 
     {
         private string output;
-
-        /// <summary>
-        /// The following are all patterns which Evaluate and Formula use for recognizing function components.
-        /// </summary>
+        private IEnumerable<string> Variables;
+        
+        // The following are all patterns which Evaluate and Formula use for recognizing function components.
         private const String lpPattern = @"\(";
         private const String rpPattern = @"\)";
         private const String opPattern = @"[\+\-*/]";
@@ -29,6 +28,33 @@ namespace Formulas
         private const String powpattern = @"^(\.?\d+\.*\d*)(e)([\-+]?\d+)?$";
         private const String doublePattern = @"(?:\d+\.\d*|\d*\.\d+|\d+)(?:e[\+-]?\d+)?";
         private const String spacePattern = @"\s+";
+
+        /// <summary>
+        /// Constucts a Formula.
+        /// </summary>
+        /// <param name="f"></param>
+        /// <param name="N"></param>
+        /// <param name="V"></param>
+        public Formula(string f, Normalizer N, Validator V)
+        {
+            //Not yet implemented.
+            if (f == null || N == null || V == null)
+            {
+                throw new ArgumentNullException("Requires a non-null formula, Normalizer and Validator to constructor.");
+            }
+
+
+            output = f;
+            Variables = new List<string>();
+        }
+        /// <summary>
+        /// Enumerates the variables found in the formula.
+        /// </summary>
+        /// <returns></returns>
+        public IEnumerable<string> GetVariables()
+        {
+            return Variables;
+        }
 
         /// <summary>
         /// Creates a Formula from a string that consists of a standard infix expression composed
@@ -54,9 +80,16 @@ namespace Formulas
         {
             var Operators = new List<string>();
             var Values = new List<string>();
+            var Var = new List<string>();
             IEnumerable<string> tokens = Formula.GetTokens(formula);
 
             int parcount = 0;
+
+            if(formula == null)
+            {
+                throw new ArgumentNullException("Requires a non-null formula string.");
+            }
+
 
             if(tokens.Count() == 0)
             {
@@ -109,9 +142,15 @@ namespace Formulas
                 }
 
                 //Checks token for numbers or variables and adds to Values list.
-                if (Regex.IsMatch(t, doublePattern) || Regex.IsMatch(t, varPattern))
+                if (Regex.IsMatch(t, doublePattern))
                 {
                     Values.Add(t);
+                }
+
+                //Checks token for variables and adds to Variables list.
+                if (Regex.IsMatch(t, varPattern) && !Regex.IsMatch(t, powpattern))
+                {
+                    Var.Add(t);
                 }
 
                 //Checks proper formatting following ( and operators.
@@ -147,6 +186,7 @@ namespace Formulas
             }
 
             output = formula;
+            Variables = Var;
 
         }
 
@@ -167,6 +207,11 @@ namespace Formulas
 
             double FinalAnswer = 0;
             bool foundexp = false;
+
+            if (lookup == null)
+            {
+                throw new ArgumentNullException("Requires a non-null lookup delegate for evaluating variables.");
+            }
 
             foreach (string t in tokens)
             {
