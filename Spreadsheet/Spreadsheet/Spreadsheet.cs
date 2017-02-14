@@ -12,8 +12,9 @@ namespace SS
 {
     class Spreadsheet : AbstractSpreadsheet
     {
-        private const string validpattern = @"^[a-zA-Z]*[1-9]\d*$";
+        private const string validpattern = @"^[a-zA-Z]+[1-9]\d*$";
 
+        
         private List<Cell> CellList;
         private DependencyGraph Graph;
 
@@ -55,8 +56,19 @@ namespace SS
             {
                 throw new InvalidNameException();
             }
+
+            foreach(Cell cell in CellList)
+            {
+                if (cell.Name == name)
+                {
+                    return cell.Contents;
+                }
+            }
+
+            //This triggers when the name isnt in the list.
+            return "";
             
-            throw new NotImplementedException();
+            //throw new NotImplementedException();
         }
 
         /// <summary>
@@ -74,10 +86,39 @@ namespace SS
         /// <returns></returns>
         public override ISet<string> SetCellContents(string name, double number)
         {
+            var ReturnSet = new HashSet<string>();
+            bool found = false;
+
             if (name == null || !Regex.IsMatch(name, validpattern))
             {
                 throw new InvalidNameException();
             }
+
+            //Looks through CellList for the cell called name.
+            foreach (Cell cell in CellList)
+            {
+                if (cell.Name == name)
+                {
+                    cell.Contents = number;
+                    cell.Value = number;
+                    foreach (string DependName in GetCellsToRecalculate(name))
+                    {
+                        ReturnSet.Add(DependName);
+                    }
+                    found = true;
+                    break;
+                }
+            }
+
+            //If the name wasnt in the list already we can add it as a new cell.
+            //Fix the value in the constructor later.
+            if (found == false)
+            {
+                Cell newcell = new Cell(name, number, number);
+                CellList.Add(newcell);
+            }
+
+            return ReturnSet;
 
             throw new NotImplementedException();
         }
@@ -99,14 +140,64 @@ namespace SS
         /// <returns></returns>
         public override ISet<string> SetCellContents(string name, string text)
         {
+            var ReturnSet = new HashSet<string>();
+            var Recalc = new List<string>();
+            bool found = false;
+            
             if (text == null)
             {
                 throw new ArgumentNullException("Cannot input null text to SetCellContents.");
             }
+
+
             if (name == null || !Regex.IsMatch(name, validpattern))
             {
                 throw new InvalidNameException();
             }
+
+            //Looks through the list of cells and replaces the contents if found.
+            foreach (Cell cell in CellList)
+            {
+                if (cell.Name == name)
+                {
+                    cell.Contents = text;
+                    cell.Value = text;
+                    found = true;
+
+                    foreach (string DependName in GetCellsToRecalculate(name))
+                    {
+                        ReturnSet.Add(DependName);
+                    }
+                    break;
+                    
+                }
+            }
+            
+
+
+            //Since name wasnt found we make a new Cell and add it to the graph.
+            if (found == false)
+            {
+                Cell newcell = new Cell(name, text, text);
+                CellList.Add(newcell);
+            }
+            //Gotta re calculate the graph now that I may have changed things.
+            else
+            {
+                foreach (string s in GetCellsToRecalculate(name))
+                {
+                    foreach (Cell cell in CellList)
+                    {
+                        if (cell.Name == s)
+                        {
+
+                        }
+                    }
+                }
+            }
+
+
+            return ReturnSet;
 
             throw new NotImplementedException();
         }
@@ -131,10 +222,37 @@ namespace SS
         /// <returns></returns>
         public override ISet<string> SetCellContents(string name, Formula formula)
         {
+            var ReturnSet = new HashSet<string>();
+            string cellpattern = @"([a-zA-Z]+[1-9]\d*)";
+            var tokens = new List<string>();
+
             if (name == null || !Regex.IsMatch(name, validpattern))
             {
                 throw new InvalidNameException();
             }
+            
+            MatchCollection matches = Regex.Matches(formula.ToString(), cellpattern);
+
+
+
+
+            
+            foreach (Cell cell in CellList)
+            {
+                if (cell.Name == name)
+                {
+                    cell.Contents = formula;
+
+                    //Need to put together the formula value.
+                    //cell.Value = formula.Evaluate();
+                    foreach (string DependName in GetCellsToRecalculate(name))
+                    {
+                        ReturnSet.Add(DependName);
+                    }
+                }
+            }
+
+            return ReturnSet;
             throw new NotImplementedException();
         }
 
@@ -159,6 +277,7 @@ namespace SS
         /// <returns></returns>
         protected override IEnumerable<string> GetDirectDependents(string name)
         {
+
             if (name == null)
             {
                 throw new ArgumentNullException();
@@ -169,12 +288,10 @@ namespace SS
                 throw new InvalidNameException();
             }
 
-            foreach(Cell cell in CellList)
+
+            foreach (string s in Graph.GetDependents(name))
             {
-                if (Regex.IsMatch(cell.Contents, name))
-                {
-                    yield return cell.Name;
-                }
+                yield return s;
             }
 
             //throw new NotImplementedException();
@@ -186,6 +303,8 @@ namespace SS
         private string name;
         private object contents;
         private object value;
+
+
 
         /// <summary>
         /// Creates a new cell with a Name, Contents, and Value.
@@ -210,16 +329,18 @@ namespace SS
         /// <summary>
         /// Returns cell's contents.
         /// </summary>
-        public string Contents
+        public object Contents
         {
             get { return contents; }
+            set {; }
         }
         /// <summary>
         /// Returns cell's value.
         /// </summary>
-        public string Value
+        public object Value
         {
             get { return value; }
+            set { }
         }
         
     }
