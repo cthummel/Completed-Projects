@@ -13,8 +13,6 @@ namespace SS
     class Spreadsheet : AbstractSpreadsheet
     {
         private const string validpattern = @"^[a-zA-Z]+[1-9]\d*$";
-
-        
         private List<Cell> CellList;
         private DependencyGraph Graph;
 
@@ -39,7 +37,6 @@ namespace SS
                     yield return cell.Name;
                 }
             }
-            //throw new NotImplementedException();
         }
 
         /// <summary>
@@ -68,7 +65,6 @@ namespace SS
             //This triggers when the name isnt in the list.
             return "";
             
-            //throw new NotImplementedException();
         }
 
         /// <summary>
@@ -87,6 +83,7 @@ namespace SS
         public override ISet<string> SetCellContents(string name, double number)
         {
             var ReturnSet = new HashSet<string>();
+            var NewDependents = new List<string>();
             bool found = false;
 
             if (name == null || !Regex.IsMatch(name, validpattern))
@@ -99,12 +96,22 @@ namespace SS
             {
                 if (cell.Name == name)
                 {
-                    cell.Contents = number;
-                    cell.Value = number;
                     foreach (string DependName in GetCellsToRecalculate(name))
                     {
-                        ReturnSet.Add(DependName);
+                        if (DependName == name)
+                        {
+                            throw new CircularException();
+                        }
+                        else
+                        {
+                            ReturnSet.Add(DependName);
+                        }
                     }
+                    NewDependents.Add(name);
+
+                    //Since we found that the cell already existed, replace the contents and replace any pre-exisiting dependents.
+                    cell.Contents = number;
+                    Graph.ReplaceDependents(name, NewDependents);
                     found = true;
                     break;
                 }
@@ -116,11 +123,11 @@ namespace SS
             {
                 Cell newcell = new Cell(name, number, number);
                 CellList.Add(newcell);
+                Graph.AddDependency(name, name);
             }
 
             return ReturnSet;
 
-            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -141,65 +148,50 @@ namespace SS
         public override ISet<string> SetCellContents(string name, string text)
         {
             var ReturnSet = new HashSet<string>();
-            var Recalc = new List<string>();
+            var NewDependents = new List<string>();
             bool found = false;
-            
-            if (text == null)
-            {
-                throw new ArgumentNullException("Cannot input null text to SetCellContents.");
-            }
-
 
             if (name == null || !Regex.IsMatch(name, validpattern))
             {
                 throw new InvalidNameException();
             }
-
-            //Looks through the list of cells and replaces the contents if found.
+            
+            //Looks through CellList for the cell called name.
             foreach (Cell cell in CellList)
             {
                 if (cell.Name == name)
                 {
-                    cell.Contents = text;
-                    cell.Value = text;
-                    found = true;
-
                     foreach (string DependName in GetCellsToRecalculate(name))
                     {
-                        ReturnSet.Add(DependName);
+                        if (DependName == name)
+                        {
+                            throw new CircularException();
+                        }
+                        else
+                        {
+                            ReturnSet.Add(DependName);
+                        }
                     }
+                    NewDependents.Add(name);
+
+                    //Since we found that the cell already existed, replace the contents and replace any pre-exisiting dependents.
+                    cell.Contents = text;
+                    Graph.ReplaceDependents(name, NewDependents);
+                    found = true;
                     break;
-                    
                 }
             }
-            
 
-
-            //Since name wasnt found we make a new Cell and add it to the graph.
+            //If the name wasnt in the list already we can add it as a new cell.
+            //Fix the value in the constructor later.
             if (found == false)
             {
                 Cell newcell = new Cell(name, text, text);
                 CellList.Add(newcell);
+                Graph.AddDependency(name, name);
             }
-            //Gotta re calculate the graph now that I may have changed things.
-            else
-            {
-                foreach (string s in GetCellsToRecalculate(name))
-                {
-                    foreach (Cell cell in CellList)
-                    {
-                        if (cell.Name == s)
-                        {
-
-                        }
-                    }
-                }
-            }
-
 
             return ReturnSet;
-
-            throw new NotImplementedException();
         }
 
 
@@ -232,10 +224,6 @@ namespace SS
             }
             
             MatchCollection matches = Regex.Matches(formula.ToString(), cellpattern);
-
-
-
-
             
             foreach (Cell cell in CellList)
             {
@@ -324,7 +312,7 @@ namespace SS
         public string Name
         {
             get { return name; }
-            set {; }
+            set { }
         }
         /// <summary>
         /// Returns cell's contents.
@@ -332,7 +320,7 @@ namespace SS
         public object Contents
         {
             get { return contents; }
-            set {; }
+            set { }
         }
         /// <summary>
         /// Returns cell's value.
