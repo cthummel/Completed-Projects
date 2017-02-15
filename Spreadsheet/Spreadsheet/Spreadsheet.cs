@@ -10,7 +10,10 @@ using Dependencies;
 
 namespace SS
 {
-    class Spreadsheet : AbstractSpreadsheet
+    /// <summary>
+    /// Spreadsheet class that extends the abstract methods of AbstractSpreadsheet.
+    /// </summary>
+    public class Spreadsheet : AbstractSpreadsheet
     {
         private const string validpattern = @"^[a-zA-Z]+[1-9]\d*$";
         private List<Cell> CellList;
@@ -63,7 +66,7 @@ namespace SS
             }
 
             //This triggers when the name isnt in the list.
-            return "";
+            return string.Empty;
             
         }
 
@@ -98,20 +101,24 @@ namespace SS
                 {
                     foreach (string DependName in GetCellsToRecalculate(name))
                     {
-                        if (DependName == name)
-                        {
-                            throw new CircularException();
-                        }
-                        else
-                        {
+                        //if (DependName == name)
+                        //{
+                        //    throw new CircularException();
+                        //}
+                        //else
+                        //{
                             ReturnSet.Add(DependName);
-                        }
+                        //}
                     }
                     NewDependents.Add(name);
 
                     //Since we found that the cell already existed, replace the contents and replace any pre-exisiting dependents.
                     cell.Contents = number;
-                    Graph.ReplaceDependents(name, NewDependents);
+                    foreach (string dependee in Graph.GetDependees(name))
+                    {
+                        Graph.RemoveDependency(name, dependee);
+                    }
+                    //Graph.ReplaceDependents(name, NewDependents);
                     found = true;
                     break;
                 }
@@ -123,7 +130,7 @@ namespace SS
             {
                 Cell newcell = new Cell(name, number, number);
                 CellList.Add(newcell);
-                Graph.AddDependency(name, name);
+                //Graph.AddDependency(name, name);
             }
 
             return ReturnSet;
@@ -161,24 +168,42 @@ namespace SS
             {
                 if (cell.Name == name)
                 {
-                    foreach (string DependName in GetCellsToRecalculate(name))
+                    //If the replacement text is an empty string we are emptying the cell, otherwise we are changing a cell to be used.
+                    if (text != string.Empty)
                     {
-                        if (DependName == name)
+                        foreach (string DependName in GetCellsToRecalculate(name))
                         {
-                            throw new CircularException();
+                            if (DependName == name)
+                            {
+                                throw new CircularException();
+                            }
+                            else
+                            {
+                                ReturnSet.Add(DependName);
+                            }
                         }
-                        else
-                        {
-                            ReturnSet.Add(DependName);
-                        }
-                    }
-                    NewDependents.Add(name);
+                        NewDependents.Add(name);
 
-                    //Since we found that the cell already existed, replace the contents and replace any pre-exisiting dependents.
-                    cell.Contents = text;
-                    Graph.ReplaceDependents(name, NewDependents);
-                    found = true;
-                    break;
+                        //Since we found that the cell already existed, replace the contents and replace any pre-exisiting dependents.
+                        cell.Contents = text;
+                        Graph.ReplaceDependents(name, NewDependents);
+                        found = true;
+                        break;
+                    }
+                    else
+                    {
+                        //Exxample.
+                        //A1 contains 3
+                        //A2 contains 5
+                        //A3 contains A1 + A2
+                        //Replacing A3 with an empty text should remove
+                        CellList.Remove(cell);
+
+
+                        
+
+                    }
+                    
                 }
             }
 
@@ -215,33 +240,59 @@ namespace SS
         public override ISet<string> SetCellContents(string name, Formula formula)
         {
             var ReturnSet = new HashSet<string>();
-            string cellpattern = @"([a-zA-Z]+[1-9]\d*)";
-            var tokens = new List<string>();
+            var NewDependees = new List<string>();
+            bool found = false;
 
             if (name == null || !Regex.IsMatch(name, validpattern))
             {
                 throw new InvalidNameException();
             }
-            
-            MatchCollection matches = Regex.Matches(formula.ToString(), cellpattern);
-            
+
+            //Looks through CellList for the cell called name.
             foreach (Cell cell in CellList)
             {
                 if (cell.Name == name)
                 {
-                    cell.Contents = formula;
-
-                    //Need to put together the formula value.
-                    //cell.Value = formula.Evaluate();
                     foreach (string DependName in GetCellsToRecalculate(name))
                     {
-                        ReturnSet.Add(DependName);
+                        if (DependName == name)
+                        {
+                            throw new CircularException();
+                        }
+                        else
+                        {
+                            ReturnSet.Add(DependName);
+                        }
                     }
+
+                    //Creates list of all cells that the given formula uses.
+                    foreach (string var in formula.GetVariables())
+                    {
+                        NewDependees.Add(var);
+                    }
+
+                    //Since we found that the cell already existed, replace the contents and replace any pre-exisiting dependents.
+                    cell.Contents = formula;
+                    Graph.ReplaceDependents(name, NewDependees);
+                    found = true;
+                    break;
                 }
             }
 
+            //If the name wasnt in the list already we can add it as a new cell.
+            //Fix the value in the constructor later.
+            if (found == false)
+            {
+                Cell newcell = new Cell(name, formula, null);
+                CellList.Add(newcell);
+                foreach (string var in formula.GetVariables())
+                {
+                    NewDependees.Add(var);
+                }
+
+                Graph.ReplaceDependees(name, NewDependees);
+            }
             return ReturnSet;
-            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -276,23 +327,17 @@ namespace SS
                 throw new InvalidNameException();
             }
 
-
             foreach (string s in Graph.GetDependents(name))
             {
                 yield return s;
             }
-
-            //throw new NotImplementedException();
         }
-
     }
     class Cell
     {
         private string name;
         private object contents;
         private object value;
-
-
 
         /// <summary>
         /// Creates a new cell with a Name, Contents, and Value.
@@ -312,7 +357,7 @@ namespace SS
         public string Name
         {
             get { return name; }
-            set { }
+            set { name = value; }
         }
         /// <summary>
         /// Returns cell's contents.
@@ -320,16 +365,16 @@ namespace SS
         public object Contents
         {
             get { return contents; }
-            set { }
+            set { contents = value; }
         }
         /// <summary>
         /// Returns cell's value.
         /// </summary>
-        public object Value
-        {
-            get { return value; }
-            set { }
-        }
+        //public object Value
+        //{
+        //    get { return value; }
+        //    set { value }
+        //}
         
     }
 }
