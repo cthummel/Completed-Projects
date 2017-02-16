@@ -173,20 +173,17 @@ namespace SS
                     {
                         foreach (string DependName in GetCellsToRecalculate(name))
                         {
-                            if (DependName == name)
-                            {
-                                throw new CircularException();
-                            }
-                            else
-                            {
-                                ReturnSet.Add(DependName);
-                            }
+                            ReturnSet.Add(DependName);
                         }
+
                         NewDependents.Add(name);
 
                         //Since we found that the cell already existed, replace the contents and replace any pre-exisiting dependents.
                         cell.Contents = text;
-                        Graph.ReplaceDependents(name, NewDependents);
+                        foreach (string dependee in Graph.GetDependees(name))
+                        {
+                            Graph.RemoveDependency(name, dependee);
+                        }
                         found = true;
                         break;
                     }
@@ -196,11 +193,22 @@ namespace SS
                         //A1 contains 3
                         //A2 contains 5
                         //A3 contains A1 + A2
-                        //Replacing A3 with an empty text should remove
+                        //A4 contains A3*2
+                        //Replacing A3 with an empty text should remove from the graph that it has dependees A1 and A2, but do nothing about A4.
                         CellList.Remove(cell);
-
-
                         
+                        foreach (string dep in Graph.GetDependees(cell.Name))
+                        {
+                            Graph.RemoveDependency(cell.Name, dep);
+                        }
+
+                        foreach (string DependName in GetCellsToRecalculate(name))
+                        {
+                            ReturnSet.Add(DependName);
+                        }
+
+                        found = true;
+                        break;
 
                     }
                     
@@ -213,7 +221,6 @@ namespace SS
             {
                 Cell newcell = new Cell(name, text, text);
                 CellList.Add(newcell);
-                Graph.AddDependency(name, name);
             }
 
             return ReturnSet;
@@ -367,9 +374,9 @@ namespace SS
             get { return contents; }
             set { contents = value; }
         }
-        /// <summary>
-        /// Returns cell's value.
-        /// </summary>
+        ///// <summary>
+        ///// Returns cell's value.
+        ///// </summary>
         //public object Value
         //{
         //    get { return value; }

@@ -114,6 +114,15 @@ namespace SpreadsheetTests
             A1cont = (double)sheet.GetCellContents(A1);
             Assert.AreEqual(40, A1cont);
 
+            var contentslist = new List<string>();
+            contentslist.Add(A1);
+            var sheetlist = new List<string>();
+            foreach (string s in sheet.GetNamesOfAllNonemptyCells())
+            {
+                sheetlist.Add(s);
+            }
+            Assert.AreEqual(contentslist.ElementAt(0), sheetlist.ElementAt(0));
+
         }
     }
 }
