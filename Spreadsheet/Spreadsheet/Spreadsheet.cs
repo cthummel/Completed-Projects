@@ -86,7 +86,7 @@ namespace SS
         public override ISet<string> SetCellContents(string name, double number)
         {
             var ReturnSet = new HashSet<string>();
-            var NewDependents = new List<string>();
+            var OldDependents = new List<string>();
             bool found = false;
 
             if (name == null || !Regex.IsMatch(name, validpattern))
@@ -101,24 +101,23 @@ namespace SS
                 {
                     foreach (string DependName in GetCellsToRecalculate(name))
                     {
-                        //if (DependName == name)
-                        //{
-                        //    throw new CircularException();
-                        //}
-                        //else
-                        //{
-                            ReturnSet.Add(DependName);
-                        //}
+                        ReturnSet.Add(DependName);
                     }
-                    NewDependents.Add(name);
+                    
 
                     //Since we found that the cell already existed, replace the contents and replace any pre-exisiting dependents.
                     cell.Contents = number;
-                    foreach (string dependee in Graph.GetDependees(name))
+
+
+                    foreach (string dependent in Graph.GetDependents(name))
                     {
-                        Graph.RemoveDependency(name, dependee);
+                        OldDependents.Add(dependent);
                     }
-                    //Graph.ReplaceDependents(name, NewDependents);
+                    foreach(string t in OldDependents)
+                    {
+                        Graph.RemoveDependency(name, t);
+                    }
+                    
                     found = true;
                     break;
                 }
@@ -130,7 +129,10 @@ namespace SS
             {
                 Cell newcell = new Cell(name, number, number);
                 CellList.Add(newcell);
-                //Graph.AddDependency(name, name);
+                foreach (string var in GetCellsToRecalculate(name))
+                {
+                    ReturnSet.Add(var);
+                }
             }
 
             return ReturnSet;
@@ -155,7 +157,7 @@ namespace SS
         public override ISet<string> SetCellContents(string name, string text)
         {
             var ReturnSet = new HashSet<string>();
-            var NewDependents = new List<string>();
+            var OldDependents = new List<string>();
             bool found = false;
 
             if (name == null || !Regex.IsMatch(name, validpattern))
@@ -176,13 +178,17 @@ namespace SS
                             ReturnSet.Add(DependName);
                         }
 
-                        NewDependents.Add(name);
+                        
 
                         //Since we found that the cell already existed, replace the contents and replace any pre-exisiting dependents.
                         cell.Contents = text;
-                        foreach (string dependee in Graph.GetDependees(name))
+                        foreach (string dependent in Graph.GetDependents(name))
                         {
-                            Graph.RemoveDependency(name, dependee);
+                            OldDependents.Add(dependent);
+                        }
+                        foreach (string t in OldDependents)
+                        {
+                            Graph.RemoveDependency(name, t);
                         }
                         found = true;
                         break;
@@ -195,16 +201,17 @@ namespace SS
                         //A3 contains A1 + A2
                         //A4 contains A3*2
                         //Replacing A3 with an empty text should remove from the graph that it has dependees A1 and A2, but do nothing about A4.
-                        CellList.Remove(cell);
                         
-                        foreach (string dep in Graph.GetDependees(cell.Name))
-                        {
-                            Graph.RemoveDependency(cell.Name, dep);
-                        }
 
                         foreach (string DependName in GetCellsToRecalculate(name))
                         {
                             ReturnSet.Add(DependName);
+                        }
+
+                        CellList.Remove(cell);
+                        foreach (string dep in Graph.GetDependees(cell.Name))
+                        {
+                            Graph.RemoveDependency(cell.Name, dep);
                         }
 
                         found = true;
@@ -221,6 +228,10 @@ namespace SS
             {
                 Cell newcell = new Cell(name, text, text);
                 CellList.Add(newcell);
+                foreach (string var in GetCellsToRecalculate(name))
+                {
+                    ReturnSet.Add(var);
+                }
             }
 
             return ReturnSet;
@@ -247,8 +258,11 @@ namespace SS
         public override ISet<string> SetCellContents(string name, Formula formula)
         {
             var ReturnSet = new HashSet<string>();
-            var NewDependees = new List<string>();
+            //ReturnSet.Add(name);
+            var NewDependents = new List<string>();
+            var OldDependees = new List<string>();
             bool found = false;
+            bool InGraph = false;
 
             if (name == null || !Regex.IsMatch(name, validpattern))
             {
@@ -260,27 +274,41 @@ namespace SS
             {
                 if (cell.Name == name)
                 {
+                    foreach (string var in formula.GetVariables())
+                    {
+                        NewDependents.Add(var);
+                    }
+
                     foreach (string DependName in GetCellsToRecalculate(name))
                     {
-                        if (DependName == name)
+                        if (NewDependents.Contains(DependName))
                         {
                             throw new CircularException();
                         }
-                        else
+
+                        ReturnSet.Add(DependName);
+                    }
+
+                    foreach (string s in Graph.GetDependents(name))
+                    {
+                        InGraph = true;
+                    }
+
+                    if (InGraph != true)
+                    {
+                        foreach (string t in NewDependents)
                         {
-                            ReturnSet.Add(DependName);
+                            Graph.AddDependency(name, t);
                         }
                     }
-
-                    //Creates list of all cells that the given formula uses.
-                    foreach (string var in formula.GetVariables())
+                    else
                     {
-                        NewDependees.Add(var);
+                        Graph.ReplaceDependents(name, NewDependents);
                     }
-
+                    
                     //Since we found that the cell already existed, replace the contents and replace any pre-exisiting dependents.
                     cell.Contents = formula;
-                    Graph.ReplaceDependents(name, NewDependees);
+
                     found = true;
                     break;
                 }
@@ -294,10 +322,20 @@ namespace SS
                 CellList.Add(newcell);
                 foreach (string var in formula.GetVariables())
                 {
-                    NewDependees.Add(var);
+                    if (var == name)
+                    {
+                        throw new CircularException();
+                    }
+                    else
+                    {
+                        Graph.AddDependency(name, var);
+                    }
                 }
 
-                Graph.ReplaceDependees(name, NewDependees);
+                foreach (string var in GetCellsToRecalculate(name))
+                {
+                    ReturnSet.Add(var);
+                }
             }
             return ReturnSet;
         }
@@ -334,7 +372,7 @@ namespace SS
                 throw new InvalidNameException();
             }
 
-            foreach (string s in Graph.GetDependents(name))
+            foreach (string s in Graph.GetDependees(name))
             {
                 yield return s;
             }
@@ -364,7 +402,7 @@ namespace SS
         public string Name
         {
             get { return name; }
-            set { name = value; }
+            //set { name = value; }
         }
         /// <summary>
         /// Returns cell's contents.
