@@ -160,6 +160,11 @@ namespace SS
             var OldDependents = new List<string>();
             bool found = false;
 
+            if (text == null)
+            {
+                throw new ArgumentNullException();
+            }
+
             if (name == null || !Regex.IsMatch(name, validpattern))
             {
                 throw new InvalidNameException();
@@ -226,12 +231,16 @@ namespace SS
             //Fix the value in the constructor later.
             if (found == false)
             {
-                Cell newcell = new Cell(name, text, text);
-                CellList.Add(newcell);
-                foreach (string var in GetCellsToRecalculate(name))
+                if (text != string.Empty)
                 {
-                    ReturnSet.Add(var);
+                    Cell newcell = new Cell(name, text, text);
+                    CellList.Add(newcell);
+                    foreach (string var in GetCellsToRecalculate(name))
+                    {
+                        ReturnSet.Add(var);
+                    }
                 }
+                
             }
 
             return ReturnSet;
