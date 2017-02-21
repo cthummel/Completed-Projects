@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Xml;
 using System.Text.RegularExpressions;
 using Formulas;
 using Dependencies;
@@ -19,15 +20,74 @@ namespace SS
         private const string validpattern = @"^[a-zA-Z]+[1-9]\d*$";
         private List<Cell> CellList;
         private DependencyGraph Graph;
+        private Regex IsValid;
+        private bool changed;
 
         /// <summary>
-        /// Constructs a new Spreadsheet.
+        /// Creates an empty Spreadsheet whose IsValid regular expression accepts every string.
         /// </summary>
         public Spreadsheet()
         {
             CellList = new List<Cell>();
             Graph = new DependencyGraph();
+            changed = false;
+            IsValid = new Regex(@".*?");
         }
+
+        /// <summary>
+        /// Creates an empty Spreadsheet whose IsValid regular expression is provided as the parameter.
+        /// </summary>
+        public Spreadsheet(Regex isValid)
+        {
+            CellList = new List<Cell>();
+            Graph = new DependencyGraph();
+            changed = false;
+            IsValid = isValid;
+        }
+
+        /// <summary>
+        /// Creates a Spreadsheet that is a duplicate of the spreadsheet saved in source.
+        ///
+        /// See the AbstractSpreadsheet.Save method and Spreadsheet.xsd for the file format 
+        /// specification.  
+        ///
+        /// If there's a problem reading source, throws an IOException.
+        ///
+        /// Else if the contents of source are not consistent with the schema in Spreadsheet.xsd, 
+        /// throws a SpreadsheetReadException.  
+        ///
+        /// Else if the IsValid string contained in source is not a valid C# regular expression, throws
+        /// a SpreadsheetReadException.  (If the exception is not thrown, this regex is referred to
+        /// below as oldIsValid.)
+        ///
+        /// Else if there is a duplicate cell name in the source, throws a SpreadsheetReadException.
+        /// (Two cell names are duplicates if they are identical after being converted to upper case.)
+        ///
+        /// Else if there is an invalid cell name or an invalid formula in the source, throws a 
+        /// SpreadsheetReadException.  (Use oldIsValid in place of IsValid in the definition of 
+        /// cell name validity.)
+        ///
+        /// Else if there is an invalid cell name or an invalid formula in the source, throws a
+        /// SpreadsheetVersionException.  (Use newIsValid in place of IsValid in the definition of
+        /// cell name validity.)
+        ///
+        /// Else if there's a formula that causes a circular dependency, throws a SpreadsheetReadException. 
+        ///
+        /// Else, create a Spreadsheet that is a duplicate of the one encoded in source except that
+        /// the new Spreadsheet's IsValid regular expression should be newIsValid.
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="newIsValid"></param>
+        public Spreadsheet(TextReader source, Regex newIsValid)
+        {
+            CellList = new List<Cell>();
+            Graph = new DependencyGraph();
+            changed = false;
+            IsValid = newIsValid;
+
+
+        }
+
 
         /// <summary>
         /// True if this spreadsheet has been modified since it was created or saved
@@ -37,15 +97,14 @@ namespace SS
         {
             get
             {
-                throw new NotImplementedException();
+                return changed;
             }
-
             protected set
             {
-                throw new NotImplementedException();
+                changed = value;
             }
         }
-
+        
         /// <summary>
         /// Writes the contents of this spreadsheet to dest using an XML format.
         /// The XML elements should be structured as follows:
@@ -67,7 +126,48 @@ namespace SS
         /// </summary>
         public override void Save(TextWriter dest)
         {
-            throw new NotImplementedException();
+            //double number;
+            try
+            {
+                using (XmlWriter writer = XmlWriter.Create(dest))
+                {
+                    writer.WriteStartDocument();
+                    writer.WriteStartElement("spreadsheet");
+                    writer.WriteElementString("IsValid", IsValid.ToString());
+
+                    foreach (Cell cell in CellList)
+                    {
+                        writer.WriteStartElement("cell");
+                        writer.WriteElementString("name", cell.Name);
+                        //Different contents options.
+
+                        if (cell.Contents.GetType() == (typeof(double)))
+                        {
+                            writer.WriteElementString("content", cell.Contents.ToString());
+                        }
+                        else if (cell.Contents.GetType() == (typeof(Formula)))
+                        {
+                            writer.WriteElementString("content", "=" + cell.Contents.ToString());
+                        }
+                        else
+                        {
+                            //For text contents. Might be incorrect.
+                            writer.WriteElementString("content", cell.Contents.ToString());
+                        }
+                        writer.WriteEndElement();
+                    }
+                    writer.WriteEndElement();
+                    writer.WriteEndDocument();
+                }
+            }
+            catch
+            {
+                throw new IOException();
+            }
+            
+            //make sure to change the "changed" value so that we know if things are modified after a save.
+            Changed = false;
+            //throw new NotImplementedException();
         }
 
         /// <summary>
@@ -78,7 +178,33 @@ namespace SS
         /// </summary>
         public override object GetCellValue(string name)
         {
-            throw new NotImplementedException();
+            if (name == null || !Regex.IsMatch(name, validpattern))
+            {
+                throw new InvalidNameException();
+            }
+            foreach (Cell cell in CellList)
+            {
+                if (cell.Name == name)
+                {
+                    //if (cell.Contents.GetType() == typeof(double))
+                    //{
+                    //    return cell.Value;
+                    //}
+                    //else if (cell.Contents.GetType() == typeof(string))
+                    //{
+                    //    return cell.Value;
+                    //}
+                    ////This means the content is a formula so we need to calculate 
+                    //else
+                    //{
+
+                    //}
+                    
+
+                    return cell.Value;
+                }
+            }
+            return string.Empty;
         }
 
         /// <summary>
@@ -120,7 +246,6 @@ namespace SS
 
             //This triggers when the name isnt in the list.
             return string.Empty;
-            
         }
 
 
@@ -157,8 +282,72 @@ namespace SS
         /// </summary>
         public override ISet<string> SetContentsOfCell(string name, string content)
         {
-            throw new NotImplementedException();
+            var ReturnSet = new HashSet<string>();
+            if (content == null)
+            {
+                throw new ArgumentNullException();
+            }
+
+            if (name == null || !Regex.IsMatch(name, validpattern))
+            {
+                throw new InvalidNameException();
+            }
+
+            //Double case.
+            double number;
+            if (double.TryParse(content, out number))
+            {
+                foreach (string s in SetCellContents(name, number))
+                {
+                    ReturnSet.Add(s);
+                }
+            }
+            //Formula case.
+            else if (content[0] == '=')
+            {
+                string text = content.Substring(1);
+                Formula form = new Formula(text, s => s.ToUpper(), s => IsValid.IsMatch(s));
+                foreach (string redo in SetCellContents(name, form))
+                {
+                    ReturnSet.Add(redo);
+                }
+            }
+            //Text case.
+            else
+            {
+                foreach (string s in SetCellContents(name, content))
+                {
+                    ReturnSet.Add(s);
+                }
+            }
+
+            //Now we have all the cells to Recalculate in ReturnSet.
+            foreach (string recalc in ReturnSet)
+            {
+                foreach (Cell cell in CellList)
+                {
+                    if (cell.Name == recalc)
+                    {
+                        //Only need to recalcuate cells whose contents are formulas. Other cells are self sufficient and values set earlier.
+                        if (cell.Contents.GetType() == typeof(Formula))
+                        {
+                            Formula contents = (Formula)cell.Contents;
+                            try
+                            {
+                                cell.Value = contents.Evaluate(s => (double)GetCellValue(s));
+                            }
+                            catch (InvalidCastException)
+                            {
+                                cell.Value = new FormulaError("One or more variables have an undefined value.");
+                            }
+                            
+                        }
+                    }
+                }
+            }
+            return ReturnSet;
         }
+        
 
         /// <summary>
         /// If name is null or invalid, throws an InvalidNameException.
@@ -193,11 +382,10 @@ namespace SS
                     {
                         ReturnSet.Add(DependName);
                     }
-                    
 
                     //Since we found that the cell already existed, replace the contents and replace any pre-exisiting dependents.
                     cell.Contents = number;
-
+                    cell.Value = number;
 
                     foreach (string dependent in Graph.GetDependents(name))
                     {
@@ -207,7 +395,6 @@ namespace SS
                     {
                         Graph.RemoveDependency(name, t);
                     }
-                    
                     found = true;
                     break;
                 }
@@ -224,7 +411,7 @@ namespace SS
                     ReturnSet.Add(var);
                 }
             }
-
+            Changed = true;
             return ReturnSet;
 
         }
@@ -273,10 +460,10 @@ namespace SS
                             ReturnSet.Add(DependName);
                         }
 
-                        
-
                         //Since we found that the cell already existed, replace the contents and replace any pre-exisiting dependents.
                         cell.Contents = text;
+                        cell.Value = text;
+
                         foreach (string dependent in Graph.GetDependents(name))
                         {
                             OldDependents.Add(dependent);
@@ -290,7 +477,7 @@ namespace SS
                     }
                     else
                     {
-                        //Exxample.
+                        //Example.
                         //A1 contains 3
                         //A2 contains 5
                         //A3 contains A1 + A2
@@ -311,9 +498,7 @@ namespace SS
 
                         found = true;
                         break;
-
                     }
-                    
                 }
             }
 
@@ -330,9 +515,8 @@ namespace SS
                         ReturnSet.Add(var);
                     }
                 }
-                
             }
-
+            Changed = true;
             return ReturnSet;
         }
 
@@ -357,9 +541,9 @@ namespace SS
         protected override ISet<string> SetCellContents(string name, Formula formula)
         {
             var ReturnSet = new HashSet<string>();
-            //ReturnSet.Add(name);
             var NewDependents = new List<string>();
             var OldDependees = new List<string>();
+            var VariableValues = new Dictionary<string, double>();
             bool found = false;
             bool InGraph = false;
 
@@ -384,7 +568,6 @@ namespace SS
                         {
                             throw new CircularException();
                         }
-
                         ReturnSet.Add(DependName);
                     }
 
@@ -405,19 +588,16 @@ namespace SS
                         Graph.ReplaceDependents(name, NewDependents);
                     }
                     
-                    //Since we found that the cell already existed, replace the contents and replace any pre-exisiting dependents.
                     cell.Contents = formula;
-
                     found = true;
                     break;
                 }
             }
 
             //If the name wasnt in the list already we can add it as a new cell.
-            //Fix the value in the constructor later.
             if (found == false)
             {
-                Cell newcell = new Cell(name, formula, null);
+                Cell newcell = new Cell(name, formula, new FormulaError("One or more variables have an undefined value."));
                 CellList.Add(newcell);
                 foreach (string var in formula.GetVariables())
                 {
@@ -430,12 +610,13 @@ namespace SS
                         Graph.AddDependency(name, var);
                     }
                 }
-
                 foreach (string var in GetCellsToRecalculate(name))
                 {
                     ReturnSet.Add(var);
                 }
+                
             }
+            Changed = true;
             return ReturnSet;
         }
 
@@ -476,10 +657,7 @@ namespace SS
                 yield return s;
             }
         }
-        //public override bool Equals(object obj)
-        //{
-        //    return base.Equals(obj);
-        //}
+        
         
         
         
@@ -488,7 +666,7 @@ namespace SS
     {
         private string name;
         private object contents;
-        private object value;
+        private object cellvalue;
 
         /// <summary>
         /// Creates a new cell with a Name, Contents, and Value.
@@ -500,7 +678,7 @@ namespace SS
         {
             name = Name;
             contents = Contents;
-            value = Value;
+            cellvalue = Value;
         }
         /// <summary>
         /// Returns cell's name.
@@ -508,7 +686,7 @@ namespace SS
         public string Name
         {
             get { return name; }
-            //set { name = value; }
+            set { name = value; }
         }
         /// <summary>
         /// Returns cell's contents.
@@ -518,14 +696,14 @@ namespace SS
             get { return contents; }
             set { contents = value; }
         }
-        ///// <summary>
-        ///// Returns cell's value.
-        ///// </summary>
-        //public object Value
-        //{
-        //    get { return value; }
-        //    set { value }
-        //}
-        
+        /// <summary>
+        /// Returns cell's value.
+        /// </summary>
+        public object Value
+        {
+            get { return cellvalue; }
+            set { cellvalue = value; }
+        }
+
     }
 }
