@@ -85,7 +85,26 @@ namespace SS
             changed = false;
             IsValid = newIsValid;
 
+            using (XmlReader reader = XmlReader.Create(source))
+            {
+                while (reader.Read())
+                {
+                    if (reader.IsStartElement())
+                    {
+                        switch (reader.Name)
+                        {
+                            case "States":
+                                break;
 
+                            case "State":
+                                Console.WriteLine();
+                                Console.WriteLine("State name = " + reader["Name"]);
+                                Console.WriteLine("State capital = " + reader["Capital"]);
+                                break;
+                        }
+                    }
+                }
+            }
         }
 
 
