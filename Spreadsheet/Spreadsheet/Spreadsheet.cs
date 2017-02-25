@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Xml;
+using System.Xml.Schema;
 using System.Text.RegularExpressions;
 using Formulas;
 using Dependencies;
@@ -17,7 +18,7 @@ namespace SS
     /// </summary>
     public class Spreadsheet : AbstractSpreadsheet
     {
-        private const string validpattern = @"^[a-zA-Z]+[1-9]\d*$";
+        //private const string validpattern = @"^[a-zA-Z]+[1-9]\d*$";
         private List<Cell> CellList;
         private DependencyGraph Graph;
         private Regex IsValid;
@@ -83,9 +84,28 @@ namespace SS
             CellList = new List<Cell>();
             Graph = new DependencyGraph();
             changed = false;
-            IsValid = newIsValid;
+            //IsValid = newIsValid;
 
-            using (XmlReader reader = XmlReader.Create(source))
+            var CellDictionary = new Dictionary<string, string>();
+
+            XmlSchemaSet sc = new XmlSchemaSet();
+            sc.Add(null, "spreadsheet.xsd");
+            // Configure validation.
+            XmlReaderSettings settings = new XmlReaderSettings();
+            settings.ValidationType = ValidationType.Schema;
+            settings.Schemas = sc;
+
+            try
+            {
+                XmlReader reader = XmlReader.Create(source, settings);
+            }
+            catch
+            {
+                throw new IOException("Problem reading from source xml.");
+            }
+            
+
+            using (XmlReader reader = XmlReader.Create(source, settings))
             {
                 while (reader.Read())
                 {
@@ -93,17 +113,87 @@ namespace SS
                     {
                         switch (reader.Name)
                         {
-                            case "States":
+                            case "spreadsheet":
+                                string oldisvalid = reader["IsValid"];
+                                
+                                try
+                                {
+                                    Regex OldIsValid = new Regex(oldisvalid);
+                                    IsValid = OldIsValid;
+                                }
+                                catch
+                                {
+                                    throw new SpreadsheetReadException("Old Regex from source is invalid.");
+                                }
                                 break;
 
-                            case "State":
-                                Console.WriteLine();
-                                Console.WriteLine("State name = " + reader["Name"]);
-                                Console.WriteLine("State capital = " + reader["Capital"]);
+                            case "cell":
+                                string name = reader["name"];
+                                string contents = reader["contents"];
+                                
+                                try
+                                {
+                                    CellDictionary.Add(name.ToUpper(), contents);
+                                }
+                                catch
+                                {
+                                    throw new SpreadsheetReadException("Duplicate cell names in source.");
+                                }
+
+                                
+                                
+
+                                //Console.WriteLine();
+                                //Console.WriteLine("State name = " + reader["Name"]);
+                                //Console.WriteLine("State capital = " + reader["Capital"]);
                                 break;
                         }
                     }
                 }
+            }
+
+            //Now we have collected a Dictionary containing all the cells that are looking to be input to the new spreadsheet.
+            foreach (string name in CellDictionary.Keys)
+            {
+                //First check each potential cell using OldIsValid
+                string contents;
+                CellDictionary.TryGetValue(name, out contents);
+                
+                try
+                {
+                    SetContentsOfCell(name, contents);
+                }
+                catch (InvalidNameException)
+                {
+                    throw new SpreadsheetReadException("Error building spreadsheet using IsValid Regex read from xml.");
+                }
+                catch (CircularException)
+                {
+                    throw new SpreadsheetReadException("Xml contained a circular dependency.");
+                }
+            }
+
+            foreach (string name in CellDictionary.Keys)
+            {
+                //Next check each potential cell using newIsValid
+                string contents;
+                CellDictionary.TryGetValue(name, out contents);
+
+                IsValid = newIsValid;
+
+                try
+                {
+                    SetContentsOfCell(name, contents);
+                }
+                catch (InvalidNameException)
+                {
+                    throw new SpreadsheetVersionException("Regex from xml and new Regex in parameter are not compatible.");
+                }
+                catch (CircularException)
+                {
+                    throw new SpreadsheetReadException("Xml contained a circular dependency.");
+                }
+                
             }
         }
 
@@ -181,12 +271,11 @@ namespace SS
             }
             catch
             {
-                throw new IOException();
+                throw new IOException("Issue writing to the destination.");
             }
             
             //make sure to change the "changed" value so that we know if things are modified after a save.
             Changed = false;
-            //throw new NotImplementedException();
         }
 
         /// <summary>
@@ -197,7 +286,7 @@ namespace SS
         /// </summary>
         public override object GetCellValue(string name)
         {
-            if (name == null || !Regex.IsMatch(name, validpattern))
+            if (name == null || !IsValid.IsMatch(name))
             {
                 throw new InvalidNameException();
             }
@@ -205,21 +294,6 @@ namespace SS
             {
                 if (cell.Name == name)
                 {
-                    //if (cell.Contents.GetType() == typeof(double))
-                    //{
-                    //    return cell.Value;
-                    //}
-                    //else if (cell.Contents.GetType() == typeof(string))
-                    //{
-                    //    return cell.Value;
-                    //}
-                    ////This means the content is a formula so we need to calculate 
-                    //else
-                    //{
-
-                    //}
-                    
-
                     return cell.Value;
                 }
             }
@@ -250,7 +324,7 @@ namespace SS
         /// <returns></returns>
         public override object GetCellContents(string name)
         {
-            if (name == null || !Regex.IsMatch(name, validpattern))
+            if (name == null || !IsValid.IsMatch(name))
             {
                 throw new InvalidNameException();
             }
@@ -307,7 +381,7 @@ namespace SS
                 throw new ArgumentNullException();
             }
 
-            if (name == null || !Regex.IsMatch(name, validpattern))
+            if (name == null || !IsValid.IsMatch(name))
             {
                 throw new InvalidNameException();
             }
@@ -355,7 +429,7 @@ namespace SS
                             {
                                 cell.Value = contents.Evaluate(s => (double)GetCellValue(s));
                             }
-                            catch (InvalidCastException)
+                            catch (FormulaEvaluationException)
                             {
                                 cell.Value = new FormulaError("One or more variables have an undefined value.");
                             }
@@ -387,7 +461,7 @@ namespace SS
             var OldDependents = new List<string>();
             bool found = false;
 
-            if (name == null || !Regex.IsMatch(name, validpattern))
+            if (name == null || !IsValid.IsMatch(name))
             {
                 throw new InvalidNameException();
             }
@@ -461,7 +535,7 @@ namespace SS
                 throw new ArgumentNullException();
             }
 
-            if (name == null || !Regex.IsMatch(name, validpattern))
+            if (name == null || !IsValid.IsMatch(name))
             {
                 throw new InvalidNameException();
             }
@@ -566,7 +640,7 @@ namespace SS
             bool found = false;
             bool InGraph = false;
 
-            if (name == null || !Regex.IsMatch(name, validpattern))
+            if (name == null || !IsValid.IsMatch(name))
             {
                 throw new InvalidNameException();
             }
@@ -666,7 +740,7 @@ namespace SS
                 throw new ArgumentNullException();
             }
 
-            if (!Regex.IsMatch(name, validpattern))
+            if (!IsValid.IsMatch(name))
             {
                 throw new InvalidNameException();
             }
