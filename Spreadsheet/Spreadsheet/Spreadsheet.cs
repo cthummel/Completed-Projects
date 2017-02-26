@@ -18,12 +18,10 @@ namespace SS
     /// </summary>
     public class Spreadsheet : AbstractSpreadsheet
     {
-        //private const string validpattern = @"^[a-zA-Z]+[1-9]\d*$";
         private List<Cell> CellList;
         private DependencyGraph Graph;
         private Regex IsValid;
         private bool changed;
-        //private bool schemapass;
 
         /// <summary>
         /// Creates an empty Spreadsheet whose IsValid regular expression accepts every string.
@@ -85,8 +83,6 @@ namespace SS
             CellList = new List<Cell>();
             Graph = new DependencyGraph();
             
-            //IsValid = newIsValid;
-
             var CellDictionary = new Dictionary<string, string>();
 
             XmlSchemaSet sc = new XmlSchemaSet();
@@ -124,6 +120,11 @@ namespace SS
                                     string name = reader["name"];
                                     string contents = reader["contents"];
 
+                                    if (name == null || contents == null)
+                                    {
+                                        throw new XmlSchemaException();
+                                    }
+
                                     try
                                     {
                                         CellDictionary.Add(name.ToUpper(), contents);
@@ -137,13 +138,13 @@ namespace SS
                         }
                     }
                 }
-                catch (XmlException)
-                {
-                    throw new IOException("Issues reading from source.");
-                }
                 catch (XmlSchemaException)
                 {
                     throw new SpreadsheetReadException("Issues validating with schema. Improper fomatting of xml.");
+                }
+                catch (IOException)
+                {
+                    throw new IOException("Issues reading from source.");
                 }
             }
 
@@ -452,11 +453,6 @@ namespace SS
             var OldDependents = new List<string>();
             bool found = false;
 
-            //if (name == null || !IsValid.IsMatch(name))
-            //{
-            //    throw new InvalidNameException();
-            //}
-
             //Looks through CellList for the cell called name.
             foreach (Cell cell in CellList)
             {
@@ -485,7 +481,6 @@ namespace SS
             }
 
             //If the name wasnt in the list already we can add it as a new cell.
-            //Fix the value in the constructor later.
             if (found == false)
             {
                 Cell newcell = new Cell(name, number, number);
@@ -526,11 +521,6 @@ namespace SS
                 throw new ArgumentNullException();
             }
 
-            //if (name == null || !IsValid.IsMatch(name))
-            //{
-            //    throw new InvalidNameException();
-            //}
-            
             //Looks through CellList for the cell called name.
             foreach (Cell cell in CellList)
             {
@@ -630,11 +620,6 @@ namespace SS
             var VariableValues = new Dictionary<string, double>();
             bool found = false;
             bool InGraph = false;
-
-            //if (name == null || !IsValid.IsMatch(name))
-            //{
-            //    throw new InvalidNameException();
-            //}
 
             //Looks through CellList for the cell called name.
             foreach (Cell cell in CellList)

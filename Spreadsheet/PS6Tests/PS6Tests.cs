@@ -127,6 +127,7 @@ namespace PS6Tests
             Assert.AreEqual(30.0, sheet.GetCellValue(A3));
             TextWriter writer = File.CreateText("spreadsheettest.txt");
             sheet.Save(writer);
+            writer.Close();
         }
 
         [TestMethod]
@@ -185,12 +186,45 @@ namespace PS6Tests
         [TestMethod]
         public void ConstructTest6()
         {
+            AbstractSpreadsheet sheet1 = new Spreadsheet();
+            sheet1.SetContentsOfCell(A1, 10.ToString());
+            sheet1.SetContentsOfCell(A2, 20.ToString());
+            sheet1.SetContentsOfCell(A3, "=A1+A2");
+
+            TextWriter writer = File.CreateText("spreadsheettest.txt");
+            sheet1.Save(writer);
+            writer.Close();
+
             Regex TestValid = new Regex(@"^[a-zA-Z]+[1-9]\d*$");
             TextReader source = File.OpenText(@"C:\Users\Corin Thummel\Source\Repos\spreadsheet\Spreadsheet\PS6Tests\bin\Debug\spreadsheettest.txt");
             AbstractSpreadsheet sheet = new Spreadsheet(source, TestValid);
             Assert.AreEqual(10.0, sheet.GetCellValue(A1));
             Assert.AreEqual(20.0, sheet.GetCellValue(A2));
             Assert.AreEqual(30.0, sheet.GetCellValue(A3));
+            source.Close();
+
+
+        }
+        [TestMethod]
+        [ExpectedException(typeof(SpreadsheetVersionException))]
+        public void ConstructTest7()
+        {
+            AbstractSpreadsheet sheet1 = new Spreadsheet();
+            sheet1.SetContentsOfCell("CAT", 10.ToString());
+            sheet1.SetContentsOfCell("DOG", 20.ToString());
+            sheet1.SetContentsOfCell("CAT AND DOG", "=CAT + DOG");
+
+            TextWriter writer = File.CreateText("spreadsheettest.txt");
+            sheet1.Save(writer);
+            writer.Close();
+
+            Regex TestValid = new Regex(@"^[a-zA-Z]+[1-9]\d*$");
+            TextReader source = File.OpenText(@"C:\Users\Corin Thummel\Source\Repos\spreadsheet\Spreadsheet\PS6Tests\bin\Debug\spreadsheettest.txt");
+            AbstractSpreadsheet sheet = new Spreadsheet(source, TestValid);
+            Assert.AreEqual(10.0, sheet.GetCellValue(A1));
+            Assert.AreEqual(20.0, sheet.GetCellValue(A2));
+            Assert.AreEqual(30.0, sheet.GetCellValue(A3));
+            source.Close();
         }
 
     }
