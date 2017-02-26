@@ -2,7 +2,9 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using SS;
+using System.IO;
 
 namespace PS6Tests
 {
@@ -88,5 +90,108 @@ namespace PS6Tests
             Assert.AreEqual(30.0, sheet.GetCellValue(A3));
 
         }
+        /// <summary>
+        /// Checking removing Formula Errors.
+        /// </summary>
+        [TestMethod]
+        public void ValueTest5()
+        {
+            AbstractSpreadsheet sheet = new Spreadsheet();
+            sheet.SetContentsOfCell(A1, 10.ToString());
+            sheet.SetContentsOfCell(A2, 20.ToString());
+            sheet.SetContentsOfCell(A3, "=A1+A2");
+            Assert.AreEqual(30.0, sheet.GetCellValue(A3));
+
+            sheet.SetContentsOfCell(A2, "hello");
+            Assert.AreEqual(new FormulaError("One or more variables have an undefined value."), sheet.GetCellValue(A3));
+
+            sheet.SetContentsOfCell(A2, 20.ToString());
+            Assert.AreEqual(30.0, sheet.GetCellValue(A3));
+        }
+        /// <summary>
+        /// Checking removing Formula Errors.
+        /// </summary>
+        [TestMethod]
+        public void ValueTest6()
+        {
+            AbstractSpreadsheet sheet = new Spreadsheet();
+            sheet.SetContentsOfCell(A1, 10.ToString());
+            sheet.SetContentsOfCell(A2, 20.ToString());
+            sheet.SetContentsOfCell(A3, "=A1+A2");
+            Assert.AreEqual(30.0, sheet.GetCellValue(A3));
+
+            sheet.SetContentsOfCell(A2, "hello");
+            Assert.AreEqual(new FormulaError("One or more variables have an undefined value."), sheet.GetCellValue(A3));
+
+            sheet.SetContentsOfCell(A2, 20.ToString());
+            Assert.AreEqual(30.0, sheet.GetCellValue(A3));
+            TextWriter writer = File.CreateText("spreadsheettest.txt");
+            sheet.Save(writer);
+        }
+
+        [TestMethod]
+        public void ConstructTest1()
+        {
+            AbstractSpreadsheet sheet = new Spreadsheet();
+            sheet.SetContentsOfCell("CAT", 10.ToString());
+            sheet.SetContentsOfCell("DOG", 20.ToString());
+            sheet.SetContentsOfCell("CAT AND DOG", "=CAT + DOG");
+            Assert.AreEqual(30.0, sheet.GetCellValue("CAT AND DOG"));
+            sheet.SetContentsOfCell("CAT AND DOG", "=DOG - CAT");
+            Assert.AreEqual(10.0, sheet.GetCellValue("CAT AND DOG"));
+        }
+
+        [TestMethod]
+        public void ConstructTest2()
+        {
+            Regex TestValid = new Regex(@"^[a-zA-Z]+[1-9]\d*$");
+            AbstractSpreadsheet sheet = new Spreadsheet(TestValid);
+            sheet.SetContentsOfCell(A1, 10.ToString());
+            sheet.SetContentsOfCell(A2, 20.ToString());
+            sheet.SetContentsOfCell(A3, "=A1+A2");
+            Assert.AreEqual(30.0, sheet.GetCellValue(A3));
+
+            sheet.SetContentsOfCell(A2, "hello");
+            Assert.AreEqual(new FormulaError("One or more variables have an undefined value."), sheet.GetCellValue(A3));
+
+            sheet.SetContentsOfCell(A2, 20.ToString());
+            Assert.AreEqual(30.0, sheet.GetCellValue(A3));
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(InvalidNameException))]
+        public void ConstructTest3()
+        {
+            Regex TestValid = new Regex(@"^[a-zA-Z]+[1-9]\d*$");
+            AbstractSpreadsheet sheet = new Spreadsheet(TestValid);
+            sheet.SetContentsOfCell("CAT", 10.ToString());
+        }
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException))]
+        public void ConstructTest4()
+        {
+            Regex TestValid = new Regex(@"^[a-zA-Z]+[1-9]\d*$");
+            AbstractSpreadsheet sheet = new Spreadsheet(TestValid);
+            sheet.SetContentsOfCell(A1, null);
+        }
+        [TestMethod]
+        [ExpectedException(typeof(InvalidNameException))]
+        public void ConstructTest5()
+        {
+            Regex TestValid = new Regex(@"^[a-zA-Z]+[1-9]\d*$");
+            AbstractSpreadsheet sheet = new Spreadsheet(TestValid);
+            sheet.SetContentsOfCell(null, 10.ToString());
+        }
+        [TestMethod]
+        public void ConstructTest6()
+        {
+            Regex TestValid = new Regex(@"^[a-zA-Z]+[1-9]\d*$");
+            TextReader source = File.OpenText(@"C:\Users\Corin Thummel\Source\Repos\spreadsheet\Spreadsheet\PS6Tests\bin\Debug\spreadsheettest.txt");
+            AbstractSpreadsheet sheet = new Spreadsheet(source, TestValid);
+            Assert.AreEqual(10.0, sheet.GetCellValue(A1));
+            Assert.AreEqual(20.0, sheet.GetCellValue(A2));
+            Assert.AreEqual(30.0, sheet.GetCellValue(A3));
+        }
+
     }
 }

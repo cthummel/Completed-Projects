@@ -23,6 +23,7 @@ namespace SS
         private DependencyGraph Graph;
         private Regex IsValid;
         private bool changed;
+        //private bool schemapass;
 
         /// <summary>
         /// Creates an empty Spreadsheet whose IsValid regular expression accepts every string.
@@ -83,7 +84,7 @@ namespace SS
         {
             CellList = new List<Cell>();
             Graph = new DependencyGraph();
-            changed = false;
+            
             //IsValid = newIsValid;
 
             var CellDictionary = new Dictionary<string, string>();
@@ -95,60 +96,54 @@ namespace SS
             settings.ValidationType = ValidationType.Schema;
             settings.Schemas = sc;
 
-            try
-            {
-                XmlReader reader = XmlReader.Create(source, settings);
-            }
-            catch
-            {
-                throw new IOException("Problem reading from source xml.");
-            }
-            
-
             using (XmlReader reader = XmlReader.Create(source, settings))
             {
-                while (reader.Read())
+                try
                 {
-                    if (reader.IsStartElement())
+                    while (reader.Read())
                     {
-                        switch (reader.Name)
+                        if (reader.IsStartElement())
                         {
-                            case "spreadsheet":
-                                string oldisvalid = reader["IsValid"];
-                                
-                                try
-                                {
-                                    Regex OldIsValid = new Regex(oldisvalid);
-                                    IsValid = OldIsValid;
-                                }
-                                catch
-                                {
-                                    throw new SpreadsheetReadException("Old Regex from source is invalid.");
-                                }
-                                break;
+                            switch (reader.Name)
+                            {
+                                case "spreadsheet":
+                                    string oldisvalid = reader["IsValid"];
 
-                            case "cell":
-                                string name = reader["name"];
-                                string contents = reader["contents"];
-                                
-                                try
-                                {
-                                    CellDictionary.Add(name.ToUpper(), contents);
-                                }
-                                catch
-                                {
-                                    throw new SpreadsheetReadException("Duplicate cell names in source.");
-                                }
+                                    try
+                                    {
+                                        Regex OldIsValid = new Regex(oldisvalid);
+                                        IsValid = OldIsValid;
+                                    }
+                                    catch
+                                    {
+                                        throw new SpreadsheetReadException("Old Regex from source is invalid.");
+                                    }
+                                    break;
 
-                                
-                                
+                                case "cell":
+                                    string name = reader["name"];
+                                    string contents = reader["contents"];
 
-                                //Console.WriteLine();
-                                //Console.WriteLine("State name = " + reader["Name"]);
-                                //Console.WriteLine("State capital = " + reader["Capital"]);
-                                break;
+                                    try
+                                    {
+                                        CellDictionary.Add(name.ToUpper(), contents);
+                                    }
+                                    catch
+                                    {
+                                        throw new SpreadsheetReadException("Duplicate cell names in source.");
+                                    }
+                                    break;
+                            }
                         }
                     }
+                }
+                catch (XmlException)
+                {
+                    throw new IOException("Issues reading from source.");
+                }
+                catch (XmlSchemaException)
+                {
+                    throw new SpreadsheetReadException("Issues validating with schema. Improper fomatting of xml.");
                 }
             }
 
@@ -173,14 +168,13 @@ namespace SS
                 }
             }
 
+            IsValid = newIsValid;
+
             foreach (string name in CellDictionary.Keys)
             {
                 //Next check each potential cell using newIsValid
                 string contents;
                 CellDictionary.TryGetValue(name, out contents);
-
-                IsValid = newIsValid;
-
                 try
                 {
                     SetContentsOfCell(name, contents);
@@ -193,8 +187,8 @@ namespace SS
                 {
                     throw new SpreadsheetReadException("Xml contained a circular dependency.");
                 }
-                
             }
+            Changed = false;
         }
 
 
@@ -235,34 +229,29 @@ namespace SS
         /// </summary>
         public override void Save(TextWriter dest)
         {
-            //double number;
             try
             {
                 using (XmlWriter writer = XmlWriter.Create(dest))
                 {
                     writer.WriteStartDocument();
-                    writer.WriteStartElement("spreadsheet");
-                    writer.WriteElementString("IsValid", IsValid.ToString());
+                    writer.WriteStartElement("", "spreadsheet", "urn:spreadsheet-schema");
+                    writer.WriteAttributeString("IsValid", IsValid.ToString());
 
                     foreach (Cell cell in CellList)
                     {
                         writer.WriteStartElement("cell");
-                        writer.WriteElementString("name", cell.Name);
-                        //Different contents options.
+                        writer.WriteAttributeString("name", cell.Name);
 
-                        if (cell.Contents.GetType() == (typeof(double)))
+                        //Different contents options.
+                        if (cell.Contents.GetType() == (typeof(Formula)))
                         {
-                            writer.WriteElementString("content", cell.Contents.ToString());
-                        }
-                        else if (cell.Contents.GetType() == (typeof(Formula)))
-                        {
-                            writer.WriteElementString("content", "=" + cell.Contents.ToString());
+                            writer.WriteAttributeString("contents", "=" + cell.Contents.ToString());
                         }
                         else
                         {
-                            //For text contents. Might be incorrect.
-                            writer.WriteElementString("content", cell.Contents.ToString());
+                            writer.WriteAttributeString("contents", cell.Contents.ToString());
                         }
+
                         writer.WriteEndElement();
                     }
                     writer.WriteEndElement();
@@ -277,6 +266,8 @@ namespace SS
             //make sure to change the "changed" value so that we know if things are modified after a save.
             Changed = false;
         }
+
+        
 
         /// <summary>
         /// If name is null or invalid, throws an InvalidNameException.
@@ -429,7 +420,7 @@ namespace SS
                             {
                                 cell.Value = contents.Evaluate(s => (double)GetCellValue(s));
                             }
-                            catch (FormulaEvaluationException)
+                            catch (InvalidCastException)
                             {
                                 cell.Value = new FormulaError("One or more variables have an undefined value.");
                             }
@@ -461,10 +452,10 @@ namespace SS
             var OldDependents = new List<string>();
             bool found = false;
 
-            if (name == null || !IsValid.IsMatch(name))
-            {
-                throw new InvalidNameException();
-            }
+            //if (name == null || !IsValid.IsMatch(name))
+            //{
+            //    throw new InvalidNameException();
+            //}
 
             //Looks through CellList for the cell called name.
             foreach (Cell cell in CellList)
@@ -535,10 +526,10 @@ namespace SS
                 throw new ArgumentNullException();
             }
 
-            if (name == null || !IsValid.IsMatch(name))
-            {
-                throw new InvalidNameException();
-            }
+            //if (name == null || !IsValid.IsMatch(name))
+            //{
+            //    throw new InvalidNameException();
+            //}
             
             //Looks through CellList for the cell called name.
             foreach (Cell cell in CellList)
@@ -640,10 +631,10 @@ namespace SS
             bool found = false;
             bool InGraph = false;
 
-            if (name == null || !IsValid.IsMatch(name))
-            {
-                throw new InvalidNameException();
-            }
+            //if (name == null || !IsValid.IsMatch(name))
+            //{
+            //    throw new InvalidNameException();
+            //}
 
             //Looks through CellList for the cell called name.
             foreach (Cell cell in CellList)
@@ -750,11 +741,8 @@ namespace SS
                 yield return s;
             }
         }
-        
-        
-        
-        
     }
+
     class Cell
     {
         private string name;
@@ -779,7 +767,6 @@ namespace SS
         public string Name
         {
             get { return name; }
-            set { name = value; }
         }
         /// <summary>
         /// Returns cell's contents.
