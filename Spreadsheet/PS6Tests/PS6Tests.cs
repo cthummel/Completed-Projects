@@ -226,6 +226,18 @@ namespace PS6Tests
             Assert.AreEqual(30.0, sheet.GetCellValue(A3));
             source.Close();
         }
+        [TestMethod]
+        [ExpectedException(typeof(SpreadsheetReadException))]
+        public void ConstructTest8()
+        {
+            Regex TestValid = new Regex(@"^[a-zA-Z]+[1-9]\d*$");
+            TextReader source = File.OpenText(@"C:\Users\Corin Thummel\Source\Repos\spreadsheet\Spreadsheet\PS6Tests\bin\Debug\spreadsheettest1.txt");
+            AbstractSpreadsheet sheet = new Spreadsheet(source, TestValid);
+            Assert.AreEqual(10.0, sheet.GetCellValue(A1));
+            Assert.AreEqual(20.0, sheet.GetCellValue(A2));
+            Assert.AreEqual(30.0, sheet.GetCellValue(A3));
+            source.Close();
+        }
 
     }
 }

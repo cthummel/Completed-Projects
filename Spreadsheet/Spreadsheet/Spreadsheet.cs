@@ -22,6 +22,7 @@ namespace SS
         private DependencyGraph Graph;
         private Regex IsValid;
         private bool changed;
+        private bool PassesSchema;
 
         /// <summary>
         /// Creates an empty Spreadsheet whose IsValid regular expression accepts every string.
@@ -82,7 +83,8 @@ namespace SS
         {
             CellList = new List<Cell>();
             Graph = new DependencyGraph();
-            
+            PassesSchema = true;
+
             var CellDictionary = new Dictionary<string, string>();
 
             XmlSchemaSet sc = new XmlSchemaSet();
@@ -91,6 +93,7 @@ namespace SS
             XmlReaderSettings settings = new XmlReaderSettings();
             settings.ValidationType = ValidationType.Schema;
             settings.Schemas = sc;
+            //settings.ValidationEventHandler += ValidationCallback;
 
             using (XmlReader reader = XmlReader.Create(source, settings))
             {
@@ -122,7 +125,7 @@ namespace SS
 
                                     if (name == null || contents == null)
                                     {
-                                        throw new XmlSchemaException();
+                                        throw new XmlSchemaValidationException();
                                     }
 
                                     try
@@ -134,11 +137,20 @@ namespace SS
                                         throw new SpreadsheetReadException("Duplicate cell names in source.");
                                     }
                                     break;
+
+                                default:
+                                    PassesSchema = false;
+                                    break;
                             }
                         }
                     }
+                    if (PassesSchema == false)
+                    {
+                        throw new XmlSchemaValidationException();
+                    }
+                    
                 }
-                catch (XmlSchemaException)
+                catch (XmlSchemaValidationException)
                 {
                     throw new SpreadsheetReadException("Issues validating with schema. Improper fomatting of xml.");
                 }
@@ -147,6 +159,10 @@ namespace SS
                     throw new IOException("Issues reading from source.");
                 }
             }
+
+            
+            
+
 
             //Now we have collected a Dictionary containing all the cells that are looking to be input to the new spreadsheet.
             foreach (string name in CellDictionary.Keys)
@@ -191,6 +207,11 @@ namespace SS
             }
             Changed = false;
         }
+
+        //private static void ValidationCallback(object sender, ValidationEventArgs e)
+        //{
+        //    Console.WriteLine(" *** Validation Error: {0}", e.Message);
+        //}
 
 
         /// <summary>
