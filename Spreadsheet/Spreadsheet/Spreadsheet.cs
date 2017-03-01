@@ -303,6 +303,7 @@ namespace SS
             {
                 throw new InvalidNameException();
             }
+            name = name.ToUpper();
             foreach (Cell cell in CellList)
             {
                 if (cell.Name == name)
@@ -341,7 +342,7 @@ namespace SS
             {
                 throw new InvalidNameException();
             }
-
+            name = name.ToUpper();
             foreach(Cell cell in CellList)
             {
                 if (cell.Name == name)
@@ -403,29 +404,31 @@ namespace SS
             double number;
             if (double.TryParse(content, out number))
             {
-                foreach (string s in SetCellContents(name, number))
+                foreach (string s in SetCellContents(name.ToUpper(), number))
                 {
                     ReturnSet.Add(s);
                 }
             }
             //Formula case.
-            else if (content[0] == '=')
+            else if (content != string.Empty && content[0] == '=')
             {
                 string text = content.Substring(1);
                 Formula form = new Formula(text, s => s.ToUpper(), s => IsValid.IsMatch(s));
-                foreach (string redo in SetCellContents(name, form))
+                foreach (string redo in SetCellContents(name.ToUpper(), form))
                 {
                     ReturnSet.Add(redo);
                 }
             }
+
             //Text case.
             else
             {
-                foreach (string s in SetCellContents(name, content))
+                foreach (string s in SetCellContents(name.ToUpper(), content))
                 {
                     ReturnSet.Add(s);
                 }
             }
+
 
             //Now we have all the cells to Recalculate in ReturnSet.
             foreach (string recalc in ReturnSet)
@@ -445,6 +448,10 @@ namespace SS
                             catch (InvalidCastException)
                             {
                                 cell.Value = new FormulaError("One or more variables have an undefined value.");
+                            }
+                            catch (FormulaEvaluationException)
+                            {
+                                cell.Value = new FormulaError("Issue evaluating formula.");
                             }
                             
                         }
