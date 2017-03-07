@@ -47,6 +47,39 @@ namespace SpreadsheetGUI
             
         }
 
+       
+
+        private void ContentsBox_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+        /// <summary>
+        /// Creates a new spreadsheet.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void newToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
+        }
+        /// <summary>
+        /// Opens a new spreadsheet that was saved on the harddrive.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void openToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
+        }
+        /// <summary>
+        /// Deals with saving the spreadsheet.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void saveToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
+        }
         /// <summary>
         /// Deals with the Close menu
         /// </summary>
@@ -54,8 +87,12 @@ namespace SpreadsheetGUI
         {
             Close();
         }
-
-        private void ContentsBox_TextChanged(object sender, EventArgs e)
+        /// <summary>
+        /// Deals with the Help menu
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void controlsToolStripMenuItem_Click(object sender, EventArgs e)
         {
 
         }
