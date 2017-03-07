@@ -1,24 +1,17 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using SSGui;
 
 namespace SpreadsheetGUI
 {
     /// <summary>
-    /// Example of using a SpreadsheetPanel object
+    /// This class handles updating the view for our spreadsheet.
     /// </summary>
     public partial class SpreadsheetView : Form
     {
         
         /// <summary>
-        /// Constructor for the demo
+        /// Constructor for the view
         /// </summary>
         public SpreadsheetView()
         {
@@ -33,7 +26,7 @@ namespace SpreadsheetGUI
             // This could also be done graphically in the designer, as has been
             // demonstrated in class.
             spreadsheetPanel1.SelectionChanged += displaySelection;
-            spreadsheetPanel1.SetSelection(2, 3);
+            spreadsheetPanel1.SetSelection(0, 0);
         }
         /// <summary>
         /// Every time the selection changes, this method is called with the
@@ -42,15 +35,16 @@ namespace SpreadsheetGUI
         private void displaySelection(SpreadsheetPanel ss)
         {
             int row, col;
-            String value;
+            String contents;
             ss.GetSelection(out col, out row);
-            ss.GetValue(col, row, out value);
-            if (value == "")
-            {
-                ss.SetValue(col, row, DateTime.Now.ToLocalTime().ToString("T"));
-                ss.GetValue(col, row, out value);
-                MessageBox.Show("Selection: column " + col + " row " + row + " value " + value);
-            }
+
+            ss.GetValue(col, row, out contents);
+
+            //ss.SetValue(col, row, DateTime.Now.ToLocalTime().ToString("T"));
+
+            ss.GetValue(col, row, out contents);
+                //MessageBox.Show("Selection: column " + col + " row " + row + " value " + value);
+            
         }
 
         /// <summary>
@@ -61,7 +55,7 @@ namespace SpreadsheetGUI
             Close();
         }
 
-        private void SpreadsheetView_Load(object sender, EventArgs e)
+        private void ContentsBox_TextChanged(object sender, EventArgs e)
         {
 
         }
