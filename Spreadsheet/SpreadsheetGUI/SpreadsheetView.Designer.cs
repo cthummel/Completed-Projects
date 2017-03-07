@@ -1,6 +1,7 @@
-﻿namespace SSGui
+﻿using SSGui;
+namespace SpreadsheetGUI
 {
-    partial class SpreadsheetDemo
+    partial class SpreadsheetView
     {
         /// <summary>
         /// Required designer variable.
@@ -21,7 +22,7 @@
         }
 
         #region Windows Form Designer generated code
-
+        
         /// <summary>
         /// Required method for Designer support - do not modify
         /// the contents of this method with the code editor.
@@ -88,16 +89,13 @@
             this.PerformLayout();
 
         }
-
+        
         #endregion
 
         private SpreadsheetPanel spreadsheetPanel1;
         private System.Windows.Forms.MenuStrip menuStrip1;
         private System.Windows.Forms.ToolStripMenuItem fileToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem closeToolStripMenuItem;
-
-
-
     }
 }
 
