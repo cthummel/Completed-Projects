@@ -32,11 +32,15 @@ namespace SpreadsheetGUI
         }
 
         
-        private void UpdateContents(string contents)
+        private void UpdateContents(string name, string contents)
         {
             var ReturnSet = new HashSet<string>();
 
-
+            foreach (string cell in sheet.SetContentsOfCell(name, contents))
+            {
+                ReturnSet.Add(cell);
+            }
+            window.UpdateView(ReturnSet);
             
         }
 
