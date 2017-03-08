@@ -19,7 +19,9 @@ namespace SpreadsheetGUI
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new SpreadsheetView());
+            var context = FileAnalysisApplicationContext.GetContext();
+            FileAnalysisApplicationContext.GetContext().RunNew();
+            Application.Run(context);
         }
     }
 }

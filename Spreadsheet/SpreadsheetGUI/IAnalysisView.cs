@@ -31,7 +31,7 @@ namespace SpreadsheetGUI
 
         string Title { set; }
 
-        void UpdateView(HashSet<string>);
+        void UpdateView(HashSet<string> values);
 
         void DoClose();
 
