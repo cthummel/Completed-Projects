@@ -13,7 +13,7 @@ namespace SpreadsheetGUI
     {
 
 
-        event Action<string> SetContents;
+        event Action<string, string> SetContents;
 
         event Action FileSaveEvent;
 
@@ -23,7 +23,15 @@ namespace SpreadsheetGUI
 
         event Action NewEvent;
 
-        //int CharCount { set; }
+        string ContentsOfCell { set; }
+
+        int RowSelection { set; }
+
+        int ColumnSelection { set; }
+
+        string Title { set; }
+
+        void UpdateView(HashSet<string>);
 
         void DoClose();
 

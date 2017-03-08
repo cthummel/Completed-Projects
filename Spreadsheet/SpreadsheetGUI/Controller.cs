@@ -32,9 +32,16 @@ namespace SpreadsheetGUI
         }
 
         
-        private void UpdateContents(string contents)
+        private void UpdateContents(string name, string contents)
         {
             var ReturnSet = new HashSet<string>();
+
+            foreach (string cell in sheet.SetContentsOfCell(name, contents))
+            {
+                ReturnSet.Add(cell);
+            }
+            window.UpdateView(ReturnSet);
+            
         }
 
 
@@ -44,16 +51,15 @@ namespace SpreadsheetGUI
         private void HandleClose()
         {
             //Check for unsaved progress before closing the window.
-         //   if (sheet.Changed == true)
-        //    {
+            if (sheet.Changed == true)
+            {
                 //SHould check if the user wants to save. Maybe use a message box with "Yes", "No", "Cancel" options.
 
 
                 //Save(this, e);
-       //     }
-       //     else
+            }
+            else
             {
-                 // Should nominally close here? 
                 //Just closes the window since nothing needed to be saved.
                 window.DoClose();
             }
@@ -68,7 +74,6 @@ namespace SpreadsheetGUI
             window.OpenNew();
         }
 
-        // may need to be changed
         private void HandleSave()
         {
             Stream myStream;

@@ -24,7 +24,7 @@ namespace SpreadsheetGUI
         }
 
 
-        public event Action<string> SetContents;
+        public event Action<string, string> SetContents;
 
         public event Action FileSaveEvent;
 
@@ -34,7 +34,10 @@ namespace SpreadsheetGUI
 
         public event Action NewEvent;
 
-
+        public string ContentsOfCell
+        {
+            set { contents = ContentsBox.Text; }
+        }
 
         /// <summary>
         /// Every time the selection changes, this method is called with the
@@ -43,6 +46,8 @@ namespace SpreadsheetGUI
         private void displaySelection(SpreadsheetPanel ss)
         {
             ss.GetSelection(out col, out row);
+
+
             ss.SetValue(col, row, contents);
 
 
@@ -64,10 +69,14 @@ namespace SpreadsheetGUI
             //If this passes probably need an event so that we send the contents to the controller to update the model.
             if (e.KeyCode == Keys.Enter)
             {
-                contents = ContentsBox.Text;
+                
                 if (SetContents != null)
                 {
-                    SetContents(contents);
+                    string column = col.ToString();
+                    string number = row.ToString();
+                    string name = column + number;
+                    contents = ContentsBox.Text;
+                    SetContents(name, contents);
                 }
             }
 
@@ -125,6 +134,14 @@ namespace SpreadsheetGUI
         private void controlsToolStripMenuItem_Click(object sender, EventArgs e)
         {
 
+        }
+
+        /// <summary>
+        /// Sets the title in the UI
+        /// </summary>
+        public string Title
+        {
+            set { Text = value; }
         }
 
         /// <summary>
