@@ -57,7 +57,7 @@ namespace SpreadsheetGUI
             else
             {
                 //Just closes the window since nothing needed to be saved.
-                window.DoClose();
+                Close();
             }
             
         }

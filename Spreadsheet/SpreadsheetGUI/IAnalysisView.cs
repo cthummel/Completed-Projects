@@ -11,7 +11,7 @@ namespace SpreadsheetGUI
     /// </summary>
     public interface IAnalysisView
     {
-        
+
 
         event Action<string> SetContents;
 
@@ -23,22 +23,12 @@ namespace SpreadsheetGUI
 
         event Action FileNewEvent;
 
-        int CharCount { set; }
+        //int CharCount { set; }
 
-        int LineCount { set; }
+        
 
-        string SearchString { set; }
+        //void DoClose();
 
-        int SubstringCount { set; }
-
-        int WordCount { set; }
-
-        string Title { set; }
-
-        string Message { set; }
-
-        void DoClose();
-
-        void OpenNew();
+        //void OpenNew();
     }
 }

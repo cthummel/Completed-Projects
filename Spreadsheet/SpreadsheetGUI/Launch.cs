@@ -22,8 +22,4 @@ namespace SpreadsheetGUI
             Application.Run(new SpreadsheetView());
         }
     }
-
-    
-    
-    
 }

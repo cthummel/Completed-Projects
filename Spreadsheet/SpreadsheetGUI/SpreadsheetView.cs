@@ -7,10 +7,11 @@ namespace SpreadsheetGUI
     /// <summary>
     /// This class handles updating the view for our spreadsheet.
     /// </summary>
-    public partial class SpreadsheetView : Form
+    public partial class SpreadsheetView : Form, IAnalysisView
     {
         private int row, col;
         private String contents;
+        private IAnalysisView window;
 
         /// <summary>
         /// Constructor for the view
@@ -19,17 +20,23 @@ namespace SpreadsheetGUI
         {
             InitializeComponent();
             
-            // This an example of registering a method so that it is notified when
-            // an event happens.  The SelectionChanged event is declared with a
-            // delegate that specifies that all methods that register with it must
-            // take a SpreadsheetPanel as its parameter and return nothing.  So we
-            // register the displaySelection method below.
-
-            // This could also be done graphically in the designer, as has been
-            // demonstrated in class.
             spreadsheetPanel1.SelectionChanged += displaySelection;
             spreadsheetPanel1.SetSelection(0, 0);
         }
+
+
+        public event Action<string> SetContents;
+
+        public event Action FileSaveEvent;
+
+        public event Action FileOpenEvent;
+
+        public event Action FileCloseEvent;
+
+        public event Action FileNewEvent;
+
+
+
         /// <summary>
         /// Every time the selection changes, this method is called with the
         /// Spreadsheet as its parameter.
@@ -58,7 +65,10 @@ namespace SpreadsheetGUI
             if (e.KeyCode == Keys.Enter)
             {
                 contents = ContentsBox.Text;
-                
+                if (SetContents != null)
+                {
+                    SetContents(contents);
+                }
             }
 
         }
@@ -90,11 +100,14 @@ namespace SpreadsheetGUI
            
         }
         /// <summary>
-        /// Deals with the Close menu
+        /// Deals with the Close menu item.
         /// </summary>
         private void closeToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            Close();
+            if (FileCloseEvent != null)
+            {
+                FileCloseEvent();
+            }
         }
         /// <summary>
         /// Deals with the Help menu

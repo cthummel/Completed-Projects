@@ -46,7 +46,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AnalysisWindow.cs" />
+    <Compile Include="FIleAnalysisApplicationContext.cs" />
+    <Compile Include="IAnalysisView.cs" />
     <Compile Include="Controller.cs" />
     <Compile Include="SpreadsheetView.cs">
       <SubType>Form</SubType>
@@ -54,7 +55,7 @@
     <Compile Include="SpreadsheetView.Designer.cs">
       <DependentUpon>SpreadsheetView.cs</DependentUpon>
     </Compile>
-    <Compile Include="SpreadsheetGUI.cs" />
+    <Compile Include="Launch.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
