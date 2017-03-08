@@ -11,7 +11,6 @@ namespace SpreadsheetGUI
     {
         private int row, col;
         private String contents;
-        //private IAnalysisView window;
 
         /// <summary>
         /// Constructor for the view
@@ -45,6 +44,7 @@ namespace SpreadsheetGUI
         {
             ss.GetSelection(out col, out row);
             ss.SetValue(col, row, contents);
+
 
             //ss.SetValue(col, row, DateTime.Now.ToLocalTime().ToString("T"));
 
@@ -81,6 +81,7 @@ namespace SpreadsheetGUI
         {
 
         }
+
         /// <summary>
         /// Opens a new spreadsheet that was saved on the harddrive.
         /// </summary>
@@ -90,6 +91,7 @@ namespace SpreadsheetGUI
         {
 
         }
+
         /// <summary>
         /// Deals with saving the spreadsheet.
         /// </summary>
@@ -99,10 +101,12 @@ namespace SpreadsheetGUI
         {
             if (FileSaveEvent != null)
             {
+                Close();
                 FileSaveEvent();
             }
            
         }
+
         /// <summary>
         /// Deals with the Close menu item.
         /// </summary>

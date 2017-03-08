@@ -25,9 +25,6 @@ namespace SpreadsheetGUI
 
         //int CharCount { set; }
 
-
-        
-
         void DoClose();
 
         void OpenNew();

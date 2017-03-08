@@ -164,7 +164,7 @@ namespace SS
             
 
 
-            //Now we have collected a Dictionary containing all the cells that are looking to be input to the new spreadsheet.
+            // Now we have collected a Dictionary containing all the cells that are looking to be input to the new spreadsheet.
             foreach (string name in CellDictionary.Keys)
             {
                 //First check each potential cell using OldIsValid
