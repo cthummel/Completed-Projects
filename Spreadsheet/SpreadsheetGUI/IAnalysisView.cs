@@ -23,11 +23,11 @@ namespace SpreadsheetGUI
 
         event Action NewEvent;
 
-        string ContentsOfCell { set; }
+        //string ContentsOfCell { set; }
 
-        int RowSelection { set; }
+        //int RowSelection { set; }
 
-        int ColumnSelection { set; }
+        //int ColumnSelection { set; }
 
         string Title { set; }
 

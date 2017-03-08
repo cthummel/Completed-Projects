@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Windows.Forms;
 using SSGui;
 
@@ -71,7 +72,7 @@ namespace SpreadsheetGUI
                 
                 if (SetContents != null)
                 {
-                    string column = col.ToString();
+                    string column = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".Substring(col, 1);
                     string number = row.ToString();
                     string name = column + number;
                     contents = ContentsBox.Text;
@@ -153,6 +154,17 @@ namespace SpreadsheetGUI
         public void DoClose()
         {
             Close();
+        }
+
+        public void UpdateView(HashSet<string> values)
+        {
+            foreach (string cellname in values)
+            {
+                int temprow, tempcol;
+                tempcol = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".IndexOf(cellname[0]);
+                temprow = Int32.Parse(cellname.Substring(1));
+                
+            }
         }
     }
 }
