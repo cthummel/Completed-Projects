@@ -11,13 +11,17 @@ namespace SpreadsheetGUI
     /// </summary>
     public interface IAnalysisView
     {
-        event Action<string> FileChosenEvent;
+        
 
-        event Action<string> FileSaveEvent;
+        event Action<string> SetContents;
 
-        event Action CloseEvent;
+        event Action FileSaveEvent;
 
-        event Action NewEvent;
+        event Action FileOpenEvent;
+
+        event Action FileCloseEvent;
+
+        event Action FileNewEvent;
 
         int CharCount { set; }
 

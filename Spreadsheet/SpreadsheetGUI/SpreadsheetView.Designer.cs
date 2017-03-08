@@ -89,7 +89,7 @@ namespace SpreadsheetGUI
             this.ContentsBox.Name = "ContentsBox";
             this.ContentsBox.Size = new System.Drawing.Size(563, 26);
             this.ContentsBox.TabIndex = 2;
-            this.ContentsBox.TextChanged += new System.EventHandler(this.ContentsBox_TextChanged);
+            this.ContentsBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.ContentsBox_KeyDown);
             // 
             // ContentLabel
             // 
