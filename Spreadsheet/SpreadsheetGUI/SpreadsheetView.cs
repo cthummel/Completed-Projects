@@ -11,7 +11,7 @@ namespace SpreadsheetGUI
     {
         private int row, col;
         private String contents;
-        private IAnalysisView window;
+        //private IAnalysisView window;
 
         /// <summary>
         /// Constructor for the view
@@ -33,7 +33,7 @@ namespace SpreadsheetGUI
 
         public event Action FileCloseEvent;
 
-        public event Action FileNewEvent;
+        public event Action NewEvent;
 
 
 
@@ -97,6 +97,10 @@ namespace SpreadsheetGUI
         /// <param name="e"></param>
         private void saveToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            if (FileSaveEvent != null)
+            {
+                FileSaveEvent();
+            }
            
         }
         /// <summary>
@@ -117,6 +121,22 @@ namespace SpreadsheetGUI
         private void controlsToolStripMenuItem_Click(object sender, EventArgs e)
         {
 
+        }
+
+        /// <summary>
+        /// Opens a new Analysis window.
+        /// </summary>
+        public void OpenNew()
+        {
+            FileAnalysisApplicationContext.GetContext().RunNew();
+        }
+
+        /// <summary>
+        /// Closes this window.
+        /// </summary>
+        public void DoClose()
+        {
+            Close();
         }
     }
 }

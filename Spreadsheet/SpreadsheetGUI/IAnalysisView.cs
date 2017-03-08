@@ -21,14 +21,15 @@ namespace SpreadsheetGUI
 
         event Action FileCloseEvent;
 
-        event Action FileNewEvent;
+        event Action NewEvent;
 
         //int CharCount { set; }
 
+
         
 
-        //void DoClose();
+        void DoClose();
 
-        //void OpenNew();
+        void OpenNew();
     }
 }

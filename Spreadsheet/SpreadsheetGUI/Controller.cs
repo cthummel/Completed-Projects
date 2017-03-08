@@ -26,7 +26,7 @@ namespace SpreadsheetGUI
             //window.FileChosenEvent += HandleFileChosen;
             window.SetContents += UpdateContents;
             window.FileCloseEvent += HandleClose;
-            window.FileNewEvent += HandleNew;
+            window.NewEvent += HandleNew;
             window.FileSaveEvent += HandleSave;
             window.FileOpenEvent += HandleOpen;
         }
@@ -57,7 +57,7 @@ namespace SpreadsheetGUI
             else
             {
                 //Just closes the window since nothing needed to be saved.
-                Close();
+                window.DoClose();
             }
             
         }
