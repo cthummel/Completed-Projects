@@ -61,12 +61,11 @@ namespace SpreadsheetGUI
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void ContentsBox_KeyDown(object sender, KeyEventArgs e)
+        private void ContentsBox_KeyPress(object sender, KeyEventArgs e)
         {
             //If this passes probably need an event so that we send the contents to the controller to update the model.
             if (e.KeyCode == Keys.Enter)
             {
-                
                 if (SetContents != null)
                 {
                     string column = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".Substring(col, 1);
@@ -123,7 +122,7 @@ namespace SpreadsheetGUI
             }
         }
         /// <summary>
-        /// Deals with the Help menu
+        /// Deals with the Help menu.
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
