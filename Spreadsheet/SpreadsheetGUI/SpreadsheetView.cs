@@ -79,8 +79,8 @@ namespace SpreadsheetGUI
                     SetContents(name, contents);
                 }
             }
-
         }
+
         /// <summary>
         /// Creates a new spreadsheet.
         /// </summary>
