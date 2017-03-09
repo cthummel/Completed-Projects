@@ -47,15 +47,12 @@ namespace SpreadsheetGUI
         private void displaySelection(SpreadsheetPanel ss)
         {
             ss.GetSelection(out col, out row);
-
-
-            ss.SetValue(col, row, contents);
-
-            //ss.SetValue(col, row, DateTime.Now.ToLocalTime().ToString("T"));
-
             ss.GetValue(col, row, out contents);
+            ContentsBox.Text = contents;
+
+            //ss.SetValue(col, row, contents);
+            //ss.SetValue(col, row, DateTime.Now.ToLocalTime().ToString("T"));
             //MessageBox.Show("Selection: column " + col + " row " + row + " value " + value);
-            
         }
 
        
@@ -88,7 +85,7 @@ namespace SpreadsheetGUI
         /// <param name="e"></param>
         private void newToolStripMenuItem_Click(object sender, EventArgs e)
         {
-
+            OpenNew();
         }
         /// <summary>
         /// Opens a new spreadsheet that was saved on the harddrive.
@@ -97,7 +94,10 @@ namespace SpreadsheetGUI
         /// <param name="e"></param>
         private void openToolStripMenuItem_Click(object sender, EventArgs e)
         {
-
+            if (FileOpenEvent != null)
+            {
+                FileOpenEvent();
+            }
         }
         /// <summary>
         /// Deals with saving the spreadsheet.
@@ -156,14 +156,14 @@ namespace SpreadsheetGUI
             Close();
         }
 
-        public void UpdateView(HashSet<string> values)
+        public void UpdateView(Dictionary<string, string> values)
         {
-            foreach (string cellname in values)
+            foreach (string cellname in values.Keys)
             {
                 int temprow, tempcol;
                 tempcol = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".IndexOf(cellname[0]);
-                temprow = Int32.Parse(cellname.Substring(1));
-                
+                temprow = Int32.Parse(cellname.Substring(1)) - 1;
+                spreadsheetPanel1.SetValue(tempcol, temprow, values[cellname]);
             }
         }
     }

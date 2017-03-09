@@ -118,6 +118,12 @@ namespace PS6Tests
             sheet.SetContentsOfCell(A1, 10.ToString());
             sheet.SetContentsOfCell(A2, 20.ToString());
             sheet.SetContentsOfCell(A3, "=A1+A2");
+            sheet.SetContentsOfCell(B1, 50.ToString());
+            sheet.SetContentsOfCell(B2, 70.ToString());
+            sheet.SetContentsOfCell(B3, "=B1+B2");
+            sheet.SetContentsOfCell("C1", 90.ToString());
+            sheet.SetContentsOfCell("C2", 210.ToString());
+            sheet.SetContentsOfCell("C3", "=C1+C2");
             Assert.AreEqual(30.0, sheet.GetCellValue(A3));
 
             sheet.SetContentsOfCell(A2, "hello");
