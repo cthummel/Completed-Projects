@@ -42,6 +42,11 @@ namespace SpreadsheetGUI
             set { ContentsBox.Text = value; }
         }
 
+        public string Message
+        {
+            set { MessageBox.Show(value); }
+        }
+
         /// <summary>
         /// Every time the selection changes, this method is called with the
         /// Spreadsheet as its parameter.
@@ -196,5 +201,7 @@ namespace SpreadsheetGUI
                 //Dont save or close the form.
             }
         }
+
+        
     }
 }

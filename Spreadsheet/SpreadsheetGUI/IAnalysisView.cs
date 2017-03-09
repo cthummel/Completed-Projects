@@ -27,6 +27,8 @@ namespace SpreadsheetGUI
 
         string ContentsOfCell {  set; }
 
+        string Message { set; }
+
         //int RowSelection { set; }
 
         //int ColumnSelection { set; }

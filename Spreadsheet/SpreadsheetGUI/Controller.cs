@@ -56,15 +56,15 @@ namespace SpreadsheetGUI
 
                 window.UpdateView(ReturnPairs);
             }
-            catch (CircularException)
+            catch (CircularException ex)
             {
                 //MessageBox goes here saying that circular exceptions are bad.
-
-
+                window.Message = ex.Message;
             }
             catch
             {
-
+                //Would be nice to output the error messages that ive baked into each exception in spreadsheet but not sure how to do it.
+                window.Message = "An Error has occured.";
             }            
         }
 
@@ -135,7 +135,8 @@ namespace SpreadsheetGUI
         private void HandleOpen()
         {
             //Need this to open the spreadsheet in a new window without overwriting whats in this current window.
-
+            //Currently it just overwrites the current window.
+            //If you can find a way to implement this right that would be awesome.
 
             Stream myStream;
             OpenFileDialog openFileDialog1 = new OpenFileDialog();
@@ -152,7 +153,7 @@ namespace SpreadsheetGUI
                     TextReader reader = File.OpenText(openFileDialog1.FileName);
                     Regex IsValid = new Regex(@"[a-zA-Z]\d+");
                     Spreadsheet newsheet = new Spreadsheet(reader, IsValid);
-                    //sheet = newsheet;
+
 
                     //Now it should return all non-empty cells so that the view can update the values.
                     var ReturnPairs = new Dictionary<string, string>();

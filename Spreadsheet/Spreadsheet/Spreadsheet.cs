@@ -663,7 +663,7 @@ namespace SS
                     {
                         if (NewDependents.Contains(DependName))
                         {
-                            throw new CircularException();
+                            throw new CircularException("Spreadsheet contains a Circular Dependancy");
                         }
                         ReturnSet.Add(DependName);
                     }
