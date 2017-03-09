@@ -115,13 +115,12 @@ namespace SpreadsheetGUI
             // controlsToolStripMenuItem
             // 
             this.controlsToolStripMenuItem.Name = "controlsToolStripMenuItem";
-            this.controlsToolStripMenuItem.Size = new System.Drawing.Size(164, 30);
+            this.controlsToolStripMenuItem.Size = new System.Drawing.Size(211, 30);
             this.controlsToolStripMenuItem.Text = "Controls";
             this.controlsToolStripMenuItem.Click += new System.EventHandler(this.controlsToolStripMenuItem_Click);
             // 
             // ContentsBox
             // 
-            this.ContentsBox.CharacterCasing = System.Windows.Forms.CharacterCasing.Upper;
             this.ContentsBox.Location = new System.Drawing.Point(349, 7);
             this.ContentsBox.Name = "ContentsBox";
             this.ContentsBox.Size = new System.Drawing.Size(563, 26);

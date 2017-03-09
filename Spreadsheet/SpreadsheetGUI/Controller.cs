@@ -5,6 +5,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.IO;
 using SS;
+using Formulas;
 using System.Windows.Forms;
 
 namespace SpreadsheetGUI
@@ -25,6 +26,7 @@ namespace SpreadsheetGUI
             this.sheet = new Spreadsheet();
             //window.FileChosenEvent += HandleFileChosen;
             window.SetContents += UpdateContents;
+            window.GetContents += PassBackContents;
             window.FileCloseEvent += HandleClose;
             window.NewEvent += HandleNew;
             window.FileSaveEvent += HandleSave;
@@ -35,15 +37,47 @@ namespace SpreadsheetGUI
         private void UpdateContents(string name, string contents)
         {
             var ReturnPairs = new Dictionary<string, string>();
-
-            foreach (string cell in sheet.SetContentsOfCell(name, contents))
+            try
             {
-                //Need to be careful how we handle Formula Errors here.
-                string tempvalue = sheet.GetCellValue(cell).ToString();
-                ReturnPairs.Add(cell, tempvalue);
+                foreach (string cell in sheet.SetContentsOfCell(name, contents))
+                {
+                    //Need to be careful how we handle Formula Errors here.
+                    if (sheet.GetCellValue(cell).GetType() == typeof(FormulaError))
+                    {
+                        ReturnPairs.Add(cell, "Formula Error");
+                    }
+                    else
+                    {
+                        string tempvalue = sheet.GetCellValue(cell).ToString();
+                        ReturnPairs.Add(cell, tempvalue);
+                    }
+                    
+                }
+
+                window.UpdateView(ReturnPairs);
             }
-            window.UpdateView(ReturnPairs);
-            
+            catch (CircularException)
+            {
+                //MessageBox goes here saying that circular exceptions are bad.
+
+
+            }
+            catch
+            {
+
+            }            
+        }
+
+        private void PassBackContents(string name)
+        {
+            if (sheet.GetCellContents(name).GetType() == typeof(Formula))
+            {
+                window.ContentsOfCell = "=" + sheet.GetCellContents(name).ToString();
+            }
+            else
+            {
+                window.ContentsOfCell = sheet.GetCellContents(name).ToString();
+            }
         }
 
 
@@ -55,22 +89,14 @@ namespace SpreadsheetGUI
             //Check for unsaved progress before closing the window.
             if (sheet.Changed == true)
             {
-                //SHould check if the user wants to save. Maybe use a message box with "Yes", "No", "Cancel" options.
-
-
-                //Save(this, e);
-
-
-
-                //For now it will always close but we will remove this later.
-                window.DoClose();
+                //Should check if the user wants to save. Maybe use a message box with "Yes", "No", "Cancel" options.
+                window.SaveWarning();
             }
             else
             {
                 //Just closes the window since nothing needed to be saved.
                 window.DoClose();
             }
-            
         }
 
         /// <summary>
@@ -97,6 +123,7 @@ namespace SpreadsheetGUI
                     myStream.Close();
                     TextWriter writer = File.CreateText(saveFileDialog1.FileName);
                     sheet.Save(writer);
+                    window.Title = saveFileDialog1.FileName;
                     //myStream.Close();
                 }
             }
@@ -107,6 +134,9 @@ namespace SpreadsheetGUI
         /// </summary>
         private void HandleOpen()
         {
+            //Need this to open the spreadsheet in a new window without overwriting whats in this current window.
+
+
             Stream myStream;
             OpenFileDialog openFileDialog1 = new OpenFileDialog();
             openFileDialog1.DefaultExt = "ss";
@@ -122,15 +152,17 @@ namespace SpreadsheetGUI
                     TextReader reader = File.OpenText(openFileDialog1.FileName);
                     Regex IsValid = new Regex(@"[a-zA-Z]\d+");
                     Spreadsheet newsheet = new Spreadsheet(reader, IsValid);
-                    sheet = newsheet;
+                    //sheet = newsheet;
 
                     //Now it should return all non-empty cells so that the view can update the values.
                     var ReturnPairs = new Dictionary<string, string>();
-                    foreach (string s in sheet.GetNamesOfAllNonemptyCells())
+                    foreach (string s in newsheet.GetNamesOfAllNonemptyCells())
                     {
-                        string content = sheet.GetCellValue(s).ToString();
+                        string content = newsheet.GetCellValue(s).ToString();
                         ReturnPairs.Add(s, content);
                     }
+                    window.Title = openFileDialog1.FileName;
+                    
                     window.UpdateView(ReturnPairs);
 
                 }

@@ -27,6 +27,8 @@ namespace SpreadsheetGUI
 
         public event Action<string, string> SetContents;
 
+        public event Action<string> GetContents;
+
         public event Action FileSaveEvent;
 
         public event Action FileOpenEvent;
@@ -37,7 +39,7 @@ namespace SpreadsheetGUI
 
         public string ContentsOfCell
         {
-            set { contents = ContentsBox.Text; }
+            set { ContentsBox.Text = value; }
         }
 
         /// <summary>
@@ -47,8 +49,16 @@ namespace SpreadsheetGUI
         private void displaySelection(SpreadsheetPanel ss)
         {
             ss.GetSelection(out col, out row);
-            ss.GetValue(col, row, out contents);
-            ContentsBox.Text = contents;
+            string column = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".Substring(col, 1);
+            string number = (row + 1).ToString();
+            string name = column + number;
+            if (GetContents != null)
+            {
+                GetContents(name);
+            }
+
+            //ss.GetValue(col, row, out contents);
+            //ContentsBox.Text = contents;
 
             //ss.SetValue(col, row, contents);
             //ss.SetValue(col, row, DateTime.Now.ToLocalTime().ToString("T"));
@@ -69,7 +79,7 @@ namespace SpreadsheetGUI
                 if (SetContents != null)
                 {
                     string column = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".Substring(col, 1);
-                    string number = row.ToString();
+                    string number = (row + 1).ToString();
                     string name = column + number;
                     contents = ContentsBox.Text;
                     SetContents(name, contents);
@@ -161,8 +171,29 @@ namespace SpreadsheetGUI
             {
                 int tempRow, tempCol;
                 tempCol = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".IndexOf(cellName[0]);
-                tempRow = Int32.Parse(cellName.Substring(1));
+                tempRow = Int32.Parse(cellName.Substring(1)) - 1;
                 spreadsheetPanel1.SetValue(tempCol, tempRow, values[cellName]);
+            }
+        }
+
+        public void SaveWarning()
+        {
+            DialogResult result = MessageBox.Show("Would you like to save your document before closing?", "Warning", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Warning);
+            if (result == DialogResult.Yes)
+            {
+                if (FileSaveEvent != null)
+                {
+                    FileSaveEvent();
+                }
+                DoClose();
+            }
+            else if (result == DialogResult.No)
+            {
+                DoClose();
+            }
+            else if (result == DialogResult.Cancel)
+            {
+                //Dont save or close the form.
             }
         }
     }
