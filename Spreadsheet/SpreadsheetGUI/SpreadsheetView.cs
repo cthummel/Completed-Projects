@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Windows.Forms;
 using SSGui;
 
@@ -46,16 +47,12 @@ namespace SpreadsheetGUI
         private void displaySelection(SpreadsheetPanel ss)
         {
             ss.GetSelection(out col, out row);
-
-
-            ss.SetValue(col, row, contents);
-
-
-            //ss.SetValue(col, row, DateTime.Now.ToLocalTime().ToString("T"));
-
             ss.GetValue(col, row, out contents);
+            ContentsBox.Text = contents;
+
+            //ss.SetValue(col, row, contents);
+            //ss.SetValue(col, row, DateTime.Now.ToLocalTime().ToString("T"));
             //MessageBox.Show("Selection: column " + col + " row " + row + " value " + value);
-            
         }
 
        
@@ -72,15 +69,15 @@ namespace SpreadsheetGUI
                 
                 if (SetContents != null)
                 {
-                    string column = col.ToString();
+                    string column = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".Substring(col, 1);
                     string number = row.ToString();
                     string name = column + number;
                     contents = ContentsBox.Text;
                     SetContents(name, contents);
                 }
             }
-        }
 
+        }
         /// <summary>
         /// Creates a new spreadsheet.
         /// </summary>
@@ -88,9 +85,8 @@ namespace SpreadsheetGUI
         /// <param name="e"></param>
         private void newToolStripMenuItem_Click(object sender, EventArgs e)
         {
-
+            OpenNew();
         }
-
         /// <summary>
         /// Opens a new spreadsheet that was saved on the harddrive.
         /// </summary>
@@ -98,9 +94,11 @@ namespace SpreadsheetGUI
         /// <param name="e"></param>
         private void openToolStripMenuItem_Click(object sender, EventArgs e)
         {
-
+            if (FileOpenEvent != null)
+            {
+                FileOpenEvent();
+            }
         }
-
         /// <summary>
         /// Deals with saving the spreadsheet.
         /// </summary>
@@ -110,12 +108,10 @@ namespace SpreadsheetGUI
         {
             if (FileSaveEvent != null)
             {
-                Close();
                 FileSaveEvent();
             }
            
         }
-
         /// <summary>
         /// Deals with the Close menu item.
         /// </summary>
@@ -158,6 +154,17 @@ namespace SpreadsheetGUI
         public void DoClose()
         {
             Close();
+        }
+
+        public void UpdateView(Dictionary<string, string> values)
+        {
+            foreach (string cellname in values.Keys)
+            {
+                int temprow, tempcol;
+                tempcol = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".IndexOf(cellname[0]);
+                temprow = Int32.Parse(cellname.Substring(1)) - 1;
+                spreadsheetPanel1.SetValue(tempcol, temprow, values[cellname]);
+            }
         }
     }
 }

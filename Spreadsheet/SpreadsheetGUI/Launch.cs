@@ -1,9 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using System.IO;
 using System.Windows.Forms;
 using SSGui;
 
@@ -19,7 +14,9 @@ namespace SpreadsheetGUI
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new SpreadsheetView());
+            var context = FileAnalysisApplicationContext.GetContext();
+            FileAnalysisApplicationContext.GetContext().RunNew();
+            Application.Run(context);
         }
     }
 }
