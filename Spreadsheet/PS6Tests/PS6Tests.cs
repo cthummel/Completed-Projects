@@ -202,7 +202,7 @@ namespace PS6Tests
             writer.Close();
 
             Regex TestValid = new Regex(@"^[a-zA-Z]+[1-9]\d*$");
-            TextReader source = File.OpenText(@"C:\Users\Corin Thummel\Source\Repos\spreadsheet\Spreadsheet\PS6Tests\bin\Debug\spreadsheettest.txt");
+            TextReader source = File.OpenText(@"C:\Users\conradc\Source\Repos\Machine-Yearning\Spreadsheet\Spreadsheet\bin\Debug\spreadsheettest.txt");
             AbstractSpreadsheet sheet = new Spreadsheet(source, TestValid);
             Assert.AreEqual(10.0, sheet.GetCellValue(A1));
             Assert.AreEqual(20.0, sheet.GetCellValue(A2));

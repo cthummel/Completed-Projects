@@ -157,12 +157,12 @@ namespace SpreadsheetGUI
 
         public void UpdateView(Dictionary<string, string> values)
         {
-            foreach (string cellname in values.Keys)
+            foreach (string cellName in values.Keys)
             {
-                int temprow, tempcol;
-                tempcol = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".IndexOf(cellname[0]);
-                temprow = Int32.Parse(cellname.Substring(1)) - 1;
-                spreadsheetPanel1.SetValue(tempcol, temprow, values[cellname]);
+                int tempRow, tempCol;
+                tempCol = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".IndexOf(cellName[0]);
+                tempRow = Int32.Parse(cellName.Substring(1));
+                spreadsheetPanel1.SetValue(tempCol, tempRow, values[cellName]);
             }
         }
     }
