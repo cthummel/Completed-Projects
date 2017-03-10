@@ -15,6 +15,8 @@ namespace SpreadsheetGUI
 
         event Action<string, string> SetContents;
 
+        event Action<string> GetContents;
+
         event Action FileSaveEvent;
 
         event Action FileOpenEvent;
@@ -23,15 +25,19 @@ namespace SpreadsheetGUI
 
         event Action NewEvent;
 
-        //string ContentsOfCell { set; }
+        string ContentsOfCell {  set; }
+
+        string Message { set; }
 
         //int RowSelection { set; }
 
         //int ColumnSelection { set; }
 
-        string Title { set; }
+        string Title {  set; }
 
         void UpdateView(Dictionary<string, string> values);
+
+        void SaveWarning();
 
         void DoClose();
 

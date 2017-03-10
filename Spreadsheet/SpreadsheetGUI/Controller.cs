@@ -5,6 +5,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.IO;
 using SS;
+using Formulas;
 using System.Windows.Forms;
 
 namespace SpreadsheetGUI
@@ -15,6 +16,7 @@ namespace SpreadsheetGUI
         private IAnalysisView window;
         private Spreadsheet sheet;
         
+
         /// <summary>
         /// Begins controlling window.
         /// </summary>
@@ -24,24 +26,60 @@ namespace SpreadsheetGUI
             this.sheet = new Spreadsheet();
             //window.FileChosenEvent += HandleFileChosen;
             window.SetContents += UpdateContents;
+            window.GetContents += PassBackContents;
             window.FileCloseEvent += HandleClose;
             window.NewEvent += HandleNew;
             window.FileSaveEvent += HandleSave;
             window.FileOpenEvent += HandleOpen;
         }
 
+        
         private void UpdateContents(string name, string contents)
         {
             var ReturnPairs = new Dictionary<string, string>();
-
-            foreach (string cell in sheet.SetContentsOfCell(name, contents))
+            try
             {
-                //Need to be careful how we handle Formula Errors here.
-                string tempvalue = sheet.GetCellValue(cell).ToString();
-                ReturnPairs.Add(cell, tempvalue);
+                foreach (string cell in sheet.SetContentsOfCell(name, contents))
+                {
+                    //Need to be careful how we handle Formula Errors here.
+                    if (sheet.GetCellValue(cell).GetType() == typeof(FormulaError))
+                    {
+                        ReturnPairs.Add(cell, "Formula Error");
+                    }
+                    else
+                    {
+                        string tempvalue = sheet.GetCellValue(cell).ToString();
+                        ReturnPairs.Add(cell, tempvalue);
+                    }
+                    
+                }
+
+                window.UpdateView(ReturnPairs);
             }
-            window.UpdateView(ReturnPairs);
+            catch (CircularException ex)
+            {
+                //MessageBox goes here saying that circular exceptions are bad.
+                window.Message = ex.Message;
+            }
+            catch
+            {
+                //Would be nice to output the error messages that ive baked into each exception in spreadsheet but not sure how to do it.
+                window.Message = "An Error has occured.";
+            }            
         }
+
+        private void PassBackContents(string name)
+        {
+            if (sheet.GetCellContents(name).GetType() == typeof(Formula))
+            {
+                window.ContentsOfCell = "=" + sheet.GetCellContents(name).ToString();
+            }
+            else
+            {
+                window.ContentsOfCell = sheet.GetCellContents(name).ToString();
+            }
+        }
+
 
         /// <summary>
         /// Handles a request to close the window
@@ -51,22 +89,14 @@ namespace SpreadsheetGUI
             //Check for unsaved progress before closing the window.
             if (sheet.Changed == true)
             {
-                //SHould check if the user wants to save. Maybe use a message box with "Yes", "No", "Cancel" options.
-
-
-                //Save(this, e);
-
-
-
-                //For now it will always close but we will remove this later.
-                window.DoClose();
+                //Should check if the user wants to save. Maybe use a message box with "Yes", "No", "Cancel" options.
+                window.SaveWarning();
             }
             else
             {
                 //Just closes the window since nothing needed to be saved.
                 window.DoClose();
             }
-            
         }
 
         /// <summary>
@@ -77,26 +107,24 @@ namespace SpreadsheetGUI
             window.OpenNew();
         }
 
-        /// <summary>
-        /// Handles a request to save the spreadsheet to a file
-        /// </summary>
         private void HandleSave()
         {
             Stream myStream;
-            SaveFileDialog saveFileDialog = new SaveFileDialog();
-            saveFileDialog.DefaultExt = "ss"; // Defaults to .ss if the user doesn't specify something else
-            saveFileDialog.Filter = "Spreadsheet files (*.ss)|*.ss|All files (*.*)|*.*"; // Offers .ss or a user-chosen extension
-            saveFileDialog.FilterIndex = 1; // Defaults the dialog to the .ss extension
+            SaveFileDialog saveFileDialog1 = new SaveFileDialog();
+            saveFileDialog1.DefaultExt = "ss";
+            saveFileDialog1.Filter = "Spreadsheet files (*.ss)|*.ss|All files (*.*)|*.*";
+            saveFileDialog1.FilterIndex = 1;
+            saveFileDialog1.RestoreDirectory = true;
 
-            // There was an input
-            if (saveFileDialog.ShowDialog() == DialogResult.OK)
+            if (saveFileDialog1.ShowDialog() == DialogResult.OK)
             {
-                // 
-                if ((myStream = saveFileDialog.OpenFile()) != null)
+                if ((myStream = saveFileDialog1.OpenFile()) != null)
                 {
                     myStream.Close();
-                    TextWriter writer = File.CreateText(saveFileDialog.FileName);
+                    TextWriter writer = File.CreateText(saveFileDialog1.FileName);
                     sheet.Save(writer);
+                    window.Title = saveFileDialog1.FileName;
+                    //myStream.Close();
                 }
             }
         }
@@ -106,12 +134,16 @@ namespace SpreadsheetGUI
         /// </summary>
         private void HandleOpen()
         {
+            //Need this to open the spreadsheet in a new window without overwriting whats in this current window.
+            //Currently it just overwrites the current window.
+            //If you can find a way to implement this right that would be awesome.
+
             Stream myStream;
             OpenFileDialog openFileDialog1 = new OpenFileDialog();
             openFileDialog1.DefaultExt = "ss";
             openFileDialog1.Filter = "Spreadsheet files (*.ss)|*.ss|All files (*.*)|*.*";
             openFileDialog1.FilterIndex = 1;
-            openFileDialog1.RestoreDirectory = true; 
+            openFileDialog1.RestoreDirectory = true;
 
             if (openFileDialog1.ShowDialog() == DialogResult.OK)
             {
@@ -121,15 +153,17 @@ namespace SpreadsheetGUI
                     TextReader reader = File.OpenText(openFileDialog1.FileName);
                     Regex IsValid = new Regex(@"[a-zA-Z]\d+");
                     Spreadsheet newsheet = new Spreadsheet(reader, IsValid);
-                    sheet = newsheet;
+
 
                     //Now it should return all non-empty cells so that the view can update the values.
                     var ReturnPairs = new Dictionary<string, string>();
-                    foreach (string s in sheet.GetNamesOfAllNonemptyCells())
+                    foreach (string s in newsheet.GetNamesOfAllNonemptyCells())
                     {
-                        string content = sheet.GetCellValue(s).ToString();
+                        string content = newsheet.GetCellValue(s).ToString();
                         ReturnPairs.Add(s, content);
                     }
+                    window.Title = openFileDialog1.FileName;
+                    
                     window.UpdateView(ReturnPairs);
 
                 }
