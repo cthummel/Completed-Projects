@@ -15,7 +15,6 @@ namespace SpreadsheetGUI
         // The window being controlled
         private IAnalysisView window;
         private Spreadsheet sheet;
-        
 
         /// <summary>
         /// Begins controlling window.
@@ -53,7 +52,6 @@ namespace SpreadsheetGUI
                     }
                     
                 }
-
                 window.UpdateView(ReturnPairs);
             }
             catch (CircularException ex)
@@ -79,7 +77,6 @@ namespace SpreadsheetGUI
                 window.ContentsOfCell = sheet.GetCellContents(name).ToString();
             }
         }
-
 
         /// <summary>
         /// Handles a request to close the window
@@ -165,7 +162,6 @@ namespace SpreadsheetGUI
                     window.Title = openFileDialog1.FileName;
                     
                     window.UpdateView(ReturnPairs);
-
                 }
             }
         }

@@ -663,7 +663,7 @@ namespace SS
                     {
                         if (NewDependents.Contains(DependName))
                         {
-                            throw new CircularException("Spreadsheet contains a Circular Dependancy");
+                            throw new CircularException(); // Changed b/c circular exception doesn't take an argument
                         }
                         ReturnSet.Add(DependName);
                     }
@@ -774,6 +774,7 @@ namespace SS
             contents = Contents;
             cellvalue = Value;
         }
+
         /// <summary>
         /// Returns cell's name.
         /// </summary>
@@ -781,6 +782,7 @@ namespace SS
         {
             get { return name; }
         }
+
         /// <summary>
         /// Returns cell's contents.
         /// </summary>
@@ -789,6 +791,7 @@ namespace SS
             get { return contents; }
             set { contents = value; }
         }
+
         /// <summary>
         /// Returns cell's value.
         /// </summary>
@@ -797,6 +800,5 @@ namespace SS
             get { return cellvalue; }
             set { cellvalue = value; }
         }
-
     }
 }
