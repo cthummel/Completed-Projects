@@ -55,7 +55,6 @@ namespace SpreadsheetGUI
             //MessageBox.Show("Selection: column " + col + " row " + row + " value " + value);
         }
 
-       
         /// <summary>
         /// Deals with changing the contents text box.
         /// </summary>
@@ -66,7 +65,6 @@ namespace SpreadsheetGUI
             //If this passes probably need an event so that we send the contents to the controller to update the model.
             if (e.KeyCode == Keys.Enter)
             {
-                
                 if (SetContents != null)
                 {
                     string column = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".Substring(col, 1);
@@ -76,8 +74,8 @@ namespace SpreadsheetGUI
                     SetContents(name, contents);
                 }
             }
-
         }
+
         /// <summary>
         /// Creates a new spreadsheet.
         /// </summary>
@@ -87,6 +85,7 @@ namespace SpreadsheetGUI
         {
             OpenNew();
         }
+
         /// <summary>
         /// Opens a new spreadsheet that was saved on the harddrive.
         /// </summary>
@@ -99,6 +98,7 @@ namespace SpreadsheetGUI
                 FileOpenEvent();
             }
         }
+
         /// <summary>
         /// Deals with saving the spreadsheet.
         /// </summary>
@@ -112,6 +112,7 @@ namespace SpreadsheetGUI
             }
            
         }
+
         /// <summary>
         /// Deals with the Close menu item.
         /// </summary>
@@ -122,6 +123,7 @@ namespace SpreadsheetGUI
                 FileCloseEvent();
             }
         }
+
         /// <summary>
         /// Deals with the Help menu
         /// </summary>

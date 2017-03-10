@@ -15,7 +15,6 @@ namespace SpreadsheetGUI
         private IAnalysisView window;
         private Spreadsheet sheet;
         
-
         /// <summary>
         /// Begins controlling window.
         /// </summary>
@@ -31,7 +30,6 @@ namespace SpreadsheetGUI
             window.FileOpenEvent += HandleOpen;
         }
 
-        
         private void UpdateContents(string name, string contents)
         {
             var ReturnPairs = new Dictionary<string, string>();
@@ -43,9 +41,7 @@ namespace SpreadsheetGUI
                 ReturnPairs.Add(cell, tempvalue);
             }
             window.UpdateView(ReturnPairs);
-            
         }
-
 
         /// <summary>
         /// Handles a request to close the window
@@ -81,23 +77,26 @@ namespace SpreadsheetGUI
             window.OpenNew();
         }
 
+        /// <summary>
+        /// Handles a request to save the spreadsheet to a file
+        /// </summary>
         private void HandleSave()
         {
             Stream myStream;
-            SaveFileDialog saveFileDialog1 = new SaveFileDialog();
-            saveFileDialog1.DefaultExt = "ss";
-            saveFileDialog1.Filter = "Spreadsheet files (*.ss)|*.ss|All files (*.*)|*.*";
-            saveFileDialog1.FilterIndex = 1;
-            saveFileDialog1.RestoreDirectory = true;
+            SaveFileDialog saveFileDialog = new SaveFileDialog();
+            saveFileDialog.DefaultExt = "ss"; // Defaults to .ss if the user doesn't specify something else
+            saveFileDialog.Filter = "Spreadsheet files (*.ss)|*.ss|All files (*.*)|*.*"; // Offers .ss or a user-chosen extension
+            saveFileDialog.FilterIndex = 1; // Defaults the dialog to the .ss extension
 
-            if (saveFileDialog1.ShowDialog() == DialogResult.OK)
+            // There was an input
+            if (saveFileDialog.ShowDialog() == DialogResult.OK)
             {
-                if ((myStream = saveFileDialog1.OpenFile()) != null)
+                // 
+                if ((myStream = saveFileDialog.OpenFile()) != null)
                 {
                     myStream.Close();
-                    TextWriter writer = File.CreateText(saveFileDialog1.FileName);
+                    TextWriter writer = File.CreateText(saveFileDialog.FileName);
                     sheet.Save(writer);
-                    //myStream.Close();
                 }
             }
         }
@@ -112,7 +111,7 @@ namespace SpreadsheetGUI
             openFileDialog1.DefaultExt = "ss";
             openFileDialog1.Filter = "Spreadsheet files (*.ss)|*.ss|All files (*.*)|*.*";
             openFileDialog1.FilterIndex = 1;
-            openFileDialog1.RestoreDirectory = true;
+            openFileDialog1.RestoreDirectory = true; 
 
             if (openFileDialog1.ShowDialog() == DialogResult.OK)
             {
