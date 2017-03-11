@@ -23,7 +23,9 @@ namespace SpreadsheetGUI
         {
             this.window = window;
             this.sheet = new Spreadsheet();
+
             //window.FileChosenEvent += HandleFileChosen;
+
             window.SetContents += UpdateContents;
             window.GetContents += PassBackContents;
             window.FileCloseEvent += HandleClose;
@@ -86,8 +88,19 @@ namespace SpreadsheetGUI
             //Check for unsaved progress before closing the window.
             if (sheet.Changed == true)
             {
-                //Should check if the user wants to save. Maybe use a message box with "Yes", "No", "Cancel" options.
-                window.SaveWarning();
+                DialogResult dialogResult = MessageBox.Show("Would you like to save changes?", "Exit", MessageBoxButtons.YesNoCancel);
+                if (dialogResult == DialogResult.Yes)
+                {
+                    HandleSave();
+                }
+                else if (dialogResult == DialogResult.No)
+                {
+                    window.DoClose();
+                }
+                else if (dialogResult == DialogResult.Cancel)
+                {
+                    return;
+                }
             }
             else
             {
@@ -121,7 +134,6 @@ namespace SpreadsheetGUI
                     TextWriter writer = File.CreateText(saveFileDialog1.FileName);
                     sheet.Save(writer);
                     window.Title = saveFileDialog1.FileName;
-                    //myStream.Close();
                 }
             }
         }
@@ -131,17 +143,13 @@ namespace SpreadsheetGUI
         /// </summary>
         private void HandleOpen()
         {
-            //Need this to open the spreadsheet in a new window without overwriting whats in this current window.
-            //Currently it just overwrites the current window.
-            //If you can find a way to implement this right that would be awesome.
-
             Stream myStream;
             OpenFileDialog openFileDialog1 = new OpenFileDialog();
             openFileDialog1.DefaultExt = "ss";
             openFileDialog1.Filter = "Spreadsheet files (*.ss)|*.ss|All files (*.*)|*.*";
             openFileDialog1.FilterIndex = 1;
             openFileDialog1.RestoreDirectory = true;
-
+            
             if (openFileDialog1.ShowDialog() == DialogResult.OK)
             {
                 if ((myStream = openFileDialog1.OpenFile()) != null)
@@ -151,8 +159,7 @@ namespace SpreadsheetGUI
                     Regex IsValid = new Regex(@"[a-zA-Z]\d+");
                     Spreadsheet newsheet = new Spreadsheet(reader, IsValid);
 
-
-                    //Now it should return all non-empty cells so that the view can update the values.
+                    // Now it should return all non-empty cells so that the view can update the values.
                     var ReturnPairs = new Dictionary<string, string>();
                     foreach (string s in newsheet.GetNamesOfAllNonemptyCells())
                     {
