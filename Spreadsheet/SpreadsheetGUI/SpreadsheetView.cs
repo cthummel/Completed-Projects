@@ -36,6 +36,7 @@ namespace SpreadsheetGUI
             
             spreadsheetPanel1.SelectionChanged += displaySelection;
             spreadsheetPanel1.SetSelection(0, 0);
+            CellBox.Text = "A1";
         }
 
 
@@ -61,6 +62,8 @@ namespace SpreadsheetGUI
             string column = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".Substring(col, 1);
             string number = (row + 1).ToString();
             string name = column + number;
+            CellBox.Text = name;
+
             if (GetContents != null)
             {
                 GetContents(name);
@@ -152,7 +155,7 @@ namespace SpreadsheetGUI
         private void controlsToolStripMenuItem_Click(object sender, EventArgs e)
         {
             MessageBox.Show("1. To select a cell, just click on it." + Environment.NewLine + 
-                "2. To change the contents of a cell please enter the desired contents in the textbox at the top. Then press enter to confirm." + 
+                "2. To change the contents of a cell please enter the desired contents in the textbox at the top. Prepend all formulae with '='. Then press enter to confirm." + 
                 Environment.NewLine + "3. Other standard menu functions can be selected by clicking file in the upper left hand corner.");
         }
 

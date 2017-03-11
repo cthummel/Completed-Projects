@@ -40,6 +40,8 @@ namespace SpreadsheetGUI
             this.controlsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.ContentsBox = new System.Windows.Forms.TextBox();
             this.ContentLabel = new System.Windows.Forms.Label();
+            this.CellLabel = new System.Windows.Forms.Label();
+            this.CellBox = new System.Windows.Forms.TextBox();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -115,13 +117,13 @@ namespace SpreadsheetGUI
             // controlsToolStripMenuItem
             // 
             this.controlsToolStripMenuItem.Name = "controlsToolStripMenuItem";
-            this.controlsToolStripMenuItem.Size = new System.Drawing.Size(211, 30);
+            this.controlsToolStripMenuItem.Size = new System.Drawing.Size(164, 30);
             this.controlsToolStripMenuItem.Text = "Controls";
             this.controlsToolStripMenuItem.Click += new System.EventHandler(this.controlsToolStripMenuItem_Click);
             // 
             // ContentsBox
             // 
-            this.ContentsBox.Location = new System.Drawing.Point(349, 7);
+            this.ContentsBox.Location = new System.Drawing.Point(510, 4);
             this.ContentsBox.Name = "ContentsBox";
             this.ContentsBox.Size = new System.Drawing.Size(563, 26);
             this.ContentsBox.TabIndex = 2;
@@ -130,17 +132,36 @@ namespace SpreadsheetGUI
             // ContentLabel
             // 
             this.ContentLabel.AutoSize = true;
-            this.ContentLabel.Location = new System.Drawing.Point(221, 10);
+            this.ContentLabel.Location = new System.Drawing.Point(382, 8);
             this.ContentLabel.Name = "ContentLabel";
             this.ContentLabel.Size = new System.Drawing.Size(122, 20);
             this.ContentLabel.TabIndex = 3;
             this.ContentLabel.Text = "Contents of Cell";
+            // 
+            // CellLabel
+            // 
+            this.CellLabel.AutoSize = true;
+            this.CellLabel.Location = new System.Drawing.Point(253, 7);
+            this.CellLabel.Name = "CellLabel";
+            this.CellLabel.Size = new System.Drawing.Size(35, 20);
+            this.CellLabel.TabIndex = 4;
+            this.CellLabel.Text = "Cell";
+            // 
+            // CellBox
+            // 
+            this.CellBox.Location = new System.Drawing.Point(294, 4);
+            this.CellBox.Name = "CellBox";
+            this.CellBox.ReadOnly = true;
+            this.CellBox.Size = new System.Drawing.Size(41, 26);
+            this.CellBox.TabIndex = 5;
             // 
             // SpreadsheetView
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1187, 878);
+            this.Controls.Add(this.CellBox);
+            this.Controls.Add(this.CellLabel);
             this.Controls.Add(this.ContentLabel);
             this.Controls.Add(this.ContentsBox);
             this.Controls.Add(this.spreadsheetPanel1);
@@ -169,6 +190,8 @@ namespace SpreadsheetGUI
         private System.Windows.Forms.ToolStripMenuItem saveToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem helpToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem controlsToolStripMenuItem;
+        private System.Windows.Forms.Label CellLabel;
+        private System.Windows.Forms.TextBox CellBox;
     }
 }
 
