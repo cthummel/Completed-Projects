@@ -409,6 +409,7 @@ namespace SS
                     ReturnSet.Add(s);
                 }
             }
+
             //Formula case.
             else if (content != string.Empty && content[0] == '=')
             {
@@ -508,7 +509,7 @@ namespace SS
                 }
             }
 
-            //If the name wasnt in the list already we can add it as a new cell.
+            // If the name wasnt in the list already we can add it as a new cell.
             if (found == false)
             {
                 Cell newcell = new Cell(name, number, number);
@@ -554,7 +555,7 @@ namespace SS
             {
                 if (cell.Name == name)
                 {
-                    //If the replacement text is an empty string we are emptying the cell, otherwise we are changing a cell to be used.
+                    // If the replacement text is an empty string we are emptying the cell, otherwise we are changing a cell to be used.
                     if (text != string.Empty)
                     {
                         foreach (string DependName in GetCellsToRecalculate(name))

@@ -13,8 +13,9 @@ namespace DependenciesTest
         private string b = "b";
         private string c = "c";
         private string d = "d";
+
         /// <summary>
-        /// Tests constructor.
+        /// Tests constructor
         /// </summary>
         [TestMethod]
         public void Test1()
@@ -35,7 +36,7 @@ namespace DependenciesTest
         }
 
         /// <summary>
-        /// Tests adding 2 dependencies.
+        /// Tests adding 2 dependencies
         /// </summary>
         [TestMethod]
         public void Test3()
@@ -45,6 +46,7 @@ namespace DependenciesTest
             graph.AddDependency(c, d);
             Assert.AreEqual(2, graph.Size);
         }
+
         /// <summary>
         /// Tests adding the same dependency.
         /// </summary>
@@ -56,6 +58,7 @@ namespace DependenciesTest
             graph.AddDependency(a, b);
             Assert.AreEqual(1, graph.Size);
         }
+
         /// <summary>
         /// Tests adding the same dependency twice, once forwards and once in reverse. This creates a loop which is problematic. This passes but is bad.
         /// </summary>
@@ -67,6 +70,7 @@ namespace DependenciesTest
             graph.AddDependency(b, a);
             Assert.AreEqual(2, graph.Size);
         }
+
         /// <summary>
         /// Tests adding the 2 dependees dependency.
         /// </summary>
@@ -77,8 +81,8 @@ namespace DependenciesTest
             graph.AddDependency(a, b);
             graph.AddDependency(a, c);
             Assert.AreEqual(2, graph.Size);
-            
         }
+
         /// <summary>
         /// Tests adding the 2 dependees dependency.
         /// </summary>
@@ -89,10 +93,10 @@ namespace DependenciesTest
             graph.AddDependency(a, b);
             graph.AddDependency(c, b);
             Assert.AreEqual(2, graph.Size);
-
         }
+
         /// <summary>
-        /// Tests adding 3 dependencies.
+        /// Tests adding 3 dependencies
         /// </summary>
         [TestMethod]
         public void Test8()
@@ -102,10 +106,10 @@ namespace DependenciesTest
             graph.AddDependency(b, c);
             graph.AddDependency(c, d);
             Assert.AreEqual(3, graph.Size);
-
         }
+
         /// <summary>
-        /// Tests adding many duplicate dependencies.
+        /// Tests adding many duplicate dependencies
         /// </summary>
         [TestMethod]
         public void Test9()
@@ -120,10 +124,10 @@ namespace DependenciesTest
             graph.AddDependency(a, b);
             graph.AddDependency(a, b);
             Assert.AreEqual(1, graph.Size);
-
         }
+
         /// <summary>
-        /// Tests has dependents when true.
+        /// Tests has dependents when true
         /// </summary>
         [TestMethod]
         public void Test10()
@@ -131,8 +135,8 @@ namespace DependenciesTest
             DependencyGraph graph = new DependencyGraph();
             graph.AddDependency(a, b);
             Assert.IsTrue(graph.HasDependents(a));
-
         }
+
         /// <summary>
         /// Tests has dependents
         /// </summary>
@@ -142,10 +146,10 @@ namespace DependenciesTest
             DependencyGraph graph = new DependencyGraph();
             graph.AddDependency(a, b);
             Assert.IsFalse(graph.HasDependents(b));
-
         }
+
         /// <summary>
-        /// Tests has dependees when true.
+        /// Tests has dependees when true
         /// </summary>
         [TestMethod]
         public void Test12()
@@ -153,10 +157,10 @@ namespace DependenciesTest
             DependencyGraph graph = new DependencyGraph();
             graph.AddDependency(a, b);
             Assert.IsTrue(graph.HasDependees(b));
-
         }
+
         /// <summary>
-        /// Tests HasDependees when answer is false.
+        /// Tests HasDependees when answer is false
         /// </summary>
         [TestMethod]
         public void Test13()
@@ -166,8 +170,9 @@ namespace DependenciesTest
             Assert.IsFalse(graph.HasDependees(a));
 
         }
+
         /// <summary>
-        /// Test removing when graph is empty.
+        /// Test removing when graph is empty
         /// </summary>
         [TestMethod]
         public void Test14()
@@ -177,6 +182,7 @@ namespace DependenciesTest
             Assert.AreEqual(0, graph.Size);
 
         }
+
         /// <summary>
         /// Test removing the graph's only element.
         /// </summary>
@@ -189,6 +195,7 @@ namespace DependenciesTest
             Assert.AreEqual(0, graph.Size);
 
         }
+
         /// <summary>
         /// Test removing elements not in the graph.
         /// </summary>
@@ -202,8 +209,8 @@ namespace DependenciesTest
             graph.RemoveDependency(c, d);
             graph.RemoveDependency(d, c);
             Assert.AreEqual(1, graph.Size);
-
         }
+
         /// <summary>
         /// Test removing a non-unique dependent.
         /// </summary>
@@ -215,8 +222,8 @@ namespace DependenciesTest
             graph.AddDependency(a, c);
             graph.RemoveDependency(a, b);
             Assert.AreEqual(1, graph.Size);
-
         }
+
         /// <summary>
         /// Test removing a non-unique dependee.
         /// </summary>
@@ -228,8 +235,8 @@ namespace DependenciesTest
             graph.AddDependency(c, b);
             graph.RemoveDependency(a, b);
             Assert.AreEqual(1, graph.Size);
-
         }
+
         /// <summary>
         /// Tests GetDependants.
         /// </summary>
@@ -251,6 +258,7 @@ namespace DependenciesTest
             Assert.AreEqual("d", dependents.ElementAt(2));
 
         }
+
         /// <summary>
         /// Tests GetDependents when there are none.
         /// </summary>
@@ -271,6 +279,7 @@ namespace DependenciesTest
             //Assert.AreEqual("c", dependents.ElementAt(1));
             //Assert.AreEqual("d", dependents.ElementAt(2));
         }
+
         /// <summary>
         /// Tests GetDependees.
         /// </summary>
@@ -290,8 +299,8 @@ namespace DependenciesTest
             Assert.AreEqual("a", dependees.ElementAt(0));
             Assert.AreEqual("c", dependees.ElementAt(1));
             Assert.AreEqual("d", dependees.ElementAt(2));
-
         }
+
         /// <summary>
         /// Tests GetDependees when there are none.
         /// </summary>
@@ -309,8 +318,8 @@ namespace DependenciesTest
             }
 
             Assert.AreEqual(0, dependees.Count);
-
         }
+
         /// <summary>
         /// Tests ReplaceDependants.
         /// </summary>
@@ -339,8 +348,8 @@ namespace DependenciesTest
             Assert.AreSame("e", newdep.ElementAt(0));
             Assert.AreSame("f", newdep.ElementAt(1));
             Assert.AreSame("g", newdep.ElementAt(2));
-
         }
+
         /// <summary>
         /// Tests ReplaceDependees.
         /// </summary>
@@ -370,8 +379,8 @@ namespace DependenciesTest
             Assert.AreSame("f", newdep.ElementAt(1));
             Assert.AreSame("g", newdep.ElementAt(2));
             Assert.AreEqual(5, graph.Size);
-
         }
+
         /// <summary>
         /// Bit of an adding stress test.
         /// </summary>
@@ -470,9 +479,5 @@ namespace DependenciesTest
             Assert.AreSame(d, newdep2.ElementAt(2));
             Assert.AreEqual(3, newdep2.Count);
         }
-        
-
-
-
-}
+    }
 }

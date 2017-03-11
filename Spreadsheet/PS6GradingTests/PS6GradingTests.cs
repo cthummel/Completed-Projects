@@ -1109,16 +1109,16 @@ namespace PS6GradingTests
                 s.SetContentsOfCell("A1" + i, "=A1" + (i + 1));
             }
 
-            ISet<string> sss = s.SetContentsOfCell("A1" + (SIZE-1), "25.0");
+            ISet<string> sss = s.SetContentsOfCell("A1" + (SIZE - 1), "25.0");
             Assert.AreEqual(SIZE, sss.Count);
             for (int i = 0; i < SIZE; i++)
             {
                 Assert.IsTrue(sss.Contains("A1" + i));
             }
 
-            sss = s.SetContentsOfCell("A1" + (SIZE/2-1), "25.0");
-            Assert.AreEqual(SIZE/2, sss.Count);
-            for (int i = 0; i < SIZE/2; i++)
+            sss = s.SetContentsOfCell("A1" + (SIZE / 2 - 1), "25.0");
+            Assert.AreEqual(SIZE / 2, sss.Count);
+            for (int i = 0; i < SIZE / 2; i++)
             {
                 Assert.IsTrue(sss.Contains("A1" + i));
             }

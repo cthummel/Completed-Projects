@@ -7,6 +7,7 @@ using Formulas;
 
 namespace SpreadsheetTests
 {
+    
     [TestClass]
     public class SpreadsheetTests
     {
@@ -21,6 +22,8 @@ namespace SpreadsheetTests
         private const string B3 = "B3";
         private const string B4 = "B4";
         private const string B5 = "B5";
+
+        
 
         /// <summary>
         /// Tests GetNamesOfAllNonemptyCells on an empty sheet.
@@ -120,7 +123,7 @@ namespace SpreadsheetTests
         public void EmptySheet8()
         {
             AbstractSpreadsheet sheet = new Spreadsheet();
-            Formula  form = new Formula("A10");
+            Formula form = new Formula("A10");
             sheet.SetCellContents(null, form);
         }
         [TestMethod]
@@ -223,7 +226,7 @@ namespace SpreadsheetTests
             A1cont = (string)sheet.GetCellContents(A1);
             Assert.AreEqual(string.Empty, A1cont);
 
-            
+
             foreach (string s in sheet.GetNamesOfAllNonemptyCells())
             {
                 sheetlist.Add(s);
@@ -243,7 +246,10 @@ namespace SpreadsheetTests
             }
             Assert.AreEqual(contentslist.ElementAt(0), sheetlist.ElementAt(0));
 
-        }
+        } 
+
+
+        // Tried changing to set contents of cell
         [TestMethod]
         public void BasicSheet4()
         {
@@ -254,30 +260,29 @@ namespace SpreadsheetTests
             Formula A3cont;
             string A3content;
 
-
             var contentslist = new List<string>();
             var sheetlist = new List<string>();
 
-            sheet.SetCellContents(A1, 10);
+            sheet.SetContentsOfCell(A1, "10");
             A1cont = (double)sheet.GetCellContents(A1);
             Assert.AreEqual(10, A1cont);
             contentslist.Add(A1);
 
-            sheet.SetCellContents(A2, 20);
+            sheet.SetContentsOfCell(A2, "20");
             A2cont = (double)sheet.GetCellContents(A2);
             Assert.AreEqual(20, A2cont);
             contentslist.Add(A2);
 
             Formula form = new Formula("A1 + A2");
-            sheet.SetCellContents(A3,form);
-            A3cont = (Formula)sheet.GetCellContents(A3);
+            sheet.SetContentsOfCell(A3, "form");
+            A3cont = (Formula)(sheet.GetCellContents(A3));
             contentslist.Add(A3);
 
-            sheet.SetCellContents(A3, string.Empty);
+            sheet.SetContentsOfCell(A3, string.Empty);
             A3content = (string)sheet.GetCellContents(A3);
             Assert.AreEqual(string.Empty, A3content);
             contentslist.Remove(A3);
-            
+
             //contentslist.Add(A1);
             sheetlist = new List<string>();
             foreach (string s in sheet.GetNamesOfAllNonemptyCells())
@@ -288,9 +293,10 @@ namespace SpreadsheetTests
             {
                 Assert.AreEqual(contentslist.ElementAt(i), sheetlist.ElementAt(i));
             }
-            
-
         }
+
+        
+
         /// <summary>
         /// Replacing formula cells with new formula cells. Mostly looking internally at graph.
         /// </summary>
@@ -299,7 +305,7 @@ namespace SpreadsheetTests
         {
             AbstractSpreadsheet sheet = new Spreadsheet();
 
-            
+
             Formula form1 = new Formula("A2 / A3");
             Formula form2 = new Formula("A5 + A3");
             Formula form3 = new Formula("A4 * A4");
@@ -343,7 +349,7 @@ namespace SpreadsheetTests
             Formula form3 = new Formula("A1 / A4");
             sheet.SetCellContents(A1, form1);
             sheet.SetCellContents(A3, form3);
-            
+
         }
         [TestMethod]
         [ExpectedException(typeof(CircularException))]
@@ -376,7 +382,7 @@ namespace SpreadsheetTests
 
         }
         [TestMethod]
-        
+
         public void FormulaSheet7()
         {
             AbstractSpreadsheet sheet = new Spreadsheet();
@@ -513,6 +519,8 @@ namespace SpreadsheetTests
             Assert.AreEqual(checkstring4, "B1 + A1");
         }
 
+    
+
         [TestMethod]
         public void MixedTest4()
         {
@@ -523,18 +531,15 @@ namespace SpreadsheetTests
             Formula formb3 = new Formula("B3 + A3");
             Formula formb4 = new Formula("B4 * A4");
 
-            sheet.SetCellContents(B1, 100);
-            sheet.SetCellContents(B1, "cats");
-            sheet.SetCellContents(B1, 10);
-            sheet.SetCellContents(B1, formb2);
-            sheet.SetCellContents(B1, 20);
-            sheet.SetCellContents(B1, formb3);
-            sheet.SetCellContents(B1, 10);
-
-
-
+            sheet.SetContentsOfCell(B1, "100");
+            sheet.SetContentsOfCell(B1, "cats");
+            sheet.SetContentsOfCell(B1, "10");
+            sheet.SetContentsOfCell(B1, "formb2");
+            sheet.SetContentsOfCell(B1, "20");
+            sheet.SetContentsOfCell(B1, "formb3");
+            sheet.SetContentsOfCell(B1, "10");
         }
 
-
-    }
+        
+    } 
 }

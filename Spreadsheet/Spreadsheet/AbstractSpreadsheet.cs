@@ -236,7 +236,7 @@ namespace SS
         /// For example, if name is A1, B1 contains A1*2, and C1 contains B1+A1, the
         /// set {A1, B1, C1} is returned.
         /// </summary>
-        protected abstract ISet<String> SetCellContents(String name, double number);
+        protected abstract ISet<String> SetCellContents(String name, double number); // return this to protectedi n a minute
 
         // MODIFIED PROTECTION FOR PS6
         /// <summary>

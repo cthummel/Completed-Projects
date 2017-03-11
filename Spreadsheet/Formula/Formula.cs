@@ -19,7 +19,7 @@ namespace Formulas
     {
         private string output;
         private IEnumerable<string> Variables;
-        
+
         // The following are all patterns which Evaluate and Formula use for recognizing function components.
         private const String lpPattern = @"\(";
         private const String rpPattern = @"\)";
@@ -60,10 +60,10 @@ namespace Formulas
                 {
                     throw new FormulaFormatException("Normalized variables did not pass Validator test.");
                 }
-                
+
                 normvar.Add(N(var));
                 final = final.Replace(var, N(var));
-                
+
             }
 
             //Final passing formula is created.
@@ -77,7 +77,7 @@ namespace Formulas
         /// <returns></returns>
         public IEnumerable<string> GetVariables()
         {
-            if(Variables == null)
+            if (Variables == null)
             {
                 var temp = new List<string>();
                 return temp;
@@ -86,7 +86,7 @@ namespace Formulas
             {
                 return Variables;
             }
-            
+
         }
 
         /// <summary>
@@ -95,7 +95,7 @@ namespace Formulas
         /// <returns></returns>
         public override string ToString()
         {
-            if(output == null)
+            if (output == null)
             {
                 return "0";
             }
@@ -103,7 +103,7 @@ namespace Formulas
             {
                 return output;
             }
-            
+
         }
 
         /// <summary>
@@ -135,13 +135,13 @@ namespace Formulas
 
             int parcount = 0;
 
-            if(formula == null)
+            if (formula == null)
             {
                 throw new ArgumentNullException("Requires a non-null formula string.");
             }
 
 
-            if(tokens.Count() == 0)
+            if (tokens.Count() == 0)
             {
                 throw new FormulaFormatException("No input detected.");
             }
@@ -279,7 +279,7 @@ namespace Formulas
                     double exp = 0;
                     //If we found an exponential we should convert to a double then run through normal procedure.
                     //For example, 5.0e2 should equal 500.0 .
-                    if(Regex.IsMatch(t, powpattern))
+                    if (Regex.IsMatch(t, powpattern))
                     {
                         MatchCollection matches = Regex.Matches(t, powpattern);
                         double start = double.Parse(matches[0].Groups[1].Value);
@@ -292,16 +292,16 @@ namespace Formulas
                     if (Operators.Count == 0)
                     {
                         //If t is an exponential phrase, push its value.
-                        if(foundexp == true)
+                        if (foundexp == true)
                         {
                             Values.Push(exp.ToString());
                         }
-                        
+
                         else
                         {
                             Values.Push(t);
                         }
-                        
+
                     }
 
                     if (Operators.Count != 0)
@@ -339,7 +339,7 @@ namespace Formulas
                                     DoDivision(ref Values);
                                     Operators.Pop();
                                 }
-                               
+
                             }
                         }
                         else
@@ -358,7 +358,7 @@ namespace Formulas
 
                 if (Regex.IsMatch(t, varPattern))
                 {
-                    
+
                     try
                     {
                         lookup(t);
@@ -471,7 +471,7 @@ namespace Formulas
                 FinalAnswer = double.Parse(Values.Pop());
             }
 
-            
+
             if (Operators.Count == 1)
             {
                 if (Operators.Peek() == "+")
@@ -479,7 +479,7 @@ namespace Formulas
                     DoAddition(ref Values);
                     FinalAnswer = double.Parse(Values.Pop());
                 }
-                
+
                 else
                 {
                     DoSubtraction(ref Values);
@@ -539,7 +539,7 @@ namespace Formulas
         {
             double second = double.Parse(Values.Pop());
 
-            if(second == 0)
+            if (second == 0)
             {
                 throw new FormulaEvaluationException("Cannot divide by 0.");
             }

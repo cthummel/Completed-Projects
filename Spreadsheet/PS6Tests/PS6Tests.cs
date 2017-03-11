@@ -63,7 +63,7 @@ namespace PS6Tests
         public void ValueTest3()
         {
             AbstractSpreadsheet sheet = new Spreadsheet();
-            
+
             sheet.SetContentsOfCell(A3, "=A1+A2");
             Assert.AreEqual(new FormulaError("One or more variables have an undefined value."), sheet.GetCellValue(A3));
             sheet.SetContentsOfCell(A4, "=A1+A3");
