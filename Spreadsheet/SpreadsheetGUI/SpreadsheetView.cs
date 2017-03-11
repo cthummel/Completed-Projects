@@ -30,13 +30,10 @@ namespace SpreadsheetGUI
         /// <summary>
         /// Constructor for the view
         /// </summary>
-        public SpreadsheetView(Spreadsheet sheet)
+        public SpreadsheetView()
         {
             InitializeComponent();
-            foreach (string s in sheet.GetNamesOfAllNonemptyCells())
-            {
-                SetContents?.Invoke(s, sheet.GetCellContents(s).ToString());
-            }
+            
             spreadsheetPanel1.SelectionChanged += displaySelection;
             spreadsheetPanel1.SetSelection(0, 0);
         }

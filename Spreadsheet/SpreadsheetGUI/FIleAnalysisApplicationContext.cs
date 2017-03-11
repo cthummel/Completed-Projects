@@ -40,8 +40,8 @@ namespace SpreadsheetGUI
         public void RunNew(Spreadsheet ss)
         {
             // Create the window and the controller
-            SpreadsheetView window = new SpreadsheetView(ss);
-            new Controller(window);
+            SpreadsheetView window = new SpreadsheetView();
+            new Controller(window,ss);
             
 
             // One more form is running

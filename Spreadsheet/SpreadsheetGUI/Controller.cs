@@ -19,11 +19,16 @@ namespace SpreadsheetGUI
         /// <summary>
         /// Begins controlling window.
         /// </summary>
-        public Controller(IAnalysisView window)
+        public Controller(IAnalysisView window, Spreadsheet ss)
         {
             this.window = window;
-            this.sheet = new Spreadsheet();
-
+            this.sheet = ss;
+            var setvalues = new Dictionary<string, string>();
+            foreach (string s in ss.GetNamesOfAllNonemptyCells())
+            {
+                setvalues.Add(s, ss.GetCellValue(s).ToString());
+            }
+            window.UpdateView(setvalues);
             //window.FileChosenEvent += HandleFileChosen;
 
             window.SetContents += UpdateContents;
