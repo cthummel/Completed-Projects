@@ -88,19 +88,21 @@ namespace SpreadsheetGUI
             //Check for unsaved progress before closing the window.
             if (sheet.Changed == true)
             {
-                DialogResult dialogResult = MessageBox.Show("Would you like to save changes?", "Exit", MessageBoxButtons.YesNoCancel);
-                if (dialogResult == DialogResult.Yes)
-                {
-                    HandleSave();
-                }
-                else if (dialogResult == DialogResult.No)
-                {
-                    window.DoClose();
-                }
-                else if (dialogResult == DialogResult.Cancel)
-                {
-                    return;
-                }
+                window.SaveWarning();
+
+                //DialogResult dialogResult = MessageBox.Show("Would you like to save changes?", "Exit", MessageBoxButtons.YesNoCancel);
+                //if (dialogResult == DialogResult.Yes)
+                //{
+                //    HandleSave();
+                //}
+                //else if (dialogResult == DialogResult.No)
+                //{
+                //    window.DoClose();
+                //}
+                //else if (dialogResult == DialogResult.Cancel)
+                //{
+                //    return;
+                //}
             }
             else
             {

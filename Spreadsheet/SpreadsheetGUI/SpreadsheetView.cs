@@ -146,7 +146,9 @@ namespace SpreadsheetGUI
         /// <param name="e"></param>
         private void controlsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-
+            MessageBox.Show("1. To select a cell, just click on it." + Environment.NewLine + 
+                "2. To change the contents of a cell please enter the desired contents in the textbox at the top. Then press enter to confirm." + 
+                Environment.NewLine + "3. Other standard menu functions can be selected by clicking file in the upper left hand corner.");
         }
 
         /// <summary>
