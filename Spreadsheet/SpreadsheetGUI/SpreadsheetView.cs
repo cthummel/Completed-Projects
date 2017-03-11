@@ -61,13 +61,6 @@ namespace SpreadsheetGUI
             {
                 GetContents(name);
             }
-
-            //ss.GetValue(col, row, out contents);
-            //ContentsBox.Text = contents;
-
-            //ss.SetValue(col, row, contents);
-            //ss.SetValue(col, row, DateTime.Now.ToLocalTime().ToString("T"));
-            //MessageBox.Show("Selection: column " + col + " row " + row + " value " + value);
         }
 
         /// <summary>

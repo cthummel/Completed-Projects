@@ -89,20 +89,6 @@ namespace SpreadsheetGUI
             if (sheet.Changed == true)
             {
                 window.SaveWarning();
-
-                //DialogResult dialogResult = MessageBox.Show("Would you like to save changes?", "Exit", MessageBoxButtons.YesNoCancel);
-                //if (dialogResult == DialogResult.Yes)
-                //{
-                //    HandleSave();
-                //}
-                //else if (dialogResult == DialogResult.No)
-                //{
-                //    window.DoClose();
-                //}
-                //else if (dialogResult == DialogResult.Cancel)
-                //{
-                //    return;
-                //}
             }
             else
             {
