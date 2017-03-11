@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using SS;
 
 namespace SpreadsheetGUI
 {
@@ -41,6 +42,6 @@ namespace SpreadsheetGUI
 
         void DoClose();
 
-        void OpenNew();
+        void OpenNew(Spreadsheet ss);
     }
 }

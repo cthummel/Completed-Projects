@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Windows.Forms;
 using SSGui;
+using SS;
 
 namespace SpreadsheetGUI
 {
@@ -12,17 +13,6 @@ namespace SpreadsheetGUI
     {
         private int row, col;
         private String contents;
-
-        /// <summary>
-        /// Constructor for the view
-        /// </summary>
-        public SpreadsheetView()
-        {
-            InitializeComponent();
-            
-            spreadsheetPanel1.SelectionChanged += displaySelection;
-            spreadsheetPanel1.SetSelection(0, 0);
-        }
 
 
         public event Action<string, string> SetContents;
@@ -36,6 +26,20 @@ namespace SpreadsheetGUI
         public event Action FileCloseEvent;
 
         public event Action NewEvent;
+
+        /// <summary>
+        /// Constructor for the view
+        /// </summary>
+        public SpreadsheetView()
+        {
+            InitializeComponent();
+            
+            spreadsheetPanel1.SelectionChanged += displaySelection;
+            spreadsheetPanel1.SetSelection(0, 0);
+        }
+
+
+        
 
         public string ContentsOfCell
         {
@@ -91,7 +95,8 @@ namespace SpreadsheetGUI
         /// <param name="e"></param>
         private void newToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            OpenNew();
+            Spreadsheet sheet = new Spreadsheet();
+            OpenNew(sheet);
         }
 
         /// <summary>
@@ -155,9 +160,10 @@ namespace SpreadsheetGUI
         /// <summary>
         /// Opens a new Analysis window.
         /// </summary>
-        public void OpenNew()
+        public void OpenNew(Spreadsheet sheet)
         {
-            FileAnalysisApplicationContext.GetContext().RunNew();
+            //Spreadsheet sheet = new Spreadsheet();
+            FileAnalysisApplicationContext.GetContext().RunNew(sheet);
         }
 
         /// <summary>

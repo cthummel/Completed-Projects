@@ -19,11 +19,16 @@ namespace SpreadsheetGUI
         /// <summary>
         /// Begins controlling window.
         /// </summary>
-        public Controller(IAnalysisView window)
+        public Controller(IAnalysisView window, Spreadsheet ss)
         {
             this.window = window;
-            this.sheet = new Spreadsheet();
-
+            this.sheet = ss;
+            var setvalues = new Dictionary<string, string>();
+            foreach (string s in ss.GetNamesOfAllNonemptyCells())
+            {
+                setvalues.Add(s, ss.GetCellValue(s).ToString());
+            }
+            window.UpdateView(setvalues);
             //window.FileChosenEvent += HandleFileChosen;
 
             window.SetContents += UpdateContents;
@@ -102,7 +107,8 @@ namespace SpreadsheetGUI
         /// </summary>
         private void HandleNew()
         {
-            window.OpenNew();
+            Spreadsheet sheet = new Spreadsheet();
+            window.OpenNew(sheet);
         }
 
         private void HandleSave()
@@ -147,16 +153,17 @@ namespace SpreadsheetGUI
                     Regex IsValid = new Regex(@"[a-zA-Z]\d+");
                     Spreadsheet newsheet = new Spreadsheet(reader, IsValid);
 
-                    // Now it should return all non-empty cells so that the view can update the values.
-                    var ReturnPairs = new Dictionary<string, string>();
-                    foreach (string s in newsheet.GetNamesOfAllNonemptyCells())
-                    {
-                        string content = newsheet.GetCellValue(s).ToString();
-                        ReturnPairs.Add(s, content);
-                    }
-                    window.Title = openFileDialog1.FileName;
+                    window.OpenNew(newsheet);
+                    //// Now it should return all non-empty cells so that the view can update the values.
+                    //var ReturnPairs = new Dictionary<string, string>();
+                    //foreach (string s in newsheet.GetNamesOfAllNonemptyCells())
+                    //{
+                    //    string content = newsheet.GetCellValue(s).ToString();
+                    //    ReturnPairs.Add(s, content);
+                    //}
+                    //window.Title = openFileDialog1.FileName;
                     
-                    window.UpdateView(ReturnPairs);
+                    //window.UpdateView(ReturnPairs);
                 }
             }
         }
