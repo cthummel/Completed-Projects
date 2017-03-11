@@ -116,7 +116,8 @@ namespace SpreadsheetGUI
         /// </summary>
         private void HandleNew()
         {
-            window.OpenNew();
+            Spreadsheet sheet = new Spreadsheet();
+            window.OpenNew(sheet);
         }
 
         private void HandleSave()
@@ -161,16 +162,17 @@ namespace SpreadsheetGUI
                     Regex IsValid = new Regex(@"[a-zA-Z]\d+");
                     Spreadsheet newsheet = new Spreadsheet(reader, IsValid);
 
-                    // Now it should return all non-empty cells so that the view can update the values.
-                    var ReturnPairs = new Dictionary<string, string>();
-                    foreach (string s in newsheet.GetNamesOfAllNonemptyCells())
-                    {
-                        string content = newsheet.GetCellValue(s).ToString();
-                        ReturnPairs.Add(s, content);
-                    }
-                    window.Title = openFileDialog1.FileName;
+                    window.OpenNew(newsheet);
+                    //// Now it should return all non-empty cells so that the view can update the values.
+                    //var ReturnPairs = new Dictionary<string, string>();
+                    //foreach (string s in newsheet.GetNamesOfAllNonemptyCells())
+                    //{
+                    //    string content = newsheet.GetCellValue(s).ToString();
+                    //    ReturnPairs.Add(s, content);
+                    //}
+                    //window.Title = openFileDialog1.FileName;
                     
-                    window.UpdateView(ReturnPairs);
+                    //window.UpdateView(ReturnPairs);
                 }
             }
         }

@@ -14,7 +14,8 @@ namespace ControllerTester
         [TestMethod]
         public void TestMethod1()
         {
-            SpreadsheetView view = new SpreadsheetView();
+            Spreadsheet ss = new Spreadsheet();
+            SpreadsheetView view = new SpreadsheetView(ss);
             Controller controller = new Controller(view);
 
             //view.SetContents("A1", "10");

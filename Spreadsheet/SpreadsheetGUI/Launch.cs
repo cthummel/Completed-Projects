@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Windows.Forms;
-using SSGui;
+using SS;
 
 namespace SpreadsheetGUI
 {
@@ -15,7 +15,8 @@ namespace SpreadsheetGUI
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             var context = FileAnalysisApplicationContext.GetContext();
-            FileAnalysisApplicationContext.GetContext().RunNew();
+            Spreadsheet sheet = new Spreadsheet();
+            FileAnalysisApplicationContext.GetContext().RunNew(sheet);
             Application.Run(context);
         }
     }

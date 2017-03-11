@@ -1,4 +1,5 @@
 ﻿using System.Windows.Forms;
+using SS;
 
 namespace SpreadsheetGUI
 {
@@ -36,11 +37,12 @@ namespace SpreadsheetGUI
         /// <summary>
         /// Runs a form in this application context
         /// </summary>
-        public void RunNew()
+        public void RunNew(Spreadsheet ss)
         {
             // Create the window and the controller
-            SpreadsheetView window = new SpreadsheetView();
+            SpreadsheetView window = new SpreadsheetView(ss);
             new Controller(window);
+            
 
             // One more form is running
             windowCount++;
