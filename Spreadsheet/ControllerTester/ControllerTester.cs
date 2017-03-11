@@ -18,7 +18,7 @@ namespace ControllerTester
             SpreadsheetView view = new SpreadsheetView();
             Controller controller = new Controller(view, ss);
 
-            //view.SetContents("A1", "10");
+            
 
         }
     }

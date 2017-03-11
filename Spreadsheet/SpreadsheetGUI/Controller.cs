@@ -94,20 +94,7 @@ namespace SpreadsheetGUI
             if (sheet.Changed == true)
             {
                 window.SaveWarning();
-
-                //DialogResult dialogResult = MessageBox.Show("Would you like to save changes?", "Exit", MessageBoxButtons.YesNoCancel);
-                //if (dialogResult == DialogResult.Yes)
-                //{
-                //    HandleSave();
-                //}
-                //else if (dialogResult == DialogResult.No)
-                //{
-                //    window.DoClose();
-                //}
-                //else if (dialogResult == DialogResult.Cancel)
-                //{
-                //    return;
-                //}
+                
             }
             else
             {
@@ -127,7 +114,7 @@ namespace SpreadsheetGUI
 
         private void HandleSave()
         {
-            Stream myStream;
+            //Stream myStream;
             SaveFileDialog saveFileDialog1 = new SaveFileDialog();
             saveFileDialog1.DefaultExt = "ss";
             saveFileDialog1.Filter = "Spreadsheet files (*.ss)|*.ss|All files (*.*)|*.*";
@@ -136,9 +123,10 @@ namespace SpreadsheetGUI
 
             if (saveFileDialog1.ShowDialog() == DialogResult.OK)
             {
-                if ((myStream = saveFileDialog1.OpenFile()) != null)
+                
+                if ((saveFileDialog1.OpenFile()) != null)
                 {
-                    myStream.Close();
+                    //myStream.Close();
                     TextWriter writer = File.CreateText(saveFileDialog1.FileName);
                     sheet.Save(writer);
                     window.Title = saveFileDialog1.FileName;
@@ -168,16 +156,6 @@ namespace SpreadsheetGUI
                     Spreadsheet newsheet = new Spreadsheet(reader, IsValid);
 
                     window.OpenNew(newsheet);
-                    //// Now it should return all non-empty cells so that the view can update the values.
-                    //var ReturnPairs = new Dictionary<string, string>();
-                    //foreach (string s in newsheet.GetNamesOfAllNonemptyCells())
-                    //{
-                    //    string content = newsheet.GetCellValue(s).ToString();
-                    //    ReturnPairs.Add(s, content);
-                    //}
-                    //window.Title = openFileDialog1.FileName;
-                    
-                    //window.UpdateView(ReturnPairs);
                 }
             }
         }
