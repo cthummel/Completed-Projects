@@ -113,8 +113,8 @@ namespace SpreadsheetGUI
         }
 
         private void HandleSave()
-        {
-            //Stream myStream;
+                {
+            Stream myStream;
             SaveFileDialog saveFileDialog1 = new SaveFileDialog();
             saveFileDialog1.DefaultExt = "ss";
             saveFileDialog1.Filter = "Spreadsheet files (*.ss)|*.ss|All files (*.*)|*.*";
@@ -123,16 +123,16 @@ namespace SpreadsheetGUI
 
             if (saveFileDialog1.ShowDialog() == DialogResult.OK)
             {
-                
-                if ((saveFileDialog1.OpenFile()) != null)
+                if ((myStream = saveFileDialog1.OpenFile()) != null)
                 {
-                    //myStream.Close();
+                    myStream.Close();
                     TextWriter writer = File.CreateText(saveFileDialog1.FileName);
                     sheet.Save(writer);
                     window.Title = saveFileDialog1.FileName;
                 }
             }
         }
+
 
         /// <summary>
         /// Handles a request to open a spreadsheet read from a file.
