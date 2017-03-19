@@ -20,9 +20,22 @@ namespace PS8
 
         }
 
-        private void StartMatch(string ServerName, string PlayerName)
+        private void StartMatch(string server, string player)
         {
 
+        }
+
+
+        private void ReturnLetters()
+        {
+            //Asks server for letters and parses them.
+            //Saves them into a returnletters list before sending to the view to update.
+            var returnletters = new List<string>();
+
+
+
+
+            window.SetLetters(returnletters);
         }
 
 

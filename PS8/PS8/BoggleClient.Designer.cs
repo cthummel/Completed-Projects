@@ -121,113 +121,145 @@
             // 
             this.Letter1.Location = new System.Drawing.Point(329, 344);
             this.Letter1.Name = "Letter1";
+            this.Letter1.ReadOnly = true;
             this.Letter1.Size = new System.Drawing.Size(100, 26);
             this.Letter1.TabIndex = 7;
+            this.Letter1.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // Letter2
             // 
             this.Letter2.Location = new System.Drawing.Point(506, 344);
             this.Letter2.Name = "Letter2";
+            this.Letter2.ReadOnly = true;
             this.Letter2.Size = new System.Drawing.Size(100, 26);
             this.Letter2.TabIndex = 8;
+            this.Letter2.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // Letter3
             // 
             this.Letter3.Location = new System.Drawing.Point(674, 344);
             this.Letter3.Name = "Letter3";
+            this.Letter3.ReadOnly = true;
             this.Letter3.Size = new System.Drawing.Size(100, 26);
             this.Letter3.TabIndex = 9;
+            this.Letter3.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // Letter4
             // 
             this.Letter4.Location = new System.Drawing.Point(854, 344);
             this.Letter4.Name = "Letter4";
+            this.Letter4.ReadOnly = true;
             this.Letter4.Size = new System.Drawing.Size(100, 26);
             this.Letter4.TabIndex = 10;
+            this.Letter4.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // Letter5
             // 
             this.Letter5.Location = new System.Drawing.Point(329, 433);
             this.Letter5.Name = "Letter5";
+            this.Letter5.ReadOnly = true;
             this.Letter5.Size = new System.Drawing.Size(100, 26);
             this.Letter5.TabIndex = 11;
+            this.Letter5.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // Letter6
             // 
             this.Letter6.Location = new System.Drawing.Point(506, 433);
             this.Letter6.Name = "Letter6";
+            this.Letter6.ReadOnly = true;
             this.Letter6.Size = new System.Drawing.Size(100, 26);
             this.Letter6.TabIndex = 12;
+            this.Letter6.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // Letter7
             // 
             this.Letter7.Location = new System.Drawing.Point(674, 433);
             this.Letter7.Name = "Letter7";
+            this.Letter7.ReadOnly = true;
             this.Letter7.Size = new System.Drawing.Size(100, 26);
             this.Letter7.TabIndex = 13;
+            this.Letter7.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // Letter8
             // 
             this.Letter8.Location = new System.Drawing.Point(854, 433);
             this.Letter8.Name = "Letter8";
+            this.Letter8.ReadOnly = true;
             this.Letter8.Size = new System.Drawing.Size(100, 26);
             this.Letter8.TabIndex = 14;
+            this.Letter8.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // Letter9
             // 
             this.Letter9.Location = new System.Drawing.Point(329, 530);
             this.Letter9.Name = "Letter9";
+            this.Letter9.ReadOnly = true;
             this.Letter9.Size = new System.Drawing.Size(100, 26);
             this.Letter9.TabIndex = 15;
+            this.Letter9.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // Letter11
             // 
             this.Letter11.Location = new System.Drawing.Point(674, 530);
             this.Letter11.Name = "Letter11";
+            this.Letter11.ReadOnly = true;
             this.Letter11.Size = new System.Drawing.Size(100, 26);
             this.Letter11.TabIndex = 16;
+            this.Letter11.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // Letter10
             // 
             this.Letter10.Location = new System.Drawing.Point(506, 530);
             this.Letter10.Name = "Letter10";
+            this.Letter10.ReadOnly = true;
             this.Letter10.Size = new System.Drawing.Size(100, 26);
             this.Letter10.TabIndex = 17;
+            this.Letter10.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // Letter12
             // 
             this.Letter12.Location = new System.Drawing.Point(854, 530);
             this.Letter12.Name = "Letter12";
+            this.Letter12.ReadOnly = true;
             this.Letter12.Size = new System.Drawing.Size(100, 26);
             this.Letter12.TabIndex = 18;
+            this.Letter12.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // Letter13
             // 
             this.Letter13.Location = new System.Drawing.Point(329, 628);
             this.Letter13.Name = "Letter13";
+            this.Letter13.ReadOnly = true;
             this.Letter13.Size = new System.Drawing.Size(100, 26);
             this.Letter13.TabIndex = 19;
+            this.Letter13.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // Letter14
             // 
             this.Letter14.Location = new System.Drawing.Point(506, 628);
             this.Letter14.Name = "Letter14";
+            this.Letter14.ReadOnly = true;
             this.Letter14.Size = new System.Drawing.Size(100, 26);
             this.Letter14.TabIndex = 20;
+            this.Letter14.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // Letter15
             // 
             this.Letter15.Location = new System.Drawing.Point(674, 628);
             this.Letter15.Name = "Letter15";
+            this.Letter15.ReadOnly = true;
             this.Letter15.Size = new System.Drawing.Size(100, 26);
             this.Letter15.TabIndex = 21;
+            this.Letter15.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // Letter16
             // 
             this.Letter16.Location = new System.Drawing.Point(854, 628);
             this.Letter16.Name = "Letter16";
+            this.Letter16.ReadOnly = true;
             this.Letter16.Size = new System.Drawing.Size(100, 26);
             this.Letter16.TabIndex = 22;
+            this.Letter16.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             // 
             // Player1ScoreLabel
             // 
