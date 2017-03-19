@@ -60,5 +60,15 @@ namespace PS8
                 }
             }
         }
+
+        private void instructionsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show("");
+        }
+
+        private void CancelButton_Click(object sender, EventArgs e)
+        {
+
+        }
     }
 }
