@@ -52,6 +52,8 @@
     <Compile Include="BoggleClient.Designer.cs">
       <DependentUpon>BoggleClient.cs</DependentUpon>
     </Compile>
+    <Compile Include="Controller.cs" />
+    <Compile Include="IAnalysisView.cs" />
     <Compile Include="Launch.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="BoggleClient.resx">

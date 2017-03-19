@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace PS8
@@ -16,7 +13,10 @@ namespace PS8
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new BoggleClient());
+            BoggleClient window = new BoggleClient();
+            new Controller(window);
+            Application.Run(window);
+            
         }
     }
 }
