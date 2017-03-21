@@ -12,14 +12,20 @@ namespace PS8
 {
     public partial class BoggleClient : Form, IAnalysisView
     {
-        public event Action<string, string> GameStart;
+        public event Action<string, int> GameStart;
 
+        public event Action CancelGame;
+
+        public event Action<string> WordEntered;
 
 
         public BoggleClient()
         {
             InitializeComponent();
-            ServerNameBox.Text = "Enter default server name here.";
+            
+            ServerBox.Text = "Player1";
+            UsernameBox.Text = "90";
+            CancelButton.Enabled = false;
         }
 
         
@@ -27,25 +33,28 @@ namespace PS8
         private void StartButton_Click(object sender, EventArgs e)
         {
             //Tells Controller to start a match.
-            string Server = ServerNameBox.Text;
-            string Player = PlayerNameBox.Text;
+            string player = ServerBox.Text;
+            int time = Int32.Parse(UsernameBox.Text);
 
             //Locks down controls until cancel or game is complete.
-            ServerNameBox.ReadOnly = true;
-            PlayerNameBox.ReadOnly = true;
+            ServerBox.ReadOnly = true;
+            UsernameBox.ReadOnly = true;
+            UsernameBox.ReadOnly = true;
             StartButton.Enabled = false;
+            CancelButton.Enabled = true;
 
             //We could also consider repurposing the StartButton to turn into a cancel button after a game begins (after this click event occurs).
 
             if (GameStart != null)
             {
-                GameStart(Server, Player);
+                GameStart(player, time);
             }
         }
 
         private void WordEnterBox_KeyPress(object sender, KeyEventArgs e)
         {
             //Tells Controller about a new word that was entered.
+            string word = WordEnterBox.Text;
 
         }
 
@@ -68,7 +77,12 @@ namespace PS8
 
         private void CancelButton_Click(object sender, EventArgs e)
         {
-
+            if (CancelGame != null)
+            {
+                CancelGame();
+            }
         }
+
+        
     }
 }

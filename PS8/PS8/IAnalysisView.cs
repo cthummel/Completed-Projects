@@ -8,8 +8,10 @@ namespace PS8
 {
     public interface IAnalysisView
     {
-        event Action<string, string> GameStart;
-
+        event Action<string, int> GameStart;
+        event Action<string> WordEntered;
+        event Action CancelGame;
+        
 
 
 

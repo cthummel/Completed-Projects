@@ -5,6 +5,7 @@ using Newtonsoft.Json;
 using System.Dynamic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace PS8
@@ -13,13 +14,23 @@ namespace PS8
     {
         private IAnalysisView window;
 
+
+
+
+        /// <summary>
+        /// For canceling the current operation
+        /// </summary>
+        private CancellationTokenSource tokenSource;
+
+
         public Controller(IAnalysisView window)
         {
             this.window = window;
 
 
             window.GameStart += StartMatch;
-
+            window.CancelGame += Cancel;
+            window.WordEntered += NewWord;
 
         }
 
@@ -50,10 +61,20 @@ namespace PS8
         }
 
 
+        /// <summary>
+        /// Cancels the current operation (currently unimplemented)
+        /// </summary>
+        private void Cancel()
+        {
+            tokenSource.Cancel();
+        }
 
-
-
-        private void StartMatch(string server, string player)
+        /// <summary>
+        /// Starts a new match.
+        /// </summary>
+        /// <param name="server"></param>
+        /// <param name="player"></param>
+        private void StartMatch(string player, int time)
         {
             using(HttpClient client = CreateClient())
             {
@@ -92,7 +113,18 @@ namespace PS8
 
         }
 
+        /// <summary>
+        /// Tells the server that a new word was entered. Updates score and wordlist in view if successful.
+        /// </summary>
+        /// <param name="word"></param>
+        private void NewWord(string word)
+        {
 
+        }
+
+        /// <summary>
+        /// Asks server for game letters and sends them to the view to update the gameboard.
+        /// </summary>
         private void ReturnLetters()
         {
             //Asks server for letters and parses them.
