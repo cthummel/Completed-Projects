@@ -78,14 +78,14 @@ namespace PS8
         /// Sets the game board.
         /// </summary>
         /// <param name="LetterList"></param>
-        public void SetLetters(List<string> LetterList)
+        public void SetLetters(string letters)
         {
             foreach (Control c in Controls)
             {
                 int index;
                 if (c.Name.StartsWith("Letter") && int.TryParse(c.Name.Substring(6), out index))
                 {
-                    c.Text = LetterList.ElementAt(index - 1);
+                    c.Text = letters[index].ToString();
                 }
             }
         }

@@ -18,7 +18,9 @@ namespace PS8
 
 
 
-        void SetLetters(List<string> LetterList);
+        void SetLetters(string letters);
+
+        void Update(string[] parameters);
 
 
     }

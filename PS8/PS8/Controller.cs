@@ -104,6 +104,23 @@ namespace PS8
                 dynamic data = new ExpandoObject();
 
 
+                HttpResponseMessage response = client.GetAsync("games/{GameID}").Result;
+
+                if (response.IsSuccessStatusCode)
+                {
+                    String result = response.Content.ReadAsStringAsync().Result;
+                    dynamic GameData = JsonConvert.DeserializeObject(result);
+                    int timeleft = GameData.TimeLeft;
+
+
+                    //Display final word lists if the game is over.
+                    if(GameData.GameState == "completed")
+                    {
+
+                    }
+
+                }
+
 
             }
 
@@ -132,24 +149,54 @@ namespace PS8
                 // in the body of the request.
                 StringContent content = new StringContent(JsonConvert.SerializeObject(data), Encoding.UTF8, "application/json");
                 HttpResponseMessage response = client.PostAsync("games", content).Result;
-               
-                
 
                 if (response.IsSuccessStatusCode)
                 {
+                    //Starts our internal timer for pinging server.
                     RunTimer();
-
 
                     // The deserialized response value is an object that describes the new repository.
                     String result = response.Content.ReadAsStringAsync().Result;
                     dynamic newRepo = JsonConvert.DeserializeObject(result);
                     GameID = newRepo.GameID;
 
+
+                    //Now we need to update the view with the game information.
+                    HttpResponseMessage response2 = client.GetAsync("games/{GameID}").Result;
+
+                    if (response2.IsSuccessStatusCode)
+                    {
+                        String Getresult = response.Content.ReadAsStringAsync().Result;
+                        dynamic GetData = JsonConvert.DeserializeObject(result);
+
+                        //Pull data out.
+                        int ScoreP1 = GetData.Player1.Score;
+                        Player2ID = GetData.Player2.Nickname;
+                        int ScoreP2 = GetData.Player2.Score;
+                        int timeleft = GetData.TimeLeft;
+
+                        //Compile for view update
+                        string[] UpdateParameters = new string[3];
+                        UpdateParameters[0] = timeleft.ToString();
+                        UpdateParameters[1] = ScoreP1.ToString();
+                        UpdateParameters[2] = ScoreP2.ToString();
+
+                        //Update view.
+                        window.SetLetters(GetData.Board);
+                        window.Update(UpdateParameters);
+
+
+                    }
+
+
                 }
                 else
                 {
                     
                 }
+                
+
+
             }
 
         }
@@ -195,20 +242,7 @@ namespace PS8
 
         }
 
-        /// <summary>
-        /// Asks server for game letters and sends them to the view to update the gameboard.
-        /// </summary>
-        private void ReturnLetters()
-        {
-            //Asks server for letters and parses them.
-            //Saves them into a returnletters list before sending to the view to update.
-            var returnletters = new List<string>();
-
-
-
-
-            window.SetLetters(returnletters);
-        }
+        
 
 
     }
