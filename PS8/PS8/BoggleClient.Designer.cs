@@ -39,13 +39,12 @@
             this.label5 = new System.Windows.Forms.Label();
             this.Player1ScoreBox = new System.Windows.Forms.TextBox();
             this.Player2ScoreBox = new System.Windows.Forms.TextBox();
-            this.LetterLabel = new System.Windows.Forms.Label();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.helpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.instructionsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.FinalWordBoxP1 = new System.Windows.Forms.RichTextBox();
             this.WordListLabelPlayer1 = new System.Windows.Forms.Label();
-            this.CancelButton = new System.Windows.Forms.Button();
+            this.QuitGameButton = new System.Windows.Forms.Button();
             this.Letter1 = new System.Windows.Forms.RichTextBox();
             this.Letter2 = new System.Windows.Forms.RichTextBox();
             this.Letter3 = new System.Windows.Forms.RichTextBox();
@@ -64,9 +63,11 @@
             this.Letter16 = new System.Windows.Forms.RichTextBox();
             this.FinalWordBoxP2 = new System.Windows.Forms.RichTextBox();
             this.FinalWordLabelP2 = new System.Windows.Forms.Label();
-            this.RegisterBox = new System.Windows.Forms.Button();
+            this.RegisterButton = new System.Windows.Forms.Button();
             this.TimeLabel = new System.Windows.Forms.Label();
             this.TimeBox = new System.Windows.Forms.TextBox();
+            this.TimeRemainingBox = new System.Windows.Forms.RichTextBox();
+            this.RemainingLabel = new System.Windows.Forms.Label();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -74,14 +75,14 @@
             // 
             this.ServerBox.Location = new System.Drawing.Point(274, 50);
             this.ServerBox.Name = "ServerBox";
-            this.ServerBox.Size = new System.Drawing.Size(643, 26);
+            this.ServerBox.Size = new System.Drawing.Size(723, 26);
             this.ServerBox.TabIndex = 0;
             // 
             // UsernameBox
             // 
             this.UsernameBox.Location = new System.Drawing.Point(274, 82);
             this.UsernameBox.Name = "UsernameBox";
-            this.UsernameBox.Size = new System.Drawing.Size(643, 26);
+            this.UsernameBox.Size = new System.Drawing.Size(723, 26);
             this.UsernameBox.TabIndex = 1;
             // 
             // ServerLabel
@@ -96,7 +97,7 @@
             // UsernameLabel
             // 
             this.UsernameLabel.AutoSize = true;
-            this.UsernameLabel.Location = new System.Drawing.Point(174, 82);
+            this.UsernameLabel.Location = new System.Drawing.Point(181, 82);
             this.UsernameLabel.Name = "UsernameLabel";
             this.UsernameLabel.Size = new System.Drawing.Size(87, 20);
             this.UsernameLabel.TabIndex = 3;
@@ -104,9 +105,9 @@
             // 
             // StartButton
             // 
-            this.StartButton.Location = new System.Drawing.Point(1096, 207);
+            this.StartButton.Location = new System.Drawing.Point(274, 189);
             this.StartButton.Name = "StartButton";
-            this.StartButton.Size = new System.Drawing.Size(163, 61);
+            this.StartButton.Size = new System.Drawing.Size(723, 35);
             this.StartButton.TabIndex = 4;
             this.StartButton.Text = "Find Match";
             this.StartButton.UseVisualStyleBackColor = true;
@@ -163,15 +164,6 @@
             this.Player2ScoreBox.Size = new System.Drawing.Size(100, 26);
             this.Player2ScoreBox.TabIndex = 26;
             // 
-            // LetterLabel
-            // 
-            this.LetterLabel.AutoSize = true;
-            this.LetterLabel.Location = new System.Drawing.Point(553, 227);
-            this.LetterLabel.Name = "LetterLabel";
-            this.LetterLabel.Size = new System.Drawing.Size(150, 20);
-            this.LetterLabel.TabIndex = 27;
-            this.LetterLabel.Text = "Collection of Letters";
-            // 
             // menuStrip1
             // 
             this.menuStrip1.ImageScalingSize = new System.Drawing.Size(24, 24);
@@ -200,7 +192,7 @@
             // 
             // FinalWordBoxP1
             // 
-            this.FinalWordBoxP1.Location = new System.Drawing.Point(274, 575);
+            this.FinalWordBoxP1.Location = new System.Drawing.Point(218, 575);
             this.FinalWordBoxP1.Name = "FinalWordBoxP1";
             this.FinalWordBoxP1.ReadOnly = true;
             this.FinalWordBoxP1.Size = new System.Drawing.Size(258, 324);
@@ -210,21 +202,21 @@
             // WordListLabelPlayer1
             // 
             this.WordListLabelPlayer1.AutoSize = true;
-            this.WordListLabelPlayer1.Location = new System.Drawing.Point(325, 552);
+            this.WordListLabelPlayer1.Location = new System.Drawing.Point(270, 552);
             this.WordListLabelPlayer1.Name = "WordListLabelPlayer1";
             this.WordListLabelPlayer1.Size = new System.Drawing.Size(152, 20);
             this.WordListLabelPlayer1.TabIndex = 30;
             this.WordListLabelPlayer1.Text = "Your Final Word List";
             // 
-            // CancelButton
+            // QuitGameButton
             // 
-            this.CancelButton.Location = new System.Drawing.Point(1096, 274);
-            this.CancelButton.Name = "CancelButton";
-            this.CancelButton.Size = new System.Drawing.Size(163, 61);
-            this.CancelButton.TabIndex = 31;
-            this.CancelButton.Text = "Cancel Game";
-            this.CancelButton.UseVisualStyleBackColor = true;
-            this.CancelButton.Click += new System.EventHandler(this.CancelButton_Click);
+            this.QuitGameButton.Location = new System.Drawing.Point(1069, 502);
+            this.QuitGameButton.Name = "QuitGameButton";
+            this.QuitGameButton.Size = new System.Drawing.Size(163, 29);
+            this.QuitGameButton.TabIndex = 31;
+            this.QuitGameButton.Text = "Quit Game";
+            this.QuitGameButton.UseVisualStyleBackColor = true;
+            this.QuitGameButton.Click += new System.EventHandler(this.CancelButton_Click);
             // 
             // Letter1
             // 
@@ -388,7 +380,7 @@
             // 
             // FinalWordBoxP2
             // 
-            this.FinalWordBoxP2.Location = new System.Drawing.Point(739, 575);
+            this.FinalWordBoxP2.Location = new System.Drawing.Point(793, 575);
             this.FinalWordBoxP2.Name = "FinalWordBoxP2";
             this.FinalWordBoxP2.ReadOnly = true;
             this.FinalWordBoxP2.Size = new System.Drawing.Size(258, 324);
@@ -398,25 +390,26 @@
             // FinalWordLabelP2
             // 
             this.FinalWordLabelP2.AutoSize = true;
-            this.FinalWordLabelP2.Location = new System.Drawing.Point(771, 552);
+            this.FinalWordLabelP2.Location = new System.Drawing.Point(837, 552);
             this.FinalWordLabelP2.Name = "FinalWordLabelP2";
             this.FinalWordLabelP2.Size = new System.Drawing.Size(185, 20);
             this.FinalWordLabelP2.TabIndex = 49;
             this.FinalWordLabelP2.Text = "Player 2\'s Final Word List";
             // 
-            // RegisterBox
+            // RegisterButton
             // 
-            this.RegisterBox.Location = new System.Drawing.Point(923, 50);
-            this.RegisterBox.Name = "RegisterBox";
-            this.RegisterBox.Size = new System.Drawing.Size(164, 58);
-            this.RegisterBox.TabIndex = 50;
-            this.RegisterBox.Text = "Register User";
-            this.RegisterBox.UseVisualStyleBackColor = true;
+            this.RegisterButton.Location = new System.Drawing.Point(274, 114);
+            this.RegisterButton.Name = "RegisterButton";
+            this.RegisterButton.Size = new System.Drawing.Size(723, 37);
+            this.RegisterButton.TabIndex = 50;
+            this.RegisterButton.Text = "Register User";
+            this.RegisterButton.UseVisualStyleBackColor = true;
+            this.RegisterButton.Click += new System.EventHandler(this.RegisterBox_Click);
             // 
             // TimeLabel
             // 
             this.TimeLabel.AutoSize = true;
-            this.TimeLabel.Location = new System.Drawing.Point(833, 207);
+            this.TimeLabel.Location = new System.Drawing.Point(184, 157);
             this.TimeLabel.Name = "TimeLabel";
             this.TimeLabel.Size = new System.Drawing.Size(84, 20);
             this.TimeLabel.TabIndex = 51;
@@ -424,19 +417,39 @@
             // 
             // TimeBox
             // 
-            this.TimeBox.Location = new System.Drawing.Point(923, 207);
+            this.TimeBox.Location = new System.Drawing.Point(274, 157);
             this.TimeBox.Name = "TimeBox";
-            this.TimeBox.Size = new System.Drawing.Size(139, 26);
+            this.TimeBox.Size = new System.Drawing.Size(723, 26);
             this.TimeBox.TabIndex = 52;
+            // 
+            // TimeRemainingBox
+            // 
+            this.TimeRemainingBox.Location = new System.Drawing.Point(557, 657);
+            this.TimeRemainingBox.Name = "TimeRemainingBox";
+            this.TimeRemainingBox.ReadOnly = true;
+            this.TimeRemainingBox.Size = new System.Drawing.Size(161, 96);
+            this.TimeRemainingBox.TabIndex = 53;
+            this.TimeRemainingBox.Text = "";
+            // 
+            // RemainingLabel
+            // 
+            this.RemainingLabel.AutoSize = true;
+            this.RemainingLabel.Location = new System.Drawing.Point(576, 634);
+            this.RemainingLabel.Name = "RemainingLabel";
+            this.RemainingLabel.Size = new System.Drawing.Size(127, 20);
+            this.RemainingLabel.TabIndex = 54;
+            this.RemainingLabel.Text = "Time Remaining:";
             // 
             // BoggleClient
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1325, 938);
+            this.Controls.Add(this.RemainingLabel);
+            this.Controls.Add(this.TimeRemainingBox);
             this.Controls.Add(this.TimeBox);
             this.Controls.Add(this.TimeLabel);
-            this.Controls.Add(this.RegisterBox);
+            this.Controls.Add(this.RegisterButton);
             this.Controls.Add(this.FinalWordLabelP2);
             this.Controls.Add(this.FinalWordBoxP2);
             this.Controls.Add(this.Letter16);
@@ -455,10 +468,9 @@
             this.Controls.Add(this.Letter3);
             this.Controls.Add(this.Letter2);
             this.Controls.Add(this.Letter1);
-            this.Controls.Add(this.CancelButton);
+            this.Controls.Add(this.QuitGameButton);
             this.Controls.Add(this.WordListLabelPlayer1);
             this.Controls.Add(this.FinalWordBoxP1);
-            this.Controls.Add(this.LetterLabel);
             this.Controls.Add(this.Player2ScoreBox);
             this.Controls.Add(this.Player1ScoreBox);
             this.Controls.Add(this.label5);
@@ -494,13 +506,12 @@
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.TextBox Player1ScoreBox;
         private System.Windows.Forms.TextBox Player2ScoreBox;
-        private System.Windows.Forms.Label LetterLabel;
         private System.Windows.Forms.MenuStrip menuStrip1;
         private System.Windows.Forms.ToolStripMenuItem helpToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem instructionsToolStripMenuItem;
         private System.Windows.Forms.RichTextBox FinalWordBoxP1;
         private System.Windows.Forms.Label WordListLabelPlayer1;
-        private System.Windows.Forms.Button CancelButton;
+        private System.Windows.Forms.Button QuitGameButton;
         private System.Windows.Forms.RichTextBox Letter1;
         private System.Windows.Forms.RichTextBox Letter2;
         private System.Windows.Forms.RichTextBox Letter3;
@@ -519,9 +530,11 @@
         private System.Windows.Forms.RichTextBox Letter16;
         private System.Windows.Forms.RichTextBox FinalWordBoxP2;
         private System.Windows.Forms.Label FinalWordLabelP2;
-        private System.Windows.Forms.Button RegisterBox;
+        private System.Windows.Forms.Button RegisterButton;
         private System.Windows.Forms.Label TimeLabel;
         private System.Windows.Forms.TextBox TimeBox;
+        private System.Windows.Forms.RichTextBox TimeRemainingBox;
+        private System.Windows.Forms.Label RemainingLabel;
     }
 }
 

@@ -14,7 +14,12 @@ namespace PS8
     {
         private IAnalysisView window;
 
+        private string ServerName;
+        private System.Windows.Forms.Timer timer;
 
+        private string Player1ID;
+        private string Player2ID;
+        private string GameID;
 
 
         /// <summary>
@@ -26,35 +31,40 @@ namespace PS8
         public Controller(IAnalysisView window)
         {
             this.window = window;
-
+            ServerName = "http://cs3500-boggle-s17.azurewebsites.net/BoggleService.svc/";
+            Player1ID = "Player1";
+            Player2ID = "Player2";
 
             window.GameStart += StartMatch;
+            window.Register += RegisterUser;
             window.CancelGame += Cancel;
             window.WordEntered += NewWord;
+            
+            
+
 
         }
 
         /// <summary>
-        /// Creates an HttpClient for communicating with GitHub.  The GitHub API requires specific information
-        /// to appear in each request header.
+        /// Creates an HttpClient for communicating with the boggle server.
         /// </summary>
-        public static HttpClient CreateClient()
+        public static HttpClient CreateClient(string server)
         {
             // Create a client whose base address is the GitHub server
             HttpClient client = new HttpClient();
-            client.BaseAddress = new Uri("http://cs3500-boggle-s17.azurewebsites.net/BoggleService.svc/");
+            client.BaseAddress = new Uri(server);
 
             // Tell the server that the client will accept this particular type of response data
             client.DefaultRequestHeaders.Accept.Clear();
-            client.DefaultRequestHeaders.Add("Accept", "application/vnd.github.v3+json");
+            client.DefaultRequestHeaders.Add("Accept", "application/json");
 
             // This is an authorization token that you can create by logging in to your GitHub account.
-            client.DefaultRequestHeaders.Add("Authorization", "token " + TOKEN);
+            //client.DefaultRequestHeaders.Add("Authorization", "token " + TOKEN);
 
             // When an http request is made from a browser, the user agent describes the browser.
             // Github requires the email address of the authenticated user.
-            client.DefaultRequestHeaders.UserAgent.Clear();
-            client.DefaultRequestHeaders.Add("User-Agent", Uri.EscapeDataString(EMAIL));
+            //client.DefaultRequestHeaders.UserAgent.Clear();
+            //client.DefaultRequestHeaders.Add("User-Agent", Uri.EscapeDataString(EMAIL));
 
             // There is more client configuration to do, depending on the request.
             return client;
@@ -70,48 +80,111 @@ namespace PS8
         }
 
         /// <summary>
+        /// Starts a timer for a game.
+        /// </summary>
+        private void RunTimer()
+        {
+            //Starts a timer for checking the game.
+            timer = new System.Windows.Forms.Timer();
+            timer.Interval = 1000;
+            timer.Tick += WaitingForGame;
+            timer.Start();
+        }
+
+        /// <summary>
+        /// Pings server looking for current status of the game.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void WaitingForGame(object sender, EventArgs e)
+        {
+            
+            using (HttpClient client = CreateClient(ServerName))
+            {
+                dynamic data = new ExpandoObject();
+
+
+
+            }
+
+
+        }
+        
+
+
+
+        /// <summary>
         /// Starts a new match.
         /// </summary>
         /// <param name="server"></param>
         /// <param name="player"></param>
         private void StartMatch(string player, int time)
         {
-            using(HttpClient client = CreateClient())
+            
+            using(HttpClient client = CreateClient(ServerName))
             {
-                // An ExpandoObject is one to which in which we can set arbitrary properties.
-                // To create a new public repository, we must send a request parameter which
-                // is a JSON object with various properties of the new repo expressed as
-                // properties.
+                
                 dynamic data = new ExpandoObject();
-                data.name = "TestRepo";
-                data.description = "A test repository for CS 3500";
-                data.has_issues = false;
-
-                //List<dynamic> list = new List<dynamic>();
-                //list.Add(data);
-                //JsonConvert.SerializeObject(list);
-
+                data.UserToken = Player1ID;
+                data.TimeLimit = time;
+                
                 // To send a POST request, we must include the serialized parameter object
                 // in the body of the request.
                 StringContent content = new StringContent(JsonConvert.SerializeObject(data), Encoding.UTF8, "application/json");
-                HttpResponseMessage response = client.PostAsync("/user/repos", content).Result;
+                HttpResponseMessage response = client.PostAsync("games", content).Result;
+               
+                
 
                 if (response.IsSuccessStatusCode)
                 {
+                    RunTimer();
+
+
                     // The deserialized response value is an object that describes the new repository.
                     String result = response.Content.ReadAsStringAsync().Result;
                     dynamic newRepo = JsonConvert.DeserializeObject(result);
-                    Console.WriteLine("New repository: ");
-                    Console.WriteLine(newRepo);
+                    GameID = newRepo.GameID;
+
                 }
                 else
                 {
-                    Console.WriteLine("Error creating repo: " + response.StatusCode);
-                    Console.WriteLine(response.ReasonPhrase);
+                    
                 }
             }
 
         }
+
+        /// <summary>
+        /// Registers a new User with the server.
+        /// </summary>
+        /// <param name="username"></param>
+        private void RegisterUser(string username, string server)
+        {
+            ServerName = server;
+
+            using(HttpClient client = CreateClient(ServerName))
+            {
+                dynamic data = new ExpandoObject();
+                data.Nickname = username;
+
+                tokenSource = new CancellationTokenSource();
+                StringContent content = new StringContent(JsonConvert.SerializeObject(data), Encoding.UTF8, "application/json");
+                HttpResponseMessage response = client.PostAsync("users", content).Result;
+
+                if (response.IsSuccessStatusCode)
+                {
+                    String result = response.Content.ReadAsStringAsync().Result;
+                    dynamic newRepo = JsonConvert.DeserializeObject<ExpandoObject>(result);
+                    Player1ID = newRepo.UserToken;
+                }
+                else
+                {
+                    //ERRORS GO HERE
+                }
+            }
+
+        }
+
 
         /// <summary>
         /// Tells the server that a new word was entered. Updates score and wordlist in view if successful.
