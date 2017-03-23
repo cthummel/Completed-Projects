@@ -16,7 +16,6 @@ namespace PS8
             BoggleClient window = new BoggleClient();
             new Controller(window);
             Application.Run(window);
-            
         }
     }
 }
