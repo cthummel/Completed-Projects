@@ -36,7 +36,7 @@
             this.WordEnterBox = new System.Windows.Forms.TextBox();
             this.label3 = new System.Windows.Forms.Label();
             this.Player1ScoreLabel = new System.Windows.Forms.Label();
-            this.label5 = new System.Windows.Forms.Label();
+            this.Player2ScoreLabel = new System.Windows.Forms.Label();
             this.Player1ScoreBox = new System.Windows.Forms.TextBox();
             this.Player2ScoreBox = new System.Windows.Forms.TextBox();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
@@ -139,14 +139,14 @@
             this.Player1ScoreLabel.TabIndex = 23;
             this.Player1ScoreLabel.Text = "Your Score:";
             // 
-            // label5
+            // Player2ScoreLabel
             // 
-            this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(837, 424);
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(115, 20);
-            this.label5.TabIndex = 24;
-            this.label5.Text = "Player 2 Score:";
+            this.Player2ScoreLabel.AutoSize = true;
+            this.Player2ScoreLabel.Location = new System.Drawing.Point(837, 424);
+            this.Player2ScoreLabel.Name = "Player2ScoreLabel";
+            this.Player2ScoreLabel.Size = new System.Drawing.Size(115, 20);
+            this.Player2ScoreLabel.TabIndex = 24;
+            this.Player2ScoreLabel.Text = "Player 2 Score:";
             // 
             // Player1ScoreBox
             // 
@@ -473,7 +473,7 @@
             this.Controls.Add(this.FinalWordBoxP1);
             this.Controls.Add(this.Player2ScoreBox);
             this.Controls.Add(this.Player1ScoreBox);
-            this.Controls.Add(this.label5);
+            this.Controls.Add(this.Player2ScoreLabel);
             this.Controls.Add(this.Player1ScoreLabel);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.WordEnterBox);
@@ -503,7 +503,7 @@
         private System.Windows.Forms.TextBox WordEnterBox;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label Player1ScoreLabel;
-        private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.Label Player2ScoreLabel;
         private System.Windows.Forms.TextBox Player1ScoreBox;
         private System.Windows.Forms.TextBox Player2ScoreBox;
         private System.Windows.Forms.MenuStrip menuStrip1;

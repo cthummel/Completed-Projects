@@ -15,6 +15,9 @@ namespace PS8
         private IAnalysisView window;
 
         private string ServerName;
+        private string UserName;
+        
+
         private System.Windows.Forms.Timer timer;
 
         private string Player1ID;
@@ -46,7 +49,7 @@ namespace PS8
 
             window.GameStart += StartMatch;
             window.Register += RegisterUser;
-            window.CancelGame += Cancel;
+            window.CancelGame += QuitGame;
             window.WordEntered += NewWord;
             timer.Tick += WaitingForGame;
 
@@ -72,11 +75,13 @@ namespace PS8
 
 
         /// <summary>
-        /// Cancels the current operation (currently unimplemented)
+        /// Cancels the current game.
         /// </summary>
-        private void Cancel()
+        private void QuitGame()
         {
             tokenSource.Cancel();
+            timer.Stop();
+            window.GameOver();
         }
 
         /// <summary>
@@ -138,6 +143,8 @@ namespace PS8
                     if((string)GameData.GameState == "completed")
                     {
 
+
+                        QuitGame();
                     }
                 }
             }
@@ -186,16 +193,23 @@ namespace PS8
                         //Pull data out.
                         if ((string)GetData.GameState != "pending")
                         {
+                            
+                            
                             int ScoreP1 = GetData.Player1.Score;
-                            Player2ID = GetData.Player2.Nickname;
                             int ScoreP2 = GetData.Player2.Score;
                             int timeleft = GetData.TimeLeft;
+                            Player1ID = GetData.Player1.Nickname;
+                            Player2ID = GetData.Player2.Nickname;
+
+
 
                             //Compile for view update
-                            string[] UpdateParameters = new string[3];
+                            string[] UpdateParameters = new string[5];
                             UpdateParameters[0] = timeleft.ToString();
                             UpdateParameters[1] = ScoreP1.ToString();
                             UpdateParameters[2] = ScoreP2.ToString();
+                            UpdateParameters[3] = Player1ID.ToString();
+                            UpdateParameters[4] = Player2ID.ToString();
 
                             //Update view.
                             window.SetLetters((string)GetData.Board);
@@ -229,6 +243,7 @@ namespace PS8
         private void RegisterUser(string username, string server)
         {
             ServerName = server;
+            UserName = username;
 
             using(HttpClient client = CreateClient(ServerName))
             {

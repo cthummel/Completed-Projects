@@ -105,7 +105,21 @@ namespace PS8
             TimeRemainingBox.Text = parameters[0];
             Player1ScoreBox.Text = parameters[1];
             Player2ScoreBox.Text = parameters[2];
+
+            if (parameters.Length > 3)
+            {
+                Player1ScoreLabel.Text = parameters[3];
+                Player2ScoreLabel.Text = parameters[4];
+            }
+            
             //FinalWordBoxP1.Text = parameters[3];
+        }
+
+        public void GameOver()
+        {
+            RegisterButton.Enabled = true;
+            StartButton.Enabled = true;
+            QuitGameButton.Enabled = false;
         }
 
 

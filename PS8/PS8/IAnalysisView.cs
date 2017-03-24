@@ -16,5 +16,7 @@ namespace PS8
         void SetLetters(string letters);
 
         void Update(string[] parameters);
+
+        void GameOver();
     }
 }
