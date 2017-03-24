@@ -19,6 +19,8 @@ namespace PS8
 
         private string Player1ID;
         private string Player2ID;
+        private int Player1Score;
+        private int Player2Score;
         private string GameID;
 
 
@@ -27,17 +29,25 @@ namespace PS8
         /// </summary>
         private CancellationTokenSource tokenSource;
 
+
         public Controller(IAnalysisView window)
         {
             this.window = window;
             ServerName = "http://cs3500-boggle-s17.azurewebsites.net/BoggleService.svc/";
             Player1ID = "Player1";
             Player2ID = "Player2";
+            Player1Score = 0;
+            Player2Score = 0;
+
+            tokenSource = new CancellationTokenSource();
 
             window.GameStart += StartMatch;
             window.Register += RegisterUser;
             window.CancelGame += Cancel;
             window.WordEntered += NewWord;
+       
+
+
         }
 
         /// <summary>
@@ -92,7 +102,8 @@ namespace PS8
         /// <param name="sender"></param>
         /// <param name="e"></param>
         private void WaitingForGame(object sender, EventArgs e)
-        {  
+        {
+            
             using (HttpClient client = CreateClient(ServerName))
             {
                 dynamic data = new ExpandoObject();
@@ -112,12 +123,12 @@ namespace PS8
                     {
 
                     }
-
                 }
             }
-
         }
         
+
+
 
         /// <summary>
         /// Starts a new match.
@@ -126,8 +137,10 @@ namespace PS8
         /// <param name="player"></param>
         private void StartMatch(string player, int time)
         {
+            
             using(HttpClient client = CreateClient(ServerName))
             {
+                
                 dynamic data = new ExpandoObject();
                 data.UserToken = Player1ID;
                 data.TimeLimit = time;
@@ -147,14 +160,13 @@ namespace PS8
                     dynamic newRepo = JsonConvert.DeserializeObject(result);
                     GameID = newRepo.GameID;
 
-
                     //Now we need to update the view with the game information.
-                    HttpResponseMessage response2 = client.GetAsync("games/{GameID}").Result;
+                    HttpResponseMessage response2 = client.GetAsync(String.Format("games/{0}", GameID)).Result;
 
                     if (response2.IsSuccessStatusCode)
                     {
-                        String Getresult = response.Content.ReadAsStringAsync().Result;
-                        dynamic GetData = JsonConvert.DeserializeObject(result);
+                        String Getresult = response2.Content.ReadAsStringAsync().Result;
+                        dynamic GetData = JsonConvert.DeserializeObject(Getresult);
 
                         //Pull data out.
                         int ScoreP1 = GetData.Player1.Score;
@@ -169,14 +181,21 @@ namespace PS8
                         UpdateParameters[2] = ScoreP2.ToString();
 
                         //Update view.
-                        window.SetLetters(GetData.Board);
+                        window.SetLetters((string)GetData.Board);
                         window.Update(UpdateParameters);
+
+
                     }
+
+
+
                 }
                 else
                 {
                     
                 }
+
+                
 
             }
         }
@@ -212,13 +231,36 @@ namespace PS8
 
         }
 
+
         /// <summary>
         /// Tells the server that a new word was entered. Updates score and wordlist in view if successful.
         /// </summary>
         /// <param name="word"></param>
         private void NewWord(string word)
         {
+            using (HttpClient client = CreateClient(ServerName))
+            {
+                dynamic data = new ExpandoObject();
+                data.UserToken = Player1ID;
+                data.Word = word;
 
+                
+                StringContent content = new StringContent(JsonConvert.SerializeObject(data), Encoding.UTF8, "application/json");
+                HttpResponseMessage response = client.PutAsync(String.Format("games/{0}", GameID), content, tokenSource.Token).Result;
+
+                if (response.IsSuccessStatusCode)
+                {
+                    String result = response.Content.ReadAsStringAsync().Result;
+                    dynamic newRepo = JsonConvert.DeserializeObject<ExpandoObject>(result);
+                    Player1Score += newRepo.Score;
+                }
+
+
+            }
         }
+
+        
+
+
     }
 }
