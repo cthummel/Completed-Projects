@@ -86,6 +86,11 @@ namespace PS8
                 if (c.Name.StartsWith("Letter") && int.TryParse(c.Name.Substring(6), out index))
                 {
                     c.Text = letters[index].ToString();
+
+                    if (c.Text == "Q")
+                    {
+                        c.Text = "QU";
+                    }
                 }
             }
         }
