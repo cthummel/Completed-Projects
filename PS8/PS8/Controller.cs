@@ -22,6 +22,7 @@ namespace PS8
         private int Player1Score;
         private int Player2Score;
         private string GameID;
+        private bool FirstUpdate;
 
 
         /// <summary>
@@ -38,6 +39,8 @@ namespace PS8
             Player2ID = "Player2";
             Player1Score = 0;
             Player2Score = 0;
+            FirstUpdate = true;
+            timer = new System.Windows.Forms.Timer();
 
             tokenSource = new CancellationTokenSource();
 
@@ -45,7 +48,8 @@ namespace PS8
             window.Register += RegisterUser;
             window.CancelGame += Cancel;
             window.WordEntered += NewWord;
-       
+            timer.Tick += WaitingForGame;
+
 
 
         }
@@ -63,15 +67,6 @@ namespace PS8
             client.DefaultRequestHeaders.Accept.Clear();
             client.DefaultRequestHeaders.Add("Accept", "application/json");
 
-            // This is an authorization token that you can create by logging in to your GitHub account.
-            //client.DefaultRequestHeaders.Add("Authorization", "token " + TOKEN);
-
-            // When an http request is made from a browser, the user agent describes the browser.
-            // Github requires the email address of the authenticated user.
-            //client.DefaultRequestHeaders.UserAgent.Clear();
-            //client.DefaultRequestHeaders.Add("User-Agent", Uri.EscapeDataString(EMAIL));
-
-            // There is more client configuration to do, depending on the request.
             return client;
         }
 
@@ -109,17 +104,38 @@ namespace PS8
                 dynamic data = new ExpandoObject();
 
 
-                HttpResponseMessage response = client.GetAsync("games/{GameID}").Result;
+                HttpResponseMessage response = client.GetAsync(String.Format("games/{0}", GameID)).Result;
 
                 if (response.IsSuccessStatusCode)
                 {
                     String result = response.Content.ReadAsStringAsync().Result;
                     dynamic GameData = JsonConvert.DeserializeObject(result);
-                    int timeleft = GameData.TimeLeft;
+
+                    if ((string)GameData.GameState == "active")
+                    {
+                        if (FirstUpdate == true)
+                        {
+                            window.SetLetters((string)GameData.Board);
+                            FirstUpdate = false;
+                        }
+
+                        int timeleft = GameData.TimeLeft;
+                        int ScoreP1 = GameData.Player1.Score;
+                        int ScoreP2 = GameData.Player2.Score;
+
+                        string[] UpdateParameters = new string[3];
+                        UpdateParameters[0] = timeleft.ToString();
+                        UpdateParameters[1] = ScoreP1.ToString();
+                        UpdateParameters[2] = ScoreP2.ToString();
+
+                        window.Update(UpdateParameters);
+
+                    }
+                    
 
 
                     //Display final word lists if the game is over.
-                    if(GameData.GameState == "completed")
+                    if((string)GameData.GameState == "completed")
                     {
 
                     }
@@ -152,8 +168,7 @@ namespace PS8
 
                 if (response.IsSuccessStatusCode)
                 {
-                    //Starts our internal timer for pinging server.
-                    RunTimer();
+                    
 
                     // The deserialized response value is an object that describes the new repository.
                     String result = response.Content.ReadAsStringAsync().Result;
@@ -169,23 +184,30 @@ namespace PS8
                         dynamic GetData = JsonConvert.DeserializeObject(Getresult);
 
                         //Pull data out.
-                        int ScoreP1 = GetData.Player1.Score;
-                        Player2ID = GetData.Player2.Nickname;
-                        int ScoreP2 = GetData.Player2.Score;
-                        int timeleft = GetData.TimeLeft;
+                        if ((string)GetData.GameState != "pending")
+                        {
+                            int ScoreP1 = GetData.Player1.Score;
+                            Player2ID = GetData.Player2.Nickname;
+                            int ScoreP2 = GetData.Player2.Score;
+                            int timeleft = GetData.TimeLeft;
 
-                        //Compile for view update
-                        string[] UpdateParameters = new string[3];
-                        UpdateParameters[0] = timeleft.ToString();
-                        UpdateParameters[1] = ScoreP1.ToString();
-                        UpdateParameters[2] = ScoreP2.ToString();
+                            //Compile for view update
+                            string[] UpdateParameters = new string[3];
+                            UpdateParameters[0] = timeleft.ToString();
+                            UpdateParameters[1] = ScoreP1.ToString();
+                            UpdateParameters[2] = ScoreP2.ToString();
 
-                        //Update view.
-                        window.SetLetters((string)GetData.Board);
-                        window.Update(UpdateParameters);
+                            //Update view.
+                            window.SetLetters((string)GetData.Board);
+                            window.Update(UpdateParameters);
+                        }
+                       
 
 
                     }
+
+                    //Starts our internal timer for pinging server.
+                    RunTimer();
 
 
 
@@ -246,7 +268,7 @@ namespace PS8
 
                 
                 StringContent content = new StringContent(JsonConvert.SerializeObject(data), Encoding.UTF8, "application/json");
-                HttpResponseMessage response = client.PutAsync(String.Format("games/{0}", GameID), content, tokenSource.Token).Result;
+                HttpResponseMessage response = client.PutAsync(String.Format("games/{0}", GameID), content).Result;
 
                 if (response.IsSuccessStatusCode)
                 {

@@ -69,8 +69,12 @@ namespace PS8
         private void WordEnterBox_KeyPress(object sender, KeyEventArgs e)
         {
             //Tells Controller about a new word that was entered.
-            string word = WordEnterBox.Text;
-            WordEntered?.Invoke(word);
+            if (e.KeyCode == Keys.Enter)
+            {
+                WordEntered?.Invoke(WordEnterBox.Text);
+                WordEnterBox.Text = string.Empty;
+            }
+                
             
         }
 
@@ -89,6 +93,7 @@ namespace PS8
 
                     if (c.Text == "Q")
                     {
+                        
                         c.Text = "QU";
                     }
                 }
