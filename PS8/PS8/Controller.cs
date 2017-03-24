@@ -27,7 +27,6 @@ namespace PS8
         /// </summary>
         private CancellationTokenSource tokenSource;
 
-
         public Controller(IAnalysisView window)
         {
             this.window = window;
@@ -39,9 +38,6 @@ namespace PS8
             window.Register += RegisterUser;
             window.CancelGame += Cancel;
             window.WordEntered += NewWord;
-       
-
-
         }
 
         /// <summary>
@@ -96,8 +92,7 @@ namespace PS8
         /// <param name="sender"></param>
         /// <param name="e"></param>
         private void WaitingForGame(object sender, EventArgs e)
-        {
-            
+        {  
             using (HttpClient client = CreateClient(ServerName))
             {
                 dynamic data = new ExpandoObject();
@@ -119,15 +114,10 @@ namespace PS8
                     }
 
                 }
-
-
             }
-
 
         }
         
-
-
 
         /// <summary>
         /// Starts a new match.
@@ -136,10 +126,8 @@ namespace PS8
         /// <param name="player"></param>
         private void StartMatch(string player, int time)
         {
-            
             using(HttpClient client = CreateClient(ServerName))
             {
-                
                 dynamic data = new ExpandoObject();
                 data.UserToken = Player1ID;
                 data.TimeLimit = time;
@@ -183,21 +171,14 @@ namespace PS8
                         //Update view.
                         window.SetLetters(GetData.Board);
                         window.Update(UpdateParameters);
-
-
                     }
-
-
                 }
                 else
                 {
                     
                 }
-                
-
 
             }
-
         }
 
         /// <summary>
@@ -231,7 +212,6 @@ namespace PS8
 
         }
 
-
         /// <summary>
         /// Tells the server that a new word was entered. Updates score and wordlist in view if successful.
         /// </summary>
@@ -240,9 +220,5 @@ namespace PS8
         {
 
         }
-
-        
-
-
     }
 }
