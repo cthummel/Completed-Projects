@@ -38,9 +38,7 @@ namespace PS8
             Player2Score = 0;
             FirstUpdate = true;
             timer = new System.Windows.Forms.Timer();
-
             tokenSource = new CancellationTokenSource();
-
             window.GameStart += StartMatch;
             window.Register += RegisterUser;
             window.CancelGame += QuitGame;
@@ -96,7 +94,6 @@ namespace PS8
             using (HttpClient client = CreateClient(ServerName))
             {
                 dynamic data = new ExpandoObject();
-
                 HttpResponseMessage response = client.GetAsync(String.Format("games/{0}", GameID)).Result;
 
                 if (response.IsSuccessStatusCode)
@@ -115,7 +112,7 @@ namespace PS8
                         int timeleft = GameData.TimeLeft;
                         int ScoreP1 = GameData.Player1.Score;
                         int ScoreP2 = GameData.Player2.Score;
- 
+
                         string[] UpdateParameters = new string[3];
                         UpdateParameters[0] = timeleft.ToString();
                         UpdateParameters[1] = ScoreP1.ToString();
@@ -123,7 +120,6 @@ namespace PS8
 
                         window.Update(UpdateParameters);
                     }
-                    
                     //Display final word lists if the game is over.
                     if((string)GameData.GameState == "completed")
                     {
@@ -168,7 +164,7 @@ namespace PS8
 
                         //Pull data out.
                         if ((string)GetData.GameState != "pending")
-                        { 
+                        {
                             int ScoreP1 = GetData.Player1.Score;
                             int ScoreP2 = GetData.Player2.Score;
                             int timeleft = GetData.TimeLeft;
@@ -188,8 +184,7 @@ namespace PS8
                             window.Update(UpdateParameters);
                         }
                     }
-
-                    //Starts our internal timer for pinging server.
+                    // Starts our internal timer for pinging server.
                     RunTimer();
                 }
                 else
@@ -228,8 +223,8 @@ namespace PS8
                     //ERRORS GO HERE
                 }
             }
-        }
 
+        }
 
         /// <summary>
         /// Tells the server that a new word was entered. Updates score and wordlist in view if successful.
@@ -252,7 +247,6 @@ namespace PS8
                     dynamic newRepo = JsonConvert.DeserializeObject<ExpandoObject>(result);
                     Player1Score += newRepo.Score;
                 }
-
             }
         }
     }
