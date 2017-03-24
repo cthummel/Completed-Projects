@@ -13,13 +13,9 @@ namespace PS8
     public class Controller
     {
         private IAnalysisView window;
-
         private string ServerName;
         private string UserName;
-        
-
         private System.Windows.Forms.Timer timer;
-
         private string Player1ID;
         private string Player2ID;
         private int Player1Score;
@@ -27,12 +23,10 @@ namespace PS8
         private string GameID;
         private bool FirstUpdate;
 
-
         /// <summary>
         /// For canceling the current operation
         /// </summary>
         private CancellationTokenSource tokenSource;
-
 
         public Controller(IAnalysisView window)
         {
@@ -52,9 +46,6 @@ namespace PS8
             window.CancelGame += QuitGame;
             window.WordEntered += NewWord;
             timer.Tick += WaitingForGame;
-
-
-
         }
 
         /// <summary>
@@ -72,7 +63,6 @@ namespace PS8
 
             return client;
         }
-
 
         /// <summary>
         /// Cancels the current game.
@@ -103,11 +93,9 @@ namespace PS8
         /// <param name="e"></param>
         private void WaitingForGame(object sender, EventArgs e)
         {
-            
             using (HttpClient client = CreateClient(ServerName))
             {
                 dynamic data = new ExpandoObject();
-
 
                 HttpResponseMessage response = client.GetAsync(String.Format("games/{0}", GameID)).Result;
 
@@ -127,32 +115,24 @@ namespace PS8
                         int timeleft = GameData.TimeLeft;
                         int ScoreP1 = GameData.Player1.Score;
                         int ScoreP2 = GameData.Player2.Score;
-
+ 
                         string[] UpdateParameters = new string[3];
                         UpdateParameters[0] = timeleft.ToString();
                         UpdateParameters[1] = ScoreP1.ToString();
                         UpdateParameters[2] = ScoreP2.ToString();
 
                         window.Update(UpdateParameters);
-
                     }
                     
-
-
                     //Display final word lists if the game is over.
                     if((string)GameData.GameState == "completed")
                     {
-
-
                         QuitGame();
                     }
                 }
             }
         }
         
-
-
-
         /// <summary>
         /// Starts a new match.
         /// </summary>
@@ -160,10 +140,8 @@ namespace PS8
         /// <param name="player"></param>
         private void StartMatch(string player, int time)
         {
-            
             using(HttpClient client = CreateClient(ServerName))
             {
-                
                 dynamic data = new ExpandoObject();
                 data.UserToken = Player1ID;
                 data.TimeLimit = time;
@@ -175,8 +153,6 @@ namespace PS8
 
                 if (response.IsSuccessStatusCode)
                 {
-                    
-
                     // The deserialized response value is an object that describes the new repository.
                     String result = response.Content.ReadAsStringAsync().Result;
                     dynamic newRepo = JsonConvert.DeserializeObject(result);
@@ -192,16 +168,12 @@ namespace PS8
 
                         //Pull data out.
                         if ((string)GetData.GameState != "pending")
-                        {
-                            
-                            
+                        { 
                             int ScoreP1 = GetData.Player1.Score;
                             int ScoreP2 = GetData.Player2.Score;
                             int timeleft = GetData.TimeLeft;
                             Player1ID = GetData.Player1.Nickname;
                             Player2ID = GetData.Player2.Nickname;
-
-
 
                             //Compile for view update
                             string[] UpdateParameters = new string[5];
@@ -215,24 +187,15 @@ namespace PS8
                             window.SetLetters((string)GetData.Board);
                             window.Update(UpdateParameters);
                         }
-                       
-
-
                     }
 
                     //Starts our internal timer for pinging server.
                     RunTimer();
-
-
-
                 }
                 else
                 {
                     
                 }
-
-                
-
             }
         }
 
@@ -265,7 +228,6 @@ namespace PS8
                     //ERRORS GO HERE
                 }
             }
-
         }
 
 
@@ -281,7 +243,6 @@ namespace PS8
                 data.UserToken = Player1ID;
                 data.Word = word;
 
-                
                 StringContent content = new StringContent(JsonConvert.SerializeObject(data), Encoding.UTF8, "application/json");
                 HttpResponseMessage response = client.PutAsync(String.Format("games/{0}", GameID), content).Result;
 
@@ -291,6 +252,7 @@ namespace PS8
                     dynamic newRepo = JsonConvert.DeserializeObject<ExpandoObject>(result);
                     Player1Score += newRepo.Score;
                 }
+
             }
         }
     }
