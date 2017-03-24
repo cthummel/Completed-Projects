@@ -1,11 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace PS8
@@ -44,6 +38,20 @@ namespace PS8
             //string server = ServerBox.Text;
             string player = UsernameBox.Text;
             int time = Int32.Parse(TimeBox.Text);
+
+            //Empty out any boxes that have left over text in them.
+            FinalWordBoxP1.Text = string.Empty;
+            FinalWordBoxP2.Text = string.Empty;
+            TimeRemainingBox.Text = string.Empty;
+            Player1ScoreBox.Text = string.Empty;
+            Player2ScoreBox.Text = string.Empty;
+            foreach (Control c in Controls)
+            {
+                if (c.Name.StartsWith("Letter"))
+                {
+                    c.Text = string.Empty;
+                }
+            }
 
             //Locks down controls until cancel or game is complete.
             ServerBox.ReadOnly = true;
@@ -115,18 +123,67 @@ namespace PS8
             //FinalWordBoxP1.Text = parameters[3];
         }
 
+        public void FinalWords(Dictionary<string, List<string>> FinalWords, string Player1Nickname, string Player2Nickname)
+        {
+            var TempList = new List<string>();
+            
+
+            //Set final words box for player 1.
+            if (FinalWords.TryGetValue(Player1Nickname, out TempList))
+            {
+                foreach(string s in TempList)
+                {
+                    if (FinalWordBoxP1.Text == string.Empty)
+                    {
+                        FinalWordBoxP1.AppendText(s);
+                    }
+                    else
+                    {
+                        FinalWordBoxP1.AppendText(Environment.NewLine + s);
+                    }
+                    
+                }
+            }
+
+            //Set final words box for player 2.
+            if (FinalWords.TryGetValue(Player2Nickname, out TempList))
+            {
+                foreach (string s in TempList)
+                {
+                    if (FinalWordBoxP2.Text == string.Empty)
+                    {
+                        FinalWordBoxP2.AppendText(s);
+                    }
+                    else
+                    {
+                        FinalWordBoxP2.AppendText(Environment.NewLine + s);
+                    }
+                }
+            }
+        }
+
         public void GameOver()
         {
             RegisterButton.Enabled = true;
             StartButton.Enabled = true;
             QuitGameButton.Enabled = false;
+            TimeBox.ReadOnly = false;
+            ServerBox.ReadOnly = false;
+            UsernameBox.ReadOnly = false;
+
             TimeBox.Focus();
         }
 
 
+
+
         private void instructionsToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("");
+            MessageBox.Show("Enter a Boggle server name and username and then click Register to regester your name with the server." + Environment.NewLine +
+                "Then enter a time limit for the game between 5 and 250 seconds. Next click find match to find an opponent." + Environment.NewLine +
+                "Type words below and press enter to confirm. When the game is complete you will see the words and corresponding scores for both players." 
+                
+                );
         }
 
         /// <summary>

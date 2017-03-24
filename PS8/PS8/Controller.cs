@@ -16,6 +16,7 @@ namespace PS8
         private string ServerName;
         private string UserName;
         private System.Windows.Forms.Timer timer;
+        private string UserID;
         private string Player1ID;
         private string Player2ID;
         private int Player1Score;
@@ -32,7 +33,6 @@ namespace PS8
         {
             this.window = window;
             ServerName = "http://cs3500-boggle-s17.azurewebsites.net/BoggleService.svc/";
-            Player1ID = "Player1";
             Player2ID = "Player2";
             Player1Score = 0;
             Player2Score = 0;
@@ -120,9 +120,40 @@ namespace PS8
 
                         window.Update(UpdateParameters);
                     }
+
+
                     //Display final word lists if the game is over.
                     if((string)GameData.GameState == "completed")
                     {
+                        var WordsDictionary = new Dictionary<string, List<string>>();
+                        var Player1Words = new List<string>();
+                        var Player2Words = new List<string>();
+                        int timeleft = GameData.TimeLeft;
+                        int ScoreP1 = GameData.Player1.Score;
+                        int ScoreP2 = GameData.Player2.Score;
+
+                        string[] UpdateParameters = new string[3];
+                        UpdateParameters[0] = timeleft.ToString();
+                        UpdateParameters[1] = ScoreP1.ToString();
+                        UpdateParameters[2] = ScoreP2.ToString();
+
+                        foreach (dynamic s in GameData.Player1.WordsPlayed)
+                        {
+                            string word = s.Word;
+                            string score = s.Score;
+                            Player1Words.Add("Word: " + word + " Score: " + score);
+                        }
+                        foreach (dynamic s in GameData.Player2.WordsPlayed)
+                        {
+                            string word = s.Word;
+                            string score = s.Score;
+                            Player2Words.Add("Word: " + word + " Score: " + score);
+                        }
+
+                        WordsDictionary.Add((string)GameData.Player1.Nickname, Player1Words);
+                        WordsDictionary.Add((string)GameData.Player2.Nickname, Player2Words);
+                        window.FinalWords(WordsDictionary, (string)GameData.Player1.Nickname, (string)GameData.Player2.Nickname);
+
                         QuitGame();
                     }
                 }
@@ -136,10 +167,11 @@ namespace PS8
         /// <param name="player"></param>
         private void StartMatch(string player, int time)
         {
+            FirstUpdate = true;
             using(HttpClient client = CreateClient(ServerName))
             {
                 dynamic data = new ExpandoObject();
-                data.UserToken = Player1ID;
+                data.UserToken = UserID;
                 data.TimeLimit = time;
                 
                 // To send a POST request, we must include the serialized parameter object
@@ -216,7 +248,7 @@ namespace PS8
                 {
                     String result = response.Content.ReadAsStringAsync().Result;
                     dynamic newRepo = JsonConvert.DeserializeObject<ExpandoObject>(result);
-                    Player1ID = newRepo.UserToken;
+                    UserID = newRepo.UserToken;
                 }
                 else
                 {
@@ -235,7 +267,7 @@ namespace PS8
             using (HttpClient client = CreateClient(ServerName))
             {
                 dynamic data = new ExpandoObject();
-                data.UserToken = Player1ID;
+                data.UserToken = UserID;
                 data.Word = word;
 
                 StringContent content = new StringContent(JsonConvert.SerializeObject(data), Encoding.UTF8, "application/json");

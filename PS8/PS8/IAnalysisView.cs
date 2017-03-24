@@ -17,6 +17,8 @@ namespace PS8
 
         void Update(string[] parameters);
 
+        void FinalWords(Dictionary<string, List<string>> Words, string player1name, string player2name);
+
         void GameOver();
     }
 }
