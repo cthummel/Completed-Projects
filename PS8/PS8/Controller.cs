@@ -161,11 +161,11 @@ namespace PS8
                     GameID = newRepo.GameID;
 
                     //Now we need to update the view with the game information.
-                    HttpResponseMessage response2 = client.GetAsync("games/{GameID}").Result;
+                    HttpResponseMessage response2 = client.GetAsync(String.Format("games/{0}", GameID)).Result;
 
                     if (response2.IsSuccessStatusCode)
                     {
-                        String Getresult = response.Content.ReadAsStringAsync().Result;
+                        String Getresult = response2.Content.ReadAsStringAsync().Result;
                         dynamic GetData = JsonConvert.DeserializeObject(Getresult);
 
                         //Pull data out.
@@ -181,7 +181,7 @@ namespace PS8
                         UpdateParameters[2] = ScoreP2.ToString();
 
                         //Update view.
-                        window.SetLetters(GetData.Board);
+                        window.SetLetters((string)GetData.Board);
                         window.Update(UpdateParameters);
 
 
@@ -246,7 +246,7 @@ namespace PS8
 
                 
                 StringContent content = new StringContent(JsonConvert.SerializeObject(data), Encoding.UTF8, "application/json");
-                HttpResponseMessage response = client.PutAsync("games/{GameID}", content, tokenSource.Token).Result;
+                HttpResponseMessage response = client.PutAsync(String.Format("games/{0}", GameID), content, tokenSource.Token).Result;
 
                 if (response.IsSuccessStatusCode)
                 {
