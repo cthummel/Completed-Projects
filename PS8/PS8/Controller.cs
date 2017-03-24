@@ -45,8 +45,7 @@ namespace PS8
             window.Register += RegisterUser;
             window.CancelGame += Cancel;
             window.WordEntered += NewWord;
-            
-            
+       
 
 
         }
