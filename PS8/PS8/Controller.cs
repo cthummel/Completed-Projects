@@ -291,13 +291,7 @@ namespace PS8
                     dynamic newRepo = JsonConvert.DeserializeObject<ExpandoObject>(result);
                     Player1Score += newRepo.Score;
                 }
-
-
             }
         }
-
-        
-
-
     }
 }

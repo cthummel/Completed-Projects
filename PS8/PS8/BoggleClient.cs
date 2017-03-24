@@ -120,6 +120,7 @@ namespace PS8
             RegisterButton.Enabled = true;
             StartButton.Enabled = true;
             QuitGameButton.Enabled = false;
+            TimeBox.Focus();
         }
 
 
