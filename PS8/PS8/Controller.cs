@@ -44,6 +44,8 @@ namespace PS8
             window.CancelGame += QuitGame;
             window.WordEntered += NewWord;
             timer.Tick += WaitingForGame;
+            window.RegCancel += CancelRegistration;
+            window.JoinCancel += CancelJoinMatch;
         }
 
         /// <summary>
@@ -70,6 +72,19 @@ namespace PS8
             tokenSource.Cancel();
             timer.Stop();
             window.GameOver();
+        }
+
+        /// <summary>
+        /// Un-registers the previously registered user
+        /// </summary>
+        private void CancelRegistration()
+        {
+            tokenSource.Cancel();
+        }
+
+        private void CancelJoinMatch()
+        {
+            tokenSource.Cancel();
         }
 
         /// <summary>
@@ -120,7 +135,6 @@ namespace PS8
 
                         window.Update(UpdateParameters);
                     }
-
 
                     //Display final word lists if the game is over.
                     if((string)GameData.GameState == "completed")
@@ -219,10 +233,7 @@ namespace PS8
                     // Starts our internal timer for pinging server.
                     RunTimer();
                 }
-                else
-                {
-                    
-                }
+                // (removed empty else block here)
             }
         }
 
@@ -255,7 +266,6 @@ namespace PS8
                     //ERRORS GO HERE
                 }
             }
-
         }
 
         /// <summary>

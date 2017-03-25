@@ -7,13 +7,11 @@ namespace PS8
     public partial class BoggleClient : Form, IAnalysisView
     {
         public event Action<string, int> GameStart;
-
         public event Action<string,string> Register;
-
         public event Action CancelGame;
-
         public event Action<string> WordEntered;
-
+        public event Action RegCancel;
+        public event Action JoinCancel;
 
         public BoggleClient()
         {
@@ -26,9 +24,8 @@ namespace PS8
             StartButton.Enabled = false;
         }
 
-        
         /// <summary>
-        /// Fires when the user clicks the Find Match button.
+        /// Fires when the user clicks the Join Match button.
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
@@ -76,14 +73,12 @@ namespace PS8
         /// <param name="e"></param>
         private void WordEnterBox_KeyPress(object sender, KeyEventArgs e)
         {
-            //Tells Controller about a new word that was entered.
+            // Tells Controller about a new word that was entered.
             if (e.KeyCode == Keys.Enter)
             {
                 WordEntered?.Invoke(WordEnterBox.Text);
                 WordEnterBox.Text = string.Empty;
             }
-                
-            
         }
 
         /// <summary>
@@ -101,7 +96,6 @@ namespace PS8
 
                     if (c.Text == "Q")
                     {
-                        
                         c.Text = "QU";
                     }
                 }
@@ -119,7 +113,6 @@ namespace PS8
                 Player1ScoreLabel.Text = parameters[3];
                 Player2ScoreLabel.Text = parameters[4];
             }
-            
             //FinalWordBoxP1.Text = parameters[3];
         }
 
@@ -127,7 +120,6 @@ namespace PS8
         {
             var TempList = new List<string>();
             
-
             //Set final words box for player 1.
             if (FinalWords.TryGetValue(Player1Nickname, out TempList))
             {
@@ -140,8 +132,7 @@ namespace PS8
                     else
                     {
                         FinalWordBoxP1.AppendText(Environment.NewLine + s);
-                    }
-                    
+                    }   
                 }
             }
 
@@ -170,20 +161,14 @@ namespace PS8
             TimeBox.ReadOnly = false;
             ServerBox.ReadOnly = false;
             UsernameBox.ReadOnly = false;
-
             TimeBox.Focus();
         }
-
-
-
 
         private void instructionsToolStripMenuItem_Click(object sender, EventArgs e)
         {
             MessageBox.Show("Enter a Boggle server name and username and then click Register to regester your name with the server." + Environment.NewLine +
                 "Then enter a time limit for the game between 5 and 250 seconds. Next click find match to find an opponent." + Environment.NewLine +
-                "Type words below and press enter to confirm. When the game is complete you will see the words and corresponding scores for both players." 
-                
-                );
+                "Type words below and press enter to confirm. When the game is complete you will see the words and corresponding scores for both players.");
         }
 
         /// <summary>
@@ -207,7 +192,6 @@ namespace PS8
         private void RegisterBox_Click(object sender, EventArgs e)
         {
             Register?.Invoke(UsernameBox.Text, ServerBox.Text);
-
             StartButton.Enabled = true;
         }
     }

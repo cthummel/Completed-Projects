@@ -12,6 +12,8 @@ namespace PS8
         event Action<string, string> Register;
         event Action<string> WordEntered;
         event Action CancelGame;
+        event Action RegCancel;
+        event Action JoinCancel;
 
         void SetLetters(string letters);
 
