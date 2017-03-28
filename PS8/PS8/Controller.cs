@@ -251,7 +251,7 @@ namespace PS8
                 dynamic data = new ExpandoObject();
                 data.Nickname = username;
 
-                tokenSource = new CancellationTokenSource();
+                
                 StringContent content = new StringContent(JsonConvert.SerializeObject(data), Encoding.UTF8, "application/json");
                 HttpResponseMessage response = client.PostAsync("users", content).Result;
 
