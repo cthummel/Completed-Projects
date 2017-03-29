@@ -14,6 +14,22 @@ namespace Boggle
         [WebGet(UriTemplate = "/api")]
         Stream API();
 
+        [WebInvoke(Method = "POST", UriTemplate = "users")]
+        string Register(UserInfo user);
+
+        [WebInvoke(Method = "POST", UriTemplate = "games")]
+        string JoinGame();
+
+        [WebInvoke(Method = "PUT", UriTemplate = "games")]
+        string CancelJoinGame();
+
+        [WebInvoke(Method = "PUT", UriTemplate = "games/{GameID}")]
+        string PlayWord();
+
+        [WebInvoke(Method = "GET", UriTemplate = "games/{GameID}")]
+        string GetStatus();
+
+
         /// <summary>
         /// Returns the nth word from dictionary.txt.  If there is
         /// no nth word, responds with code 403. This is a demo;

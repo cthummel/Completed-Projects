@@ -9,6 +9,9 @@ namespace Boggle
 {
     public class BoggleService : IBoggleService
     {
+
+        private static readonly object sync = new object();
+
         /// <summary>
         /// The most recent call to SetStatus determines the response code used when
         /// an http response is sent.
