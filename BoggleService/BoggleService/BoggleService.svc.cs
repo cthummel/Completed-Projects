@@ -31,33 +31,40 @@ namespace Boggle
         /// <summary>
         /// Creates a user for the Boggle game
         /// </summary>
-        private static void CreateUser()
+        public string CreateUser()
         {
+            string UserToken = null;
 
+            return UserToken;
         }
 
         /// <summary>
         /// Invokes a user token to join the game
         /// </summary>
-        private static void JoinGame()
+        public string JoinGame(GameInfo Info)
         {
+            string GameID = null;
 
+            return GameID;
         }
 
         /// <summary>
         /// 
         /// </summary>
-        private static void CancelJoinRequest()
+        public void CancelJoinRequest()
         {
 
         }
 
-        private static void PlayWord()
+        public int PlayWord()
         {
+            int Score = 0;
 
+
+            return Score;
         }
 
-        private static void GetGameStatus()
+        public void GetGameStatus()
         {
 
         }

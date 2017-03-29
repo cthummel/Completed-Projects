@@ -15,19 +15,19 @@ namespace Boggle
         Stream API();
 
         [WebInvoke(Method = "POST", UriTemplate = "users")]
-        string Register(UserInfo user);
+        string Createuser(UserInfo user);
 
         [WebInvoke(Method = "POST", UriTemplate = "games")]
-        string JoinGame();
+        string JoinGame(GameInfo Info);
 
         [WebInvoke(Method = "PUT", UriTemplate = "games")]
-        string CancelJoinGame();
+        string CancelJoinRequest();
 
         [WebInvoke(Method = "PUT", UriTemplate = "games/{GameID}")]
         string PlayWord();
 
         [WebInvoke(Method = "GET", UriTemplate = "games/{GameID}")]
-        string GetStatus();
+        string GetGameStatus();
 
 
         /// <summary>
