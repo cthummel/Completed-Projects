@@ -35,7 +35,7 @@ namespace Boggle
         /// no nth word, responds with code 403. This is a demo;
         /// you can delete it.
         /// </summary>
-        [WebGet(UriTemplate = "/word?index={n}")]
-        string WordAtIndex(int n);
+         [WebGet(UriTemplate = "/word?index={n}")]
+         string WordAtIndex(int n); 
     }
 }

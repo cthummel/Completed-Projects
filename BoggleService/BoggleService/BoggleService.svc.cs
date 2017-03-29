@@ -13,6 +13,58 @@ namespace Boggle
         private static readonly object sync = new object();
 
         /// <summary>
+        /// Creates a PendingGame object
+        /// </summary>
+        public static class PendingGame
+        {
+
+        }
+
+        /// <summary>
+        /// Creates a Game object
+        /// </summary>
+        public class Game
+        {
+
+        }
+
+        /// <summary>
+        /// Creates a user for the Boggle game
+        /// </summary>
+        private static void CreateUser()
+        {
+
+        }
+
+        /// <summary>
+        /// Invokes a user token to join the game
+        /// </summary>
+        private static void JoinGame()
+        {
+
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        private static void CancelJoinRequest()
+        {
+
+        }
+
+        private static void PlayWord()
+        {
+
+        }
+
+        private static void GetGameStatus()
+        {
+
+        }
+
+
+
+        /// <summary>
         /// The most recent call to SetStatus determines the response code used when
         /// an http response is sent.
         /// </summary>
@@ -33,17 +85,18 @@ namespace Boggle
             return File.OpenRead(AppDomain.CurrentDomain.BaseDirectory + "index.html");
         }
 
-        /// <summary>
-        /// Demo.  You can delete this.
-        /// </summary>
-        public string WordAtIndex(int n)
-        {
+        // <To be deleted later>
+        // <summary>
+        // Demo.  You can delete this.
+        // </summary>
+         public string WordAtIndex(int n)
+         {
             if (n < 0)
             {
                 SetStatus(Forbidden);
                 return null;
             }
-
+        
             string line;
             using (StreamReader file = new System.IO.StreamReader(AppDomain.CurrentDomain.BaseDirectory + "dictionary.txt"))
             {
@@ -64,6 +117,6 @@ namespace Boggle
                 SetStatus(Forbidden);
                 return null;
             }
-        }
-    }
+        } 
+    } 
 }
