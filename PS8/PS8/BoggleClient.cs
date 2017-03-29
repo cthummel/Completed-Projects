@@ -192,6 +192,7 @@ namespace PS8
         private void RegisterBox_Click(object sender, EventArgs e)
         {
             Register?.Invoke(UsernameBox.Text, ServerBox.Text);
+
             StartButton.Enabled = true;
         }
     }

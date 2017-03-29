@@ -14,12 +14,13 @@ namespace Boggle
         [WebGet(UriTemplate = "/api")]
         Stream API();
 
+        // <To be deleted later>
         /// <summary>
         /// Returns the nth word from dictionary.txt.  If there is
         /// no nth word, responds with code 403. This is a demo;
         /// you can delete it.
         /// </summary>
-        [WebGet(UriTemplate = "/word?index={n}")]
-        string WordAtIndex(int n);
+         [WebGet(UriTemplate = "/word?index={n}")]
+         string WordAtIndex(int n); 
     }
 }
