@@ -31,7 +31,7 @@ namespace Boggle
         /// <summary>
         /// Creates a user for the Boggle game
         /// </summary>
-        public string CreateUser()
+        public string CreateUser(string username)
         {
             string UserToken = null;
 
@@ -56,7 +56,7 @@ namespace Boggle
 
         }
 
-        public int PlayWord()
+        public int PlayWord(string GameID)
         {
             int Score = 0;
 
@@ -64,7 +64,7 @@ namespace Boggle
             return Score;
         }
 
-        public void GetGameStatus()
+        public void GetGameStatus(string GameID)
         {
 
         }
