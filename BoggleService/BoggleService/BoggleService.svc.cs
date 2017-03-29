@@ -26,6 +26,42 @@ namespace Boggle
         }
 
         /// <summary>
+        /// Creates a user for the Boggle game
+        /// </summary>
+        private static void CreateUser()
+        {
+
+        }
+
+        /// <summary>
+        /// Invokes a user token to join the game
+        /// </summary>
+        private static void JoinGame()
+        {
+
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        private static void CancelJoinRequest()
+        {
+
+        }
+
+        private static void PlayWord()
+        {
+
+        }
+
+        private static void GetGameStatus()
+        {
+
+        }
+
+
+
+        /// <summary>
         /// The most recent call to SetStatus determines the response code used when
         /// an http response is sent.
         /// </summary>
