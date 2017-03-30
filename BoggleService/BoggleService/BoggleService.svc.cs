@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
+using System.Threading;
 using System.ServiceModel.Web;
 using static System.Net.HttpStatusCode;
 
@@ -9,33 +10,39 @@ namespace Boggle
 {
     public class BoggleService : IBoggleService
     {
-
+        private Dictionary<string, string> UserIDs = new Dictionary<string, string>();
+        private Dictionary<int, Game> GameList = new Dictionary<int, Game>();
+        private PendingGame CurrentPendingGame = new PendingGame();
+        private int CurrentGameID = 0;
         private static readonly object sync = new object();
 
-        /// <summary>
-        /// Creates a PendingGame object
-        /// </summary>
-        public static class PendingGame
-        {
-
-        }
-
-        /// <summary>
-        /// Creates a Game object
-        /// </summary>
-        public class Game
-        {
-
-        }
-
+        
         /// <summary>
         /// Creates a user for the Boggle game
         /// </summary>
-        public string CreateUser(string username)
+        public UserID CreateUser(string username)
         {
-            string UserToken = null;
-
-            return UserToken;
+            lock (sync)
+            {
+                if (username == "stall")
+                {
+                    Thread.Sleep(5000);
+                }
+                if (username == null || username.Trim().Length == 0)
+                {
+                    SetStatus(Forbidden);
+                    return null;
+                }
+                else
+                {
+                    string userID = Guid.NewGuid().ToString();
+                    UserIDs.Add(userID, username.Trim());
+                    SetStatus(Created);
+                    UserID ID = new UserID();
+                    ID.UserToken = userID;
+                    return ID;
+                }
+            }
         }
 
         /// <summary>
@@ -43,15 +50,72 @@ namespace Boggle
         /// </summary>
         public string JoinGame(GameInfo Info)
         {
-            string GameID = null;
+            lock (sync)
+            {
+                string nickname;
+                
 
-            return GameID;
+                if (UserIDs.TryGetValue(Info.UserToken, out nickname) || Info.TimeLimit < 5 || Info.TimeLimit > 120)
+                {
+                    SetStatus(Forbidden);
+                    return null;
+                }
+                else if (CurrentPendingGame.Player1Token == Info.UserToken)
+                {
+                    SetStatus(Conflict);
+                    return null;
+                }
+                else if (CurrentPendingGame.Player1Token == null)
+                {
+                    //Establishes the new PendingGame.
+                    string NewGameID = (CurrentGameID + 1).ToString();
+                    CurrentPendingGame.GameID = NewGameID;
+                    CurrentPendingGame.Player1Token = Info.UserToken;
+                    CurrentPendingGame.TimeLimit = Info.TimeLimit;
+
+                    //Increments GameID so the next time we need a pending game we can have a unique ID.
+                    CurrentGameID += 1;
+
+                    //Sets status and retuns the game ID.
+                    SetStatus(Accepted);
+                    return NewGameID;
+                }
+                else
+                {
+                    int PendingGameID = Int32.Parse(CurrentPendingGame.GameID);
+                    BoggleBoard Board = new BoggleBoard();
+
+                    //Sets up a new game;
+                    Game NewGame = new Game();
+                    
+                    NewGame.GameState = "active";
+                    NewGame.Player1Token = CurrentPendingGame.Player1Token;
+                    NewGame.Player2Token = Info.UserToken;
+                    NewGame.Player1Score = 0;
+                    NewGame.Player2Score = 0;
+                    NewGame.Player1WordList = new Dictionary<string, int>();
+                    NewGame.Player2WordList = new Dictionary<string, int>();
+                    NewGame.TimeLimit = ((CurrentPendingGame.TimeLimit + Info.TimeLimit) / 2);
+                    NewGame.TimeRemaining = NewGame.TimeLimit;
+                    NewGame.GameBoard = Board.ToString();
+
+                    //Resets PendingGameBoard so that we have an empty one waiting.
+                    CurrentPendingGame.GameID = null;
+                    CurrentPendingGame.Player1Token = null;
+                    CurrentPendingGame.TimeLimit = 0;
+
+                    //Final cleanup before sending back GameID.
+                    GameList.Add(PendingGameID, NewGame);
+                    SetStatus(Created);
+                    return PendingGameID.ToString();
+                }
+            }
         }
 
         /// <summary>
         /// 
         /// </summary>
-        public void CancelJoinRequest()
+        public void CancelJoinRequest(UserID UserToken)
         {
 
         }
@@ -92,38 +156,6 @@ namespace Boggle
             return File.OpenRead(AppDomain.CurrentDomain.BaseDirectory + "index.html");
         }
 
-        // <To be deleted later>
-        // <summary>
-        // Demo.  You can delete this.
-        // </summary>
-         public string WordAtIndex(int n)
-         {
-            if (n < 0)
-            {
-                SetStatus(Forbidden);
-                return null;
-            }
         
-            string line;
-            using (StreamReader file = new System.IO.StreamReader(AppDomain.CurrentDomain.BaseDirectory + "dictionary.txt"))
-            {
-                while ((line = file.ReadLine()) != null)
-                {
-                    if (n == 0) break;
-                    n--;
-                }
-            }
-
-            if (n == 0)
-            {
-                SetStatus(OK);
-                return line;
-            }
-            else
-            {
-                SetStatus(Forbidden);
-                return null;
-            }
-        } 
     } 
 }

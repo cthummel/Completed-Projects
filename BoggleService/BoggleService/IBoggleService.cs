@@ -15,13 +15,13 @@ namespace Boggle
         Stream API();
 
         [WebInvoke(Method = "POST", UriTemplate = "users")]
-        string CreateUser(string user);
+        UserID CreateUser(string user);
 
         [WebInvoke(Method = "POST", UriTemplate = "games")]
         string JoinGame(GameInfo Info);
 
         [WebInvoke(Method = "PUT", UriTemplate = "games")]
-        void CancelJoinRequest();
+        void CancelJoinRequest(UserID UserToken);
 
         [WebInvoke(Method = "PUT", UriTemplate = "games/{GameID}")]
         int PlayWord(string GameID);
@@ -30,12 +30,6 @@ namespace Boggle
         void GetGameStatus(string GameID);
 
 
-        /// <summary>
-        /// Returns the nth word from dictionary.txt.  If there is
-        /// no nth word, responds with code 403. This is a demo;
-        /// you can delete it.
-        /// </summary>
-         [WebGet(UriTemplate = "/word?index={n}")]
-         string WordAtIndex(int n); 
+        
     }
 }
