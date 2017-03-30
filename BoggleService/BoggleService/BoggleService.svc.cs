@@ -113,15 +113,53 @@ namespace Boggle
         }
 
         /// <summary>
-        /// 
+        /// Cancels a JoinGame request.
         /// </summary>
         public void CancelJoinRequest(UserID UserToken)
         {
-
+            if (!UserIDs.ContainsKey(UserToken.UserToken) || UserToken.UserToken != CurrentPendingGame.Player1Token)
+            {
+                SetStatus(Forbidden);
+               
+            }
+            else
+            {
+                CurrentPendingGame.Player1Token = null;
+                SetStatus(OK);
+            }
         }
 
-        public int PlayWord(string GameID)
+        public int PlayWord(WordInfo InputObject, string GameID)
         {
+            Game CurrentGame;
+            
+
+            //All the failure cases for bad input.
+            if (InputObject.Word == null || InputObject.Word.Trim().Length == 0)
+            {
+                SetStatus(Forbidden);
+                return 0;
+            }
+            else if (!GameList.TryGetValue(Int32.Parse(GameID), out CurrentGame) || UserIDs.ContainsKey(InputObject.UserToken))
+            {
+                SetStatus(Forbidden);
+                return 0;
+            }
+            else if (CurrentGame.Player1Token != InputObject.UserToken || CurrentGame.Player2Token != InputObject.UserToken)
+            {
+                SetStatus(Forbidden);
+                return 0;
+            }
+            else if (CurrentGame.GameState != "active")
+            {
+                SetStatus(Conflict);
+                return 0;
+            }
+
+            //Records the word as being played.
+
+
+
             int Score = 0;
 
 

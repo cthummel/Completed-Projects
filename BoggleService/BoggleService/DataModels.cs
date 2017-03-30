@@ -13,9 +13,22 @@ namespace Boggle
         public string UserToken { get; set; }
         public int TimeLimit { get; set; }
     }
+
+    /// <summary>
+    /// Used for encoding and reading UserID JSON objects.
+    /// </summary>
     public class UserID
     {
         public string UserToken { get; set; }
+    }
+
+    /// <summary>
+    /// Used for encoding and reading UserID JSON objects.
+    /// </summary>
+    public class WordInfo
+    {
+        public string UserToken { get; set; }
+        public string Word { get; set; }
     }
 
     /// <summary>
