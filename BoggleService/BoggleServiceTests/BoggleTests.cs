@@ -3,6 +3,10 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using static System.Net.HttpStatusCode;
 using System.Diagnostics;
 using Newtonsoft.Json;
+using System.Text;
+using System.Collections.Generic;
+using System.Net.Http;
+using System.Dynamic;
 
 namespace Boggle
 {
@@ -64,23 +68,61 @@ namespace Boggle
         }
 
         private RestTestClient client = new RestTestClient("http://localhost:60000/BoggleService.svc/");
+        //private string url = "http://localhost:60000/BoggleService.svc/";
 
-        /// <summary>
-        /// Note that DoGetAsync (and the other similar methods) returns a Response object, which contains
-        /// the response Stats and the deserialized JSON response (if any).  See RestTestClient.cs
-        /// for details.
-        /// </summary>
+        ///// <summary>
+        ///// Note that DoGetAsync (and the other similar methods) returns a Response object, which contains
+        ///// the response Stats and the deserialized JSON response (if any).  See RestTestClient.cs
+        ///// for details.
+        ///// </summary>
+        //[TestMethod]
+        //public void TestMethod1()
+        //{
+        //    Response r = client.DoGetAsync("word?index={0}", "-5").Result;
+        //    Assert.AreEqual(Forbidden, r.Status);
+
+        //    r = client.DoGetAsync("word?index={0}", "5").Result;
+        //    Assert.AreEqual(OK, r.Status);
+
+        //    string word = (string) r.Data;
+        //    Assert.AreEqual("AAL", word);
+        //}
+
+
         [TestMethod]
-        public void TestMethod1()
+        public void CreateUser1()
         {
-            Response r = client.DoGetAsync("word?index={0}", "-5").Result;
+
+            //dynamic data = new ExpandoObject();
+            //data.Nickname = "hello";
+            string data = null;
+            //StringContent content = new StringContent(JsonConvert.SerializeObject(data), Encoding.UTF8, "application/json");
+            Response r = client.DoPostAsync("users", data).Result;
             Assert.AreEqual(Forbidden, r.Status);
-
-            r = client.DoGetAsync("word?index={0}", "5").Result;
-            Assert.AreEqual(OK, r.Status);
-
-            string word = (string) r.Data;
-            Assert.AreEqual("AAL", word);
         }
+        [TestMethod]
+        public void CreateUser2()
+        {
+            //dynamic data = new ExpandoObject();
+            //data.Nickname = "          ";
+            //StringContent content = new StringContent(JsonConvert.SerializeObject(data), Encoding.UTF8, "application/json");
+
+            string data = "             ";
+            Response r = client.DoPostAsync("users", data).Result;
+            Assert.AreEqual(Forbidden, r.Status);
+        }
+        [TestMethod]
+        public void CreateUser3()
+        {
+            //dynamic data = new ExpandoObject();
+            //data.Nickname = "          ";
+            //StringContent content = new StringContent(JsonConvert.SerializeObject(data), Encoding.UTF8, "application/json");
+
+            string data = "      Hello      ";
+            Response r = client.DoPostAsync("users", data).Result;
+            Assert.AreEqual(Created, r.Status);
+            dynamic returndata = r.Data;
+        }
+
     }
 }
