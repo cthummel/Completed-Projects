@@ -14,6 +14,12 @@ namespace Boggle
         [WebGet(UriTemplate = "/api")]
         Stream API();
 
+     //   [WebGet(UriTemplate = "/")]
+
+
+
+
+
         // <To be deleted later>
         /// <summary>
         /// Returns the nth word from dictionary.txt.  If there is

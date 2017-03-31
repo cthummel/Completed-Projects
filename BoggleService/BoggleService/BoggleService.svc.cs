@@ -49,11 +49,17 @@ namespace Boggle
 
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         private static void PlayWord()
         {
 
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
         private static void GetGameStatus()
         {
 
