@@ -244,6 +244,7 @@ namespace Boggle
             }
 
             // Records the word as being played.
+            SetStatus(OK);
             return score;
         }
 
@@ -253,16 +254,60 @@ namespace Boggle
         /// <param name="GameID"></param>
         public Game GetGameStatus(string GameID, bool isBrief)
         {
-            if (!GameID.Equals(CurrentGameID))
-            {
-                SetStatus(Forbidden);
-            }
-            else
+            Game CurrentGame = new Game();
+
+            if (CurrentPendingGame.GameID == GameID)
             {
                 SetStatus(OK);
+                CurrentGame.GameState = "pending";
             }
-            Game game = new Boggle.Game();
-            return game;
+            else if(GameList.TryGetValue(Int32.Parse(GameID), out CurrentGame))
+            {
+                //If the game is active
+                if (CurrentGame.GameState == "active")
+                {
+                    if (isBrief == true)
+                    {
+
+                    }
+                    else
+                    {
+
+                    }
+
+                }
+                //if the game is completed.
+                else
+                {
+                    if (isBrief == true)
+                    {
+
+                    }
+                    else
+                    {
+
+                    }
+                }
+            }
+            //Invalid Game ID case.
+            else
+            {
+                SetStatus(Forbidden);
+                return CurrentGame;
+            }
+
+
+
+            //if (!GameID.Equals(CurrentGameID))
+            //{
+            //    SetStatus(Forbidden);
+            //}
+            //else
+            //{
+            //    SetStatus(OK);
+            //}
+            
+            return CurrentGame;
         }
 
         /// <summary>
