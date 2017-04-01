@@ -46,7 +46,7 @@ namespace Boggle
                 process.Kill();
             }
         }
-    }
+    } 
 
     [TestClass]
     public class BoggleTests
