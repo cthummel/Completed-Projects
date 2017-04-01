@@ -124,7 +124,6 @@ namespace Boggle
             return letters;
         }
 
-
         /// <summary>
         /// Reports whether the provided word can be formed by tracking through
         /// this Boggle board as described in the rules of Boggle.  The method

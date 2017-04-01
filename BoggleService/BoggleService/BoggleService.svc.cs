@@ -15,7 +15,6 @@ namespace Boggle
         private PendingGame CurrentPendingGame = new PendingGame();
         private int CurrentGameID = 0;
         private static readonly object sync = new object();
-
         
         /// <summary>
         /// Creates a user for the Boggle game
@@ -28,6 +27,7 @@ namespace Boggle
                 {
                     Thread.Sleep(5000);
                 }
+
                 if (username == null || username.Trim().Length == 0)
                 {
                     SetStatus(Forbidden);
@@ -53,8 +53,7 @@ namespace Boggle
             lock (sync)
             {
                 string nickname;
-
-
+                
                 if (UserIDs.TryGetValue(Info.UserToken, out nickname) || Info.TimeLimit < 5 || Info.TimeLimit > 120)
                 {
                     SetStatus(Forbidden);
@@ -137,7 +136,6 @@ namespace Boggle
         {
             Game CurrentGame;
             
-
             //All the failure cases for bad input.
             if (InputObject.Word == null || InputObject.Word.Trim().Length == 0)
             {
@@ -160,22 +158,26 @@ namespace Boggle
                 return 0;
             }
 
-            //Records the word as being played.
-
-
-
+            // Records the word as being played.
             int Score = 0;
-
-
             return Score;
         }
 
-        public Game GetGameStatus(string GameID, bool MakeBrief)
+        /// <summary>
+        /// Returns game status information if the GameID is valid
+        /// </summary>
+        /// <param name="GameID"></param>
+        public void GetGameStatus(string GameID)
         {
-            return null;
+            if (!GameID.Equals(CurrentGameID))
+            {
+                SetStatus(Forbidden);
+            }
+            else
+            {
+                SetStatus(OK);
+            }
         }
-
-
 
         /// <summary>
         /// The most recent call to SetStatus determines the response code used when
@@ -197,7 +199,5 @@ namespace Boggle
             WebOperationContext.Current.OutgoingResponse.ContentType = "text/html";
             return File.OpenRead(AppDomain.CurrentDomain.BaseDirectory + "index.html");
         }
-
-        
     } 
 }
