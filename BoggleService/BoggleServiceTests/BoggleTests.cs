@@ -71,6 +71,7 @@ namespace Boggle
 
         private RestTestClient client = new RestTestClient("http://localhost:60000/BoggleService.svc/");
 
+        // Invalid username
         [TestMethod]
         public void CreateUser1()
         {
@@ -79,6 +80,7 @@ namespace Boggle
             Assert.AreEqual(Forbidden, r.Status);
         }
 
+        // Invalid username
         [TestMethod]
         public void CreateUser2()
         {
@@ -87,6 +89,7 @@ namespace Boggle
             Assert.AreEqual(Forbidden, r.Status);
         }
 
+        // Valid username
         [TestMethod]
         public void CreateUser3()
         {
@@ -95,6 +98,7 @@ namespace Boggle
             Assert.AreEqual(Created, r.Status);
         }
 
+        // Time outside acceptable boundaries
         [TestMethod]
         public void  JoinGame1()
         {
@@ -105,10 +109,48 @@ namespace Boggle
             Assert.AreEqual(Forbidden, r.Status);
         }
 
+        // Time within acceptable boundaries
+        [TestMethod]
+        public void JoinGame2()
+        {
+            GameInfo data = new GameInfo();
+            data.UserToken = "user";
+            data.TimeLimit = 6;
+            Response r = client.DoPostAsync("games", data).Result;
+            Assert.AreEqual(Accepted, r.Status);
+        }
+
+        // Null username
+        [TestMethod]
+        public void JoinGame3()
+        {
+            GameInfo data = new GameInfo();
+            data.UserToken = null;
+            data.TimeLimit = 7;
+            Response r = client.DoPostAsync("games", data).Result;
+            Assert.AreEqual(Forbidden, r.Status);
+        }
+
+        // Username conflict
+        [TestMethod]
+        public void JoinGame4()
+        {
+            GameInfo data = new GameInfo();
+            data.UserToken = "user";
+            data.TimeLimit = 7;
+            Response r = client.DoPostAsync("games", data).Result;
+                     r = client.DoPostAsync("games", data).Result;
+            Assert.AreEqual(Conflict, r.Status);
+        }
+
         [TestMethod]
         public void CancelJoin1()
         {
-
+            GameInfo data = new GameInfo();
+            data.UserToken = "player";
+            data.TimeLimit = 7;
+            Response r = client.DoPostAsync("games", data).Result;
+            r = client.DoPutAsync("games", data.UserToken).Result;
         }
 
         [TestMethod]
