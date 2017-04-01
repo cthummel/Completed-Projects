@@ -113,6 +113,7 @@ namespace Boggle
         [TestMethod]
         public void JoinGame2()
         {
+           
             GameInfo data = new GameInfo();
             data.UserToken = "user";
             data.TimeLimit = 6;
@@ -131,18 +132,6 @@ namespace Boggle
             Assert.AreEqual(Forbidden, r.Status);
         }
 
-        // Username conflict
-        [TestMethod]
-        public void JoinGame4()
-        {
-            GameInfo data = new GameInfo();
-            data.UserToken = "user";
-            data.TimeLimit = 7;
-            Response r = client.DoPostAsync("games", data).Result;
-                     r = client.DoPostAsync("games", data).Result;
-            Assert.AreEqual(Conflict, r.Status);
-        }
-
         [TestMethod]
         public void CancelJoin1()
         {
@@ -151,7 +140,9 @@ namespace Boggle
             data.TimeLimit = 7;
             Response r = client.DoPostAsync("games", data).Result;
             r = client.DoPutAsync("games", data.UserToken).Result;
+
         }
+
 
         [TestMethod]
         public void PlayWord1()
