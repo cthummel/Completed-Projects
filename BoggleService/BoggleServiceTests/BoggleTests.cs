@@ -114,7 +114,7 @@ namespace Boggle
         }
 
         [TestMethod]
-        public void GameStatus1()
+        public void GetGameStatus1()
         {
 
         }

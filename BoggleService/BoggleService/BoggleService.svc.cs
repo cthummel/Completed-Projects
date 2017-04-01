@@ -27,6 +27,7 @@ namespace Boggle
                 {
                     Thread.Sleep(5000);
                 }
+
                 if (username == null || username.Trim().Length == 0)
                 {
                     SetStatus(Forbidden);
@@ -153,20 +154,25 @@ namespace Boggle
                 return 0;
             }
 
-            //Records the word as being played.
-
+            // Records the word as being played.
             int Score = 0;
-
             return Score;
         }
 
         /// <summary>
-        /// 
+        /// Returns game status information if the GameID is valid
         /// </summary>
         /// <param name="GameID"></param>
         public void GetGameStatus(string GameID)
         {
+            if (!GameID.Equals(CurrentGameID))
+            {
+                SetStatus(Forbidden);
+            }
+            else
+            {
 
+            }
         }
 
         /// <summary>
