@@ -116,7 +116,8 @@ namespace Boggle
         [TestMethod]
         public void GetGameStatus1()
         {
-
+            string[] data;
+        //    Response r = client.DoGetAsync("games/{GameID}")
         }
     }
 }
