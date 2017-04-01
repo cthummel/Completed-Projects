@@ -7,6 +7,7 @@ using System.Text;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Dynamic;
+using Boggle;
 
 namespace Boggle
 {
@@ -92,13 +93,16 @@ namespace Boggle
             string data = "      Hello      ";
             Response r = client.DoPostAsync("users", data).Result;
             Assert.AreEqual(Created, r.Status);
-            dynamic returndata = r.Data;
         }
 
         [TestMethod]
         public void  JoinGame1()
         {
-
+            GameInfo data = new GameInfo();
+            data.UserToken = "user";
+            data.TimeLimit = 3;
+            Response r = client.DoPostAsync("games", data).Result;
+            Assert.AreEqual(Forbidden, r.Status);
         }
 
         [TestMethod]
@@ -116,8 +120,11 @@ namespace Boggle
         [TestMethod]
         public void GetGameStatus1()
         {
-            string[] data;
-        //    Response r = client.DoGetAsync("games/{GameID}")
+       //     DoGetAsync("this/is/a/test?name={0}&age={1}, "James", "57"
+       //     Response r = client.DoGetAsync("games/{GameID}", data).Result;
+       //     Assert.AreEqual(Created, r.Status);
+       //     dynamic returndata = r.Data;
+
         }
     }
 }

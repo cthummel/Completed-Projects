@@ -171,7 +171,7 @@ namespace Boggle
             }
             else
             {
-
+                SetStatus(OK);
             }
         }
 
