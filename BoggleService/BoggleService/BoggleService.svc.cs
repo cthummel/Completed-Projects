@@ -15,7 +15,6 @@ namespace Boggle
         private PendingGame CurrentPendingGame = new PendingGame();
         private int CurrentGameID = 0;
         private static readonly object sync = new object();
-
         
         /// <summary>
         /// Creates a user for the Boggle game
@@ -54,7 +53,6 @@ namespace Boggle
             {
                 string nickname;
                 
-
                 if (UserIDs.TryGetValue(Info.UserToken, out nickname) || Info.TimeLimit < 5 || Info.TimeLimit > 120)
                 {
                     SetStatus(Forbidden);
@@ -133,7 +131,6 @@ namespace Boggle
         {
             Game CurrentGame;
             
-
             //All the failure cases for bad input.
             if (InputObject.Word == null || InputObject.Word.Trim().Length == 0)
             {
@@ -158,20 +155,19 @@ namespace Boggle
 
             //Records the word as being played.
 
-
-
             int Score = 0;
-
 
             return Score;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="GameID"></param>
         public void GetGameStatus(string GameID)
         {
 
         }
-
-
 
         /// <summary>
         /// The most recent call to SetStatus determines the response code used when
@@ -193,7 +189,5 @@ namespace Boggle
             WebOperationContext.Current.OutgoingResponse.ContentType = "text/html";
             return File.OpenRead(AppDomain.CurrentDomain.BaseDirectory + "index.html");
         }
-
-        
     } 
 }

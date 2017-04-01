@@ -46,6 +46,7 @@ namespace Boggle
             }
         }
     }
+
     [TestClass]
     public class BoggleTests
     {
@@ -68,31 +69,10 @@ namespace Boggle
         }
 
         private RestTestClient client = new RestTestClient("http://localhost:60000/BoggleService.svc/");
-        //private string url = "http://localhost:60000/BoggleService.svc/";
-
-        ///// <summary>
-        ///// Note that DoGetAsync (and the other similar methods) returns a Response object, which contains
-        ///// the response Stats and the deserialized JSON response (if any).  See RestTestClient.cs
-        ///// for details.
-        ///// </summary>
-        //[TestMethod]
-        //public void TestMethod1()
-        //{
-        //    Response r = client.DoGetAsync("word?index={0}", "-5").Result;
-        //    Assert.AreEqual(Forbidden, r.Status);
-
-        //    r = client.DoGetAsync("word?index={0}", "5").Result;
-        //    Assert.AreEqual(OK, r.Status);
-
-        //    string word = (string) r.Data;
-        //    Assert.AreEqual("AAL", word);
-        //}
-
 
         [TestMethod]
         public void CreateUser1()
         {
-
             //dynamic data = new ExpandoObject();
             //data.Nickname = "hello";
             string data = null;
@@ -100,6 +80,7 @@ namespace Boggle
             Response r = client.DoPostAsync("users", data).Result;
             Assert.AreEqual(Forbidden, r.Status);
         }
+
         [TestMethod]
         public void CreateUser2()
         {
@@ -111,6 +92,7 @@ namespace Boggle
             Response r = client.DoPostAsync("users", data).Result;
             Assert.AreEqual(Forbidden, r.Status);
         }
+
         [TestMethod]
         public void CreateUser3()
         {
@@ -123,6 +105,5 @@ namespace Boggle
             Assert.AreEqual(Created, r.Status);
             dynamic returndata = r.Data;
         }
-
     }
 }

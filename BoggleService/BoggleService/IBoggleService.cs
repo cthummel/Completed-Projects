@@ -28,8 +28,5 @@ namespace Boggle
 
         [WebInvoke(Method = "GET", UriTemplate = "games/{GameID}")]
         void GetGameStatus(string GameID);
-
-
-        
     }
 }

@@ -46,7 +46,6 @@ namespace Boggle
     /// </summary>
     public class Game
     {
-        //public int GameID { get; set; }
         public string GameState { get; set; }
         public string Player1Token { get; set; }
         public string Player2Token { get; set; }
