@@ -51,10 +51,8 @@ namespace Boggle
         public GameInfo JoinGame(GameInfo Info)
         {
             lock (sync)
-            {
-                string nickname;
-                
-                if (UserIDs.TryGetValue(Info.UserToken, out nickname) || Info.TimeLimit < 5 || Info.TimeLimit > 120)
+            {                
+                if (Info.UserToken == null || Info.UserToken.Trim().Equals("") || Info.TimeLimit < 5 || Info.TimeLimit > 120)
                 {
                     SetStatus(Forbidden);
                     return null;
