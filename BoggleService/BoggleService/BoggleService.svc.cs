@@ -157,6 +157,94 @@ namespace Boggle
                 SetStatus(Conflict);
                 return 0;
             }
+            else
+            {
+                CurrentGame = new Game();
+                GameList.TryGetValue(Int32.Parse(GameID), out CurrentGame);
+                string word = InputObject.Word.Trim();
+                int score = 0;
+                BoggleBoard Board = new BoggleBoard(CurrentGame.GameBoard);
+
+                //If its player 1 playing the word.
+                if (CurrentGame.Player1Token == InputObject.UserToken)
+                {
+                    if (Board.CanBeFormed(word))
+                    {
+                        if (CurrentGame.Player1WordList.ContainsKey(word))
+                        {
+                            score = 0;
+                        }
+                        else if (word.Length <= 3)
+                        {
+                            score = 0;
+                        }
+                        else if (word.Length > 3 && word.Length <= 5)
+                        {
+                            score = 1;
+                        }
+                        else if (word.Length == 6)
+                        {
+                            score = 3;
+                        }
+                        else if (word.Length == 7)
+                        {
+                            score = 5;
+                        }
+                        else if (word.Length > 7)
+                        {
+                            score = 11;
+                        }
+                        else
+                        {
+                            score = -1;
+                        }
+                        CurrentGame.Player1WordList.Add(word, score);
+                        CurrentGame.Player1Score += score;
+                    }
+                }
+
+                //If its player 2 playing the word.
+                if (CurrentGame.Player2Token == InputObject.UserToken)
+                {
+                    if (Board.CanBeFormed(word))
+                    {
+                        if (CurrentGame.Player2WordList.ContainsKey(word))
+                        {
+                            score = 0;
+                        }
+                        else if (word.Length <= 3)
+                        {
+                            score = 0;
+                        }
+                        else if (word.Length > 3 && word.Length <= 5)
+                        {
+                            score = 1;
+                        }
+                        else if (word.Length == 6)
+                        {
+                            score = 3;
+                        }
+                        else if (word.Length == 7)
+                        {
+                            score = 5;
+                        }
+                        else if (word.Length > 7)
+                        {
+                            score = 11;
+                        }
+                        else
+                        {
+                            score = -1;
+                        }
+                        CurrentGame.Player2WordList.Add(word, score);
+                        CurrentGame.Player2Score += score;
+                    }
+
+                }
+
+            }
+
+
 
             // Records the word as being played.
             int Score = 0;
@@ -167,7 +255,7 @@ namespace Boggle
         /// Returns game status information if the GameID is valid
         /// </summary>
         /// <param name="GameID"></param>
-        public void GetGameStatus(string GameID)
+        public Game GetGameStatus(string GameID, bool isBrief)
         {
             if (!GameID.Equals(CurrentGameID))
             {
@@ -177,6 +265,8 @@ namespace Boggle
             {
                 SetStatus(OK);
             }
+            Game game = new Boggle.Game();
+            return game;
         }
 
         /// <summary>

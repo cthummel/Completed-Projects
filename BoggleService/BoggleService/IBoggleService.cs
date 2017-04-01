@@ -26,7 +26,7 @@ namespace Boggle
         [WebInvoke(Method = "PUT", UriTemplate = "games/{GameID}")]
         int PlayWord(WordInfo Word, string GameID);
 
-        [WebInvoke(Method = "GET", UriTemplate = "games/{GameID}?Brief = {makebrief}")]
+        [WebInvoke(Method = "GET", UriTemplate = "games/{GameID}?Brief={makebrief}")]
         Game GetGameStatus(string GameID, bool makebrief);
 
 
