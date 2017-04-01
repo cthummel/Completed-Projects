@@ -73,10 +73,7 @@ namespace Boggle
         [TestMethod]
         public void CreateUser1()
         {
-            //dynamic data = new ExpandoObject();
-            //data.Nickname = "hello";
             string data = null;
-            //StringContent content = new StringContent(JsonConvert.SerializeObject(data), Encoding.UTF8, "application/json");
             Response r = client.DoPostAsync("users", data).Result;
             Assert.AreEqual(Forbidden, r.Status);
         }
@@ -84,10 +81,6 @@ namespace Boggle
         [TestMethod]
         public void CreateUser2()
         {
-            //dynamic data = new ExpandoObject();
-            //data.Nickname = "          ";
-            //StringContent content = new StringContent(JsonConvert.SerializeObject(data), Encoding.UTF8, "application/json");
-
             string data = "             ";
             Response r = client.DoPostAsync("users", data).Result;
             Assert.AreEqual(Forbidden, r.Status);
@@ -96,14 +89,34 @@ namespace Boggle
         [TestMethod]
         public void CreateUser3()
         {
-            //dynamic data = new ExpandoObject();
-            //data.Nickname = "          ";
-            //StringContent content = new StringContent(JsonConvert.SerializeObject(data), Encoding.UTF8, "application/json");
-
             string data = "      Hello      ";
             Response r = client.DoPostAsync("users", data).Result;
             Assert.AreEqual(Created, r.Status);
             dynamic returndata = r.Data;
+        }
+
+        [TestMethod]
+        public void  JoinGame1()
+        {
+
+        }
+
+        [TestMethod]
+        public void CancelJoin1()
+        {
+
+        }
+
+        [TestMethod]
+        public void PlayWord1()
+        {
+
+        }
+
+        [TestMethod]
+        public void GameStatus1()
+        {
+
         }
     }
 }
