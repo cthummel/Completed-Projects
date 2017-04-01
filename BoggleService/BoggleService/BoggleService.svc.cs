@@ -135,7 +135,8 @@ namespace Boggle
         public int PlayWord(WordInfo InputObject, string GameID)
         {
             Game CurrentGame;
-            
+            int score = 0;
+
             //All the failure cases for bad input.
             if (InputObject.Word == null || InputObject.Word.Trim().Length == 0)
             {
@@ -162,7 +163,7 @@ namespace Boggle
                 CurrentGame = new Game();
                 GameList.TryGetValue(Int32.Parse(GameID), out CurrentGame);
                 string word = InputObject.Word.Trim();
-                int score = 0;
+                
                 BoggleBoard Board = new BoggleBoard(CurrentGame.GameBoard);
 
                 //If its player 1 playing the word.
@@ -239,16 +240,11 @@ namespace Boggle
                         CurrentGame.Player2WordList.Add(word, score);
                         CurrentGame.Player2Score += score;
                     }
-
                 }
-
             }
 
-
-
             // Records the word as being played.
-            int Score = 0;
-            return Score;
+            return score;
         }
 
         /// <summary>
