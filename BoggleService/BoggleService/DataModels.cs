@@ -1,16 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Web;
 
 namespace Boggle
 {
     /// <summary>
-    /// Used for encoding and reading GameInfo JSON objects.
+    /// Used for encoding and reading GameInfo JSON objects. The Data members just mean we dont have to use all the parameters when we return.
     /// </summary>
+    [DataContract]
     public class GameInfo
     {
+        [DataMember(EmitDefaultValue = false)]
+        public string GameID { get; set; }
+
+        [DataMember(EmitDefaultValue = false)]
         public string UserToken { get; set; }
+
+        [DataMember(EmitDefaultValue = false)]
         public int TimeLimit { get; set; }
     }
 
@@ -44,17 +52,38 @@ namespace Boggle
     /// <summary>
     /// Creates a Game object
     /// </summary>
+    [DataContract]
     public class Game
     {
+
+        [DataMember]
         public string GameState { get; set; }
+
+        [DataMember(EmitDefaultValue = false)]
         public string Player1Token { get; set; }
+
+        [DataMember(EmitDefaultValue = false)]
         public string Player2Token { get; set; }
+
+        [DataMember(EmitDefaultValue = false)]
         public int Player1Score { get; set; }
+
+        [DataMember(EmitDefaultValue = false)]
         public int Player2Score { get; set; }
+
+        [DataMember(EmitDefaultValue = false)]
         public Dictionary<string, int> Player1WordList { get; set; }
+
+        [DataMember(EmitDefaultValue = false)]
         public Dictionary<string, int> Player2WordList { get; set; }
+
+        [DataMember(EmitDefaultValue = false)]
         public int TimeLimit { get; set; }
+
+        [DataMember(EmitDefaultValue = false)]
         public int TimeRemaining { get; set; }
+
+        [DataMember(EmitDefaultValue = false)]
         public string GameBoard { get; set; }
     }
 }
