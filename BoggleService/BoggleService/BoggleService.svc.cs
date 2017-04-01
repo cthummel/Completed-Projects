@@ -48,12 +48,12 @@ namespace Boggle
         /// <summary>
         /// Invokes a user token to join the game
         /// </summary>
-        public string JoinGame(GameInfo Info)
+        public GameInfo JoinGame(GameInfo Info)
         {
             lock (sync)
             {
                 string nickname;
-                
+
 
                 if (UserIDs.TryGetValue(Info.UserToken, out nickname) || Info.TimeLimit < 5 || Info.TimeLimit > 120)
                 {
@@ -78,7 +78,9 @@ namespace Boggle
 
                     //Sets status and retuns the game ID.
                     SetStatus(Accepted);
-                    return NewGameID;
+                    GameInfo info = new GameInfo();
+                    info.GameID = NewGameID;
+                    return info;
                 }
                 else
                 {
@@ -87,7 +89,7 @@ namespace Boggle
 
                     //Sets up a new game;
                     Game NewGame = new Game();
-                    
+
                     NewGame.GameState = "active";
                     NewGame.Player1Token = CurrentPendingGame.Player1Token;
                     NewGame.Player2Token = Info.UserToken;
@@ -107,7 +109,9 @@ namespace Boggle
                     //Final cleanup before sending back GameID.
                     GameList.Add(PendingGameID, NewGame);
                     SetStatus(Created);
-                    return PendingGameID.ToString();
+                    GameInfo info = new GameInfo();
+                    info.GameID = CurrentPendingGame.GameID;
+                    return info;
                 }
             }
         }
@@ -166,9 +170,9 @@ namespace Boggle
             return Score;
         }
 
-        public void GetGameStatus(string GameID)
+        public Game GetGameStatus(string GameID, bool MakeBrief)
         {
-
+            return null;
         }
 
 

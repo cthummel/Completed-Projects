@@ -124,5 +124,22 @@ namespace Boggle
             dynamic returndata = r.Data;
         }
 
+
+
+
+        [TestMethod]
+        public void PlayWord1()
+        {
+            dynamic data = new ExpandoObject();
+            data.Usertoken = "";
+            data.Word = "hello";
+            //StringContent content = new StringContent(JsonConvert.SerializeObject(data), Encoding.UTF8, "application/json");
+
+            //string data = "      Hello      ";
+            Response r = client.DoPutAsync(data, String.Format("games/{0}", 0)).Result;
+            Assert.AreEqual(Forbidden, r.Status);
+
+        }
+
     }
 }
