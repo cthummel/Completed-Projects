@@ -90,10 +90,12 @@ namespace Boggle
                     NewGame.GameState = "active";
                     NewGame.Player1Token = CurrentPendingGame.Player1Token;
                     NewGame.Player2Token = Info.UserToken;
-                    NewGame.Player1Score = 0;
-                    NewGame.Player2Score = 0;
-                    NewGame.Player1WordList = new Dictionary<string, int>();
-                    NewGame.Player2WordList = new Dictionary<string, int>();
+                    NewGame.Player1.Nickname = UserIDs[CurrentPendingGame.Player1Token];
+                    NewGame.Player2.Nickname = UserIDs[Info.UserToken];
+                    NewGame.Player1.Score = 0;
+                    NewGame.Player2.Score = 0;
+                    NewGame.Player1.WordsPlayed = new Dictionary<string, int>();
+                    NewGame.Player2.WordsPlayed = new Dictionary<string, int>();
                     NewGame.TimeLimit = ((CurrentPendingGame.TimeLimit + Info.TimeLimit) / 2);
                     NewGame.TimeRemaining = NewGame.TimeLimit;
                     NewGame.GameBoard = Board.ToString();
@@ -131,135 +133,194 @@ namespace Boggle
 
         public int PlayWord(WordInfo InputObject, string GameID)
         {
-            Game CurrentGame;
-            int score = 0;
+            lock (sync)
+            {
+                Game CurrentGame;
+                int score = 0;
 
-            //All the failure cases for bad input.
-            if (InputObject.Word == null || InputObject.Word.Trim().Length == 0)
-            {
-                SetStatus(Forbidden);
-                return 0;
-            }
-            else if (!GameList.TryGetValue(Int32.Parse(GameID), out CurrentGame) || UserIDs.ContainsKey(InputObject.UserToken))
-            {
-                SetStatus(Forbidden);
-                return 0;
-            }
-            else if (CurrentGame.Player1Token != InputObject.UserToken || CurrentGame.Player2Token != InputObject.UserToken)
-            {
-                SetStatus(Forbidden);
-                return 0;
-            }
-            else if (CurrentGame.GameState != "active")
-            {
-                SetStatus(Conflict);
-                return 0;
-            }
-            else
-            {
-                CurrentGame = new Game();
-                GameList.TryGetValue(Int32.Parse(GameID), out CurrentGame);
-                string word = InputObject.Word.Trim();
-                
-                BoggleBoard Board = new BoggleBoard(CurrentGame.GameBoard);
-
-                //If its player 1 playing the word.
-                if (CurrentGame.Player1Token == InputObject.UserToken)
+                //All the failure cases for bad input.
+                if (InputObject.Word == null || InputObject.Word.Trim().Length == 0)
                 {
-                    if (Board.CanBeFormed(word))
+                    SetStatus(Forbidden);
+                    return 0;
+                }
+                else if (!GameList.TryGetValue(Int32.Parse(GameID), out CurrentGame) || UserIDs.ContainsKey(InputObject.UserToken))
+                {
+                    SetStatus(Forbidden);
+                    return 0;
+                }
+                else if (CurrentGame.Player1.Nickname != InputObject.UserToken || CurrentGame.Player2.Nickname != InputObject.UserToken)
+                {
+                    SetStatus(Forbidden);
+                    return 0;
+                }
+                else if (CurrentGame.GameState != "active")
+                {
+                    SetStatus(Conflict);
+                    return 0;
+                }
+                else
+                {
+                    CurrentGame = new Game();
+                    GameList.TryGetValue(Int32.Parse(GameID), out CurrentGame);
+                    string word = InputObject.Word.Trim();
+
+                    BoggleBoard Board = new BoggleBoard(CurrentGame.GameBoard);
+
+                    //If its player 1 playing the word.
+                    if (CurrentGame.Player1.Nickname == InputObject.UserToken)
                     {
-                        if (CurrentGame.Player1WordList.ContainsKey(word))
+                        if (Board.CanBeFormed(word))
                         {
-                            score = 0;
+                            if (CurrentGame.Player1.WordsPlayed.ContainsKey(word))
+                            {
+                                score = 0;
+                            }
+                            else if (word.Length <= 3)
+                            {
+                                score = 0;
+                            }
+                            else if (word.Length > 3 && word.Length <= 5)
+                            {
+                                score = 1;
+                            }
+                            else if (word.Length == 6)
+                            {
+                                score = 3;
+                            }
+                            else if (word.Length == 7)
+                            {
+                                score = 5;
+                            }
+                            else if (word.Length > 7)
+                            {
+                                score = 11;
+                            }
+                            else
+                            {
+                                score = -1;
+                            }
+                            CurrentGame.Player1.WordsPlayed.Add(word, score);
+                            CurrentGame.Player1.Score += score;
                         }
-                        else if (word.Length <= 3)
+                    }
+
+                    //If its player 2 playing the word.
+                    if (CurrentGame.Player2.Nickname == InputObject.UserToken)
+                    {
+                        if (Board.CanBeFormed(word))
                         {
-                            score = 0;
+                            if (CurrentGame.Player2.WordsPlayed.ContainsKey(word))
+                            {
+                                score = 0;
+                            }
+                            else if (word.Length <= 3)
+                            {
+                                score = 0;
+                            }
+                            else if (word.Length > 3 && word.Length <= 5)
+                            {
+                                score = 1;
+                            }
+                            else if (word.Length == 6)
+                            {
+                                score = 3;
+                            }
+                            else if (word.Length == 7)
+                            {
+                                score = 5;
+                            }
+                            else if (word.Length > 7)
+                            {
+                                score = 11;
+                            }
+                            else
+                            {
+                                score = -1;
+                            }
+                            CurrentGame.Player2.WordsPlayed.Add(word, score);
+                            CurrentGame.Player2.Score += score;
                         }
-                        else if (word.Length > 3 && word.Length <= 5)
-                        {
-                            score = 1;
-                        }
-                        else if (word.Length == 6)
-                        {
-                            score = 3;
-                        }
-                        else if (word.Length == 7)
-                        {
-                            score = 5;
-                        }
-                        else if (word.Length > 7)
-                        {
-                            score = 11;
-                        }
-                        else
-                        {
-                            score = -1;
-                        }
-                        CurrentGame.Player1WordList.Add(word, score);
-                        CurrentGame.Player1Score += score;
                     }
                 }
 
-                //If its player 2 playing the word.
-                if (CurrentGame.Player2Token == InputObject.UserToken)
-                {
-                    if (Board.CanBeFormed(word))
-                    {
-                        if (CurrentGame.Player2WordList.ContainsKey(word))
-                        {
-                            score = 0;
-                        }
-                        else if (word.Length <= 3)
-                        {
-                            score = 0;
-                        }
-                        else if (word.Length > 3 && word.Length <= 5)
-                        {
-                            score = 1;
-                        }
-                        else if (word.Length == 6)
-                        {
-                            score = 3;
-                        }
-                        else if (word.Length == 7)
-                        {
-                            score = 5;
-                        }
-                        else if (word.Length > 7)
-                        {
-                            score = 11;
-                        }
-                        else
-                        {
-                            score = -1;
-                        }
-                        CurrentGame.Player2WordList.Add(word, score);
-                        CurrentGame.Player2Score += score;
-                    }
-                }
+                // Records the word as being played.
+                SetStatus(OK);
+                return score;
             }
-
-            // Records the word as being played.
-            return score;
         }
 
         /// <summary>
         /// Returns game status information if the GameID is valid
         /// </summary>
         /// <param name="GameID"></param>
-        public Game GetGameStatus(string GameID, bool isBrief)
+        public Game GetGameStatus(string GameID, string isBrief)
         {
-            if (!GameID.Equals(CurrentGameID))
+            lock (sync)
             {
-                SetStatus(Forbidden);
+                Game CurrentGame = new Game();
+
+                //If the game in question is our pending game.
+                if (CurrentPendingGame.GameID == GameID)
+                {
+                    SetStatus(OK);
+                    CurrentGame.GameState = "pending";
+                }
+                //If the game in question is a currently running game.
+                else if (GameList.TryGetValue(Int32.Parse(GameID), out CurrentGame))
+                {
+                    Game ReturnGame = new Game();
+                    //If the game is active
+                    if (CurrentGame.GameState == "active")
+                    {
+                        ReturnGame.GameState = "active";
+
+                        if (isBrief == "yes")
+                        {
+                            
+                            ReturnGame.TimeRemaining = CurrentGame.TimeRemaining;
+                            ReturnGame.Player1.Score = CurrentGame.Player1.Score;
+                            ReturnGame.Player2.Score = CurrentGame.Player2.Score;
+
+                        }
+                        else
+                        {
+                            ReturnGame.GameBoard = CurrentGame.GameBoard;
+                            ReturnGame.TimeLimit = CurrentGame.TimeLimit;
+                            ReturnGame.TimeRemaining = CurrentGame.TimeRemaining;
+                            ReturnGame.Player1.Nickname = CurrentGame.Player1.Nickname;
+                            ReturnGame.Player1.Score = CurrentGame.Player1.Score;
+                            ReturnGame.Player2.Nickname = CurrentGame.Player2.Nickname;
+                            ReturnGame.Player2.Score = CurrentGame.Player2.Score;
+                        }
+
+                    }
+                    //if the game is completed.
+                    else
+                    {
+                        ReturnGame.GameState = "completed";
+
+                        if (isBrief == "yes")
+                        {
+                            ReturnGame.TimeRemaining = 0;
+                            ReturnGame.Player1.Score = CurrentGame.Player1.Score;
+                            ReturnGame.Player2.Score = CurrentGame.Player2.Score;
+                        }
+                        else
+                        {
+
+                        }
+                    }
+                    SetStatus(OK);
+                }
+                //Invalid Game ID case.
+                else
+                {
+                    SetStatus(Forbidden);
+                }
+
+                return CurrentGame;
             }
-            else
-            {
-                SetStatus(OK);
-            }
-            Game game = new Boggle.Game();
-            return game;
         }
 
         /// <summary>

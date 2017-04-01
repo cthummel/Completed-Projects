@@ -60,22 +60,30 @@ namespace Boggle
         public string GameState { get; set; }
 
         [DataMember(EmitDefaultValue = false)]
+        public Player Player1 { get; set; }
+
+        [DataMember(EmitDefaultValue = false)]
+        public Player Player2 { get; set; }
+
+
+
+        [DataMember(EmitDefaultValue = false)]
         public string Player1Token { get; set; }
 
         [DataMember(EmitDefaultValue = false)]
         public string Player2Token { get; set; }
 
-        [DataMember(EmitDefaultValue = false)]
-        public int Player1Score { get; set; }
+        //[DataMember(EmitDefaultValue = false)]
+        //public int Player1Score { get; set; }
 
-        [DataMember(EmitDefaultValue = false)]
-        public int Player2Score { get; set; }
+        //[DataMember(EmitDefaultValue = false)]
+        //public int Player2Score { get; set; }
 
-        [DataMember(EmitDefaultValue = false)]
-        public Dictionary<string, int> Player1WordList { get; set; }
+        //[DataMember(EmitDefaultValue = false)]
+        //public Dictionary<string, int> Player1WordList { get; set; }
 
-        [DataMember(EmitDefaultValue = false)]
-        public Dictionary<string, int> Player2WordList { get; set; }
+        //[DataMember(EmitDefaultValue = false)]
+        //public Dictionary<string, int> Player2WordList { get; set; }
 
         [DataMember(EmitDefaultValue = false)]
         public int TimeLimit { get; set; }
@@ -85,5 +93,16 @@ namespace Boggle
 
         [DataMember(EmitDefaultValue = false)]
         public string GameBoard { get; set; }
+    }
+
+    [DataContract]
+    public class Player
+    {
+        [DataMember(EmitDefaultValue = false)]
+        public string Nickname { get; set; }
+        [DataMember(EmitDefaultValue = false)]
+        public int Score { get; set; }
+        [DataMember(EmitDefaultValue = false)]
+        public Dictionary<string, int> WordsPlayed { get; set; }
     }
 }
