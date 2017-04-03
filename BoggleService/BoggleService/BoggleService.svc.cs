@@ -12,6 +12,7 @@ namespace Boggle
     {
         private Dictionary<string, string> UserIDs = new Dictionary<string, string>();
         private Dictionary<int, Game> GameList = new Dictionary<int, Game>();
+        private Dictionary<int, Timer> TimerList = new Dictionary<int, Timer>();
         private PendingGame CurrentPendingGame = new PendingGame();
         private int CurrentGameID = 0;
         private static readonly object sync = new object();
@@ -260,6 +261,7 @@ namespace Boggle
             lock (sync)
             {
                 Game CurrentGame = new Game();
+                Game ReturnGame = new Game();
 
                 //If the game in question is our pending game.
                 if (CurrentPendingGame.GameID == GameID)
@@ -270,7 +272,7 @@ namespace Boggle
                 //If the game in question is a currently running game.
                 else if (GameList.TryGetValue(Int32.Parse(GameID), out CurrentGame))
                 {
-                    Game ReturnGame = new Game();
+                    
                     //If the game is active
                     if (CurrentGame.GameState == "active")
                     {
@@ -320,7 +322,7 @@ namespace Boggle
                     SetStatus(Forbidden);
                 }
 
-                return CurrentGame;
+                return ReturnGame;
             }
         }
 
