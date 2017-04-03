@@ -81,7 +81,7 @@ namespace Boggle
         }
 
         // Invalid username
-        [TestMethod]
+        [TestMethod] 
         public void CreateUser2()
         {
             string data = "             ";
