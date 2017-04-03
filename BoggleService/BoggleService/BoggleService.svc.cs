@@ -124,7 +124,6 @@ namespace Boggle
             if (!UserIDs.ContainsKey(UserToken.UserToken) || UserToken.UserToken != CurrentPendingGame.Player1Token)
             {
                 SetStatus(Forbidden);
-               
             }
             else
             {
