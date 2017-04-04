@@ -153,10 +153,19 @@ namespace Boggle
         [TestMethod]
         public void GetGameStatus1()
         {
-       //     DoGetAsync("this/is/a/test?name={0}&age={1}, "James", "57"
-       //     Response r = client.DoGetAsync("games/{GameID}", data).Result;
-       //     Assert.AreEqual(Created, r.Status);
-       //     dynamic returndata = r.Data;
+
+            
+            dynamic data = new ExpandoObject();
+            Response r = client.DoGetAsync("games/0").Result;
+            Assert.AreEqual(OK, r.Status);
+            //dynamic returndata = JsonConvert.DeserializeObject(r.Data);
+            Assert.IsNull(r.Data.TimeLimit);
+            Assert.IsNull(r.Data.TimeLeft);
+            Assert.IsNull(r.Data.Board);
+            Assert.IsNull(r.Data.Player1);
+            Assert.IsNull(r.Data.Player2);
+            Assert.AreEqual(null, r.Data.TimeRemaining);
+            Assert.AreEqual("pending", r.Data.GameState);
 
         }
     }
