@@ -19,20 +19,21 @@ namespace Boggle
         /// <summary>
         /// Creates a user for the Boggle game
         /// </summary>
-        public UserID CreateUser(string username)
+        public void CreateUser(string username)
         {
             lock (sync)
             {
-                if (username == "stall")
-                {
-                    Thread.Sleep(5000);
-                }
-
                 if (username == null || username.Trim().Length == 0)
                 {
                     SetStatus(Forbidden);
-                    return null;
+                    return;
                 }
+
+                //if (username == "stall")
+                //{
+                //    Thread.Sleep(5000);
+                //}
+
                 else
                 {
                     string userID = Guid.NewGuid().ToString();
