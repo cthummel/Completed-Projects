@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Threading;
+
 using System.ServiceModel.Web;
 using static System.Net.HttpStatusCode;
 
@@ -12,10 +13,37 @@ namespace Boggle
     {
         private Dictionary<string, string> UserIDs = new Dictionary<string, string>();
         private Dictionary<int, Game> GameList = new Dictionary<int, Game>();
+        private System.Timers.Timer ServerTimer = new System.Timers.Timer(1000);
         private PendingGame CurrentPendingGame = new PendingGame();
         private int CurrentGameID = 0;
         private static readonly object sync = new object();
         
+        
+        
+
+        /// <summary>
+        /// Server side timer ticks every second and updates time remaining on all games.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ServerTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+        {
+            foreach (int GameID in GameList.Keys)
+            {
+                if (GameList[GameID].TimeRemaining <=1)
+                {
+                    GameList[GameID].GameState = "completed";
+                    GameList[GameID].TimeRemaining = 0;
+                }
+                else
+                {
+                    GameList[GameID].TimeRemaining -= 1;
+                }
+            }
+            //throw new NotImplementedException();
+        }
+
+
         /// <summary>
         /// Creates a user for the Boggle game
         /// </summary>
@@ -260,17 +288,19 @@ namespace Boggle
             lock (sync)
             {
                 Game CurrentGame = new Game();
+                Game ReturnGame = new Game();
 
                 //If the game in question is our pending game.
                 if (CurrentPendingGame.GameID == GameID)
                 {
                     SetStatus(OK);
                     CurrentGame.GameState = "pending";
+                    return CurrentGame;
                 }
                 //If the game in question is a currently running game.
                 else if (GameList.TryGetValue(Int32.Parse(GameID), out CurrentGame))
                 {
-                    Game ReturnGame = new Game();
+                    
                     //If the game is active
                     if (CurrentGame.GameState == "active")
                     {
@@ -278,11 +308,9 @@ namespace Boggle
 
                         if (isBrief == "yes")
                         {
-                            
                             ReturnGame.TimeRemaining = CurrentGame.TimeRemaining;
                             ReturnGame.Player1.Score = CurrentGame.Player1.Score;
                             ReturnGame.Player2.Score = CurrentGame.Player2.Score;
-
                         }
                         else
                         {
@@ -309,7 +337,15 @@ namespace Boggle
                         }
                         else
                         {
-
+                            ReturnGame.GameBoard = CurrentGame.GameBoard;
+                            ReturnGame.TimeLimit = CurrentGame.TimeLimit;
+                            ReturnGame.TimeRemaining = CurrentGame.TimeRemaining;
+                            ReturnGame.Player1.Nickname = CurrentGame.Player1.Nickname;
+                            ReturnGame.Player1.Score = CurrentGame.Player1.Score;
+                            ReturnGame.Player1.WordsPlayed = CurrentGame.Player1.WordsPlayed;
+                            ReturnGame.Player2.Nickname = CurrentGame.Player2.Nickname;
+                            ReturnGame.Player2.Score = CurrentGame.Player2.Score;
+                            ReturnGame.Player2.WordsPlayed = CurrentGame.Player2.WordsPlayed;
                         }
                     }
                     SetStatus(OK);
@@ -318,11 +354,15 @@ namespace Boggle
                 else
                 {
                     SetStatus(Forbidden);
+                    return null;
                 }
 
-                return CurrentGame;
+                return ReturnGame;
             }
         }
+
+        
+
 
         /// <summary>
         /// The most recent call to SetStatus determines the response code used when
