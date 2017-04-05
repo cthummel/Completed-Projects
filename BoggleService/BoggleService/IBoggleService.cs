@@ -18,7 +18,7 @@ namespace Boggle
         UserID CreateUser(NameInfo user);
 
         [WebInvoke(Method = "POST", UriTemplate = "games")]
-        GameInfo JoinGame(GameInfo Info);
+        GameIDReturn JoinGame(GameInfo Info);
 
         [WebInvoke(Method = "PUT", UriTemplate = "games")]
         void CancelJoinRequest(UserID UserToken);

@@ -10,16 +10,14 @@ namespace Boggle
     /// <summary>
     /// Used for encoding and reading GameInfo JSON objects. The Data members just mean we dont have to use all the parameters when we return.
     /// </summary>
-    [DataContract]
+    //[DataContract]
     public class GameInfo
     {
-        [DataMember(EmitDefaultValue = false)]
-        public string GameID { get; set; }
 
-        [DataMember(EmitDefaultValue = false)]
+        //[DataMember(EmitDefaultValue = false)]
         public string UserToken { get; set; }
 
-        [DataMember(EmitDefaultValue = false)]
+        //[DataMember(EmitDefaultValue = false)]
         public int TimeLimit { get; set; }
     }
 
@@ -31,6 +29,11 @@ namespace Boggle
     public class ScoreReturn
     {
         public int Score { get; set; }
+    }
+
+    public class GameIDReturn
+    {
+        public string GameID { get; set; }
     }
 
     /// <summary>
@@ -57,8 +60,8 @@ namespace Boggle
     {
         public PendingGame()
         {
-            GameID = null;
-            Player1Token = null;
+            GameID = "1";
+            Player1Token = string.Empty;
             TimeLimit = 0;
         }
 

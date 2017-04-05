@@ -93,7 +93,8 @@ namespace Boggle
         [TestMethod]
         public void CreateUser3()
         {
-            string data = "      Hello      ";
+            dynamic data = new ExpandoObject();
+            data.Nickname = "      Hello      ";
             Response r = client.DoPostAsync("users", data).Result;
             Assert.AreEqual(Created, r.Status);
         }
@@ -118,7 +119,7 @@ namespace Boggle
             data.UserToken = "user";
             data.TimeLimit = 6;
             Response r = client.DoPostAsync("games", data).Result;
-            Assert.AreEqual(Accepted, r.Status);
+            Assert.AreEqual(Forbidden, r.Status);
         }
 
         // Null username
@@ -126,11 +127,28 @@ namespace Boggle
         public void JoinGame3()
         {
             GameInfo data = new GameInfo();
-            data.UserToken = null;
+            data.UserToken = "";
             data.TimeLimit = 7;
             Response r = client.DoPostAsync("games", data).Result;
             Assert.AreEqual(Forbidden, r.Status);
         }
+        //Joined Pending game successfully
+        [TestMethod]
+        public void JoinGame4()
+        {
+            dynamic data = new ExpandoObject();
+            data.Nickname = "Player 1";
+            Response r = client.DoPostAsync("users", data).Result;
+            string Token = r.Data.UserToken;
+
+            dynamic data2 = new ExpandoObject();
+            data2.UserToken = Token;
+            data2.TimeLimit = 30;
+            Response r2 = client.DoPostAsync("games", data2).Result;
+            Assert.AreEqual(Accepted, r2.Status);
+
+        }
+
 
         [TestMethod]
         public void CancelJoin1()
@@ -156,7 +174,7 @@ namespace Boggle
 
             
             dynamic data = new ExpandoObject();
-            Response r = client.DoGetAsync("games/0").Result;
+            Response r = client.DoGetAsync("games/1").Result;
             Assert.AreEqual(OK, r.Status);
             //dynamic returndata = JsonConvert.DeserializeObject(r.Data);
             Assert.IsNull(r.Data.TimeLimit);
