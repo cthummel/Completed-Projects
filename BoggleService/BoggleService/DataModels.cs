@@ -23,6 +23,16 @@ namespace Boggle
         public int TimeLimit { get; set; }
     }
 
+    public class NameInfo
+    {
+        public string Nickname { get; set; }
+    }
+
+    public class ScoreReturn
+    {
+        public int Score { get; set; }
+    }
+
     /// <summary>
     /// Used for encoding and reading UserID JSON objects.
     /// </summary>
@@ -47,7 +57,7 @@ namespace Boggle
     {
         public PendingGame()
         {
-            GameID = "0";
+            GameID = null;
             Player1Token = null;
             TimeLimit = 0;
         }

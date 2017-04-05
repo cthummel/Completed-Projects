@@ -165,7 +165,7 @@ namespace Boggle
             Assert.IsNull(r.Data.Player1);
             Assert.IsNull(r.Data.Player2);
             Assert.AreEqual(null, r.Data.TimeRemaining);
-            Assert.AreEqual("pending", r.Data.GameState);
+            Assert.AreEqual("pending", r.Data.GameState.ToString());
 
         }
     }

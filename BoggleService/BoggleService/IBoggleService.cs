@@ -15,7 +15,7 @@ namespace Boggle
         Stream API();
 
         [WebInvoke(Method = "POST", UriTemplate = "users")]
-        UserID CreateUser(string user);
+        UserID CreateUser(NameInfo user);
 
         [WebInvoke(Method = "POST", UriTemplate = "games")]
         GameInfo JoinGame(GameInfo Info);
@@ -24,7 +24,7 @@ namespace Boggle
         void CancelJoinRequest(UserID UserToken);
 
         [WebInvoke(Method = "PUT", UriTemplate = "games/{GameID}")]
-        int PlayWord(WordInfo Word, string GameID);
+        ScoreReturn PlayWord(WordInfo Word, string GameID);
 
         [WebInvoke(Method = "GET", UriTemplate = "games/{GameID}?Brief={makebrief}")]
         Game GetGameStatus(string GameID, string makebrief);
