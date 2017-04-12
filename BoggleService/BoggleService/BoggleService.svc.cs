@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Threading;
+using System.Diagnostics;
 
 using System.ServiceModel.Web;
 using static System.Net.HttpStatusCode;
@@ -12,14 +13,21 @@ namespace Boggle
     public class BoggleService : IBoggleService
     {
         private readonly static Dictionary<string, string> UserIDs = new Dictionary<string, string>();
-        /// <summary>
-        /// Maps gameIDs to Game data structures.
-        /// </summary>
         private readonly static Dictionary<int, Game> GameList = new Dictionary<int, Game>();
         private static System.Timers.Timer ServerTimer = new System.Timers.Timer(1000);
-        private PendingGame CurrentPendingGame = new PendingGame();
+        private static Game CurrentPendingGame = new Game();
         private static readonly object sync = new object();
         
+        static BoggleService()
+        {
+            CurrentPendingGame.GameState = "pending";
+            CurrentPendingGame.Player1Token = null;
+            CurrentPendingGame.TimeLimit = 0;
+            GameList.Add(1, CurrentPendingGame);
+
+            ServerTimer.Start();
+        }
+
 
         /// <summary>
         /// Server side timer ticks every second and updates time remaining on all games.
@@ -28,19 +36,24 @@ namespace Boggle
         /// <param name="e"></param>
         private void ServerTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
         {
-            foreach (int GameID in GameList.Keys)
+            lock (sync)
             {
-                if (GameList[GameID].TimeRemaining <=1)
+                foreach (int GameID in GameList.Keys)
                 {
-                    GameList[GameID].GameState = "completed";
-                    GameList[GameID].TimeRemaining = 0;
-                }
-                else
-                {
-                    GameList[GameID].TimeRemaining -= 1;
+                    if (GameList[GameID].GameState == "active")
+                    {
+                        if (GameList[GameID].TimeRemaining == 1)
+                        {
+                            GameList[GameID].GameState = "completed";
+                            GameList[GameID].TimeRemaining = 0;
+                        }
+                        else
+                        {
+                            GameList[GameID].TimeRemaining -= 1;
+                        }
+                    }
                 }
             }
-            //throw new NotImplementedException();
         }
 
 
@@ -81,6 +94,8 @@ namespace Boggle
             lock (sync)
             {
                 GameIDReturn ReturnInfo = new GameIDReturn();
+                //string ReturnInfo = string.Empty;
+
                 string nickname;
                 //!UserIDs.ContainsKey(Info.UserToken) ||
                 if ( Info.TimeLimit < 5 || Info.TimeLimit > 120)
@@ -93,46 +108,70 @@ namespace Boggle
                     SetStatus(Forbidden);
                     return ReturnInfo;
                 }
+                //If the same player tries to join the pending game against himself.
                 else if (CurrentPendingGame.Player1Token == Info.UserToken)
                 {
                     SetStatus(Conflict);
                     return ReturnInfo;
                 }
-                if (CurrentPendingGame.Player1Token != string.Empty)
+                //If the pending game has a player 1 waiting.
+                else if (CurrentPendingGame.Player1Token != null)
                 {
                     Game NewGame = new Game();
-                    BoggleBoard Board = new BoggleBoard();
-                    string PendingGameID = CurrentPendingGame.GameID;
+                    NewGame.Player1 = new Player();
+                    NewGame.Player2 = new Player();
+                    string P1Nickname;
+                    UserIDs.TryGetValue(CurrentPendingGame.Player1Token, out P1Nickname);
 
+                    //Game NewPendingGame = new Game();
+                    BoggleBoard Board = new BoggleBoard();
+                    string PendingGameID = GameList.Keys.Count.ToString();
+
+                    //Start new active game.
                     NewGame.GameState = "active";
                     NewGame.GameBoard = Board.ToString();
                     NewGame.Player1Token = CurrentPendingGame.Player1Token;
                     NewGame.Player2Token = Info.UserToken;
                     NewGame.TimeLimit = (Info.TimeLimit + CurrentPendingGame.TimeLimit) / 2;
                     NewGame.TimeRemaining = NewGame.TimeLimit;
-                    NewGame.Player1.Nickname = UserIDs[CurrentPendingGame.Player1Token];
+                    NewGame.Player1.Nickname = P1Nickname;
                     NewGame.Player1.Score = 0;
                     NewGame.Player1.WordsPlayed = new Dictionary<string, int>();
-                    NewGame.Player2.Nickname = UserIDs[Info.UserToken];
+                    NewGame.Player2.Nickname = Info.UserToken;
                     NewGame.Player2.Score = 0;
                     NewGame.Player2.WordsPlayed = new Dictionary<string, int>();
 
-                    CurrentPendingGame.GameID = (Int32.Parse(PendingGameID) + 1).ToString();
-                    CurrentPendingGame.Player1Token = string.Empty;
+                    //Add an empty pending game.
+                    CurrentPendingGame.Player1Token = null;
                     CurrentPendingGame.TimeLimit = 0;
 
-                    ReturnInfo.GameID = PendingGameID;
+
+                    //Send back information to client.
+                    GameList.Add(GameList.Keys.Count + 1, NewGame);
+                    //GameList.Add(GameList.Keys.Count + 1, NewPendingGame);
+
+                    //ReturnInfo.GameID = (GameList.Keys.Count - 1).ToString();
+                    ReturnInfo.GameID = (GameList.Keys.Count).ToString();
                     SetStatus(Created);
                     return ReturnInfo;
                 }
-                else
+                //If the pending game is empty.
+                else if (CurrentPendingGame.Player1Token == null)
                 {
+                    Console.WriteLine("Here");
+                    //Inputs user data into the pending game.
+                    CurrentPendingGame.GameState = "pending";
                     CurrentPendingGame.Player1Token = Info.UserToken;
                     CurrentPendingGame.TimeLimit = Info.TimeLimit;
-                    ReturnInfo.GameID = CurrentPendingGame.GameID;
+                    
+
+                    //Returns info back to the user.
+                    //ReturnInfo.GameID = GameList.Keys.Count.ToString();
+                    ReturnInfo.GameID = (GameList.Keys.Count + 1).ToString();
                     SetStatus(Accepted);
                     return ReturnInfo;
                 }
+                return ReturnInfo;
             }
         }
 
@@ -167,7 +206,7 @@ namespace Boggle
                     SetStatus(Forbidden);
                     return Score;
                 }
-                if (CurrentPendingGame.GameID == GameID)
+                if (GameList.Keys.Count.ToString() == GameID)
                 {
                     SetStatus(Conflict);
                     return Score;
@@ -290,7 +329,7 @@ namespace Boggle
                 Game ReturnGame = new Game();
 
                 //If the game in question is our pending game.
-                if (CurrentPendingGame.GameID == GameID)
+                if (GameList.Keys.Count.ToString() == GameID)
                 {
                     SetStatus(OK);
                     CurrentGame.GameState = "pending";

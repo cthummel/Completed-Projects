@@ -10,14 +10,10 @@ namespace Boggle
     /// <summary>
     /// Used for encoding and reading GameInfo JSON objects. The Data members just mean we dont have to use all the parameters when we return.
     /// </summary>
-    //[DataContract]
     public class GameInfo
     {
-
-        //[DataMember(EmitDefaultValue = false)]
         public string UserToken { get; set; }
 
-        //[DataMember(EmitDefaultValue = false)]
         public int TimeLimit { get; set; }
     }
 
@@ -53,22 +49,22 @@ namespace Boggle
         public string Word { get; set; }
     }
 
-    /// <summary>
-    /// Creates a PendingGame object
-    /// </summary>
-    public class PendingGame
-    {
-        public PendingGame()
-        {
-            GameID = "1";
-            Player1Token = string.Empty;
-            TimeLimit = 0;
-        }
+    ///// <summary>
+    ///// Creates a PendingGame object
+    ///// </summary>
+    //public class PendingGame
+    //{
+    //    public PendingGame()
+    //    {
+    //        GameID = "1";
+    //        Player1Token = string.Empty;
+    //        TimeLimit = 0;
+    //    }
 
-        public string GameID { get; set; }
-        public string Player1Token { get; set; }
-        public int TimeLimit { get; set; }
-    }
+    //    public string GameID { get; set; }
+    //    public string Player1Token { get; set; }
+    //    public int TimeLimit { get; set; }
+    //}
 
     /// <summary>
     /// Creates a Game object
@@ -105,14 +101,14 @@ namespace Boggle
     /// <summary>
     /// Creates a Player object for use in the Game object. Holds individual player stats.
     /// </summary>
-    [DataContract]
+    
     public class Player
     {
-        [DataMember(EmitDefaultValue = false)]
+        
         public string Nickname { get; set; }
-        [DataMember(EmitDefaultValue = false)]
+        
         public int Score { get; set; }
-        [DataMember(EmitDefaultValue = false)]
+        
         public Dictionary<string, int> WordsPlayed { get; set; }
     }
 
