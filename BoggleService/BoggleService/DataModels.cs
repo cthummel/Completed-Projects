@@ -92,10 +92,10 @@ namespace Boggle
         public int TimeLimit { get; set; }
 
         [DataMember(EmitDefaultValue = false)]
-        public int TimeRemaining { get; set; }
+        public int TimeLeft { get; set; }
 
         [DataMember(EmitDefaultValue = false)]
-        public string GameBoard { get; set; }
+        public string Board { get; set; }
     }
 
     /// <summary>

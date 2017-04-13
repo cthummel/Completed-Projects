@@ -23,9 +23,10 @@ namespace Boggle
             CurrentPendingGame.GameState = "pending";
             CurrentPendingGame.Player1Token = null;
             CurrentPendingGame.TimeLimit = 0;
-            GameList.Add(1, CurrentPendingGame);
-
+            //GameList.Add(1, CurrentPendingGame);
+            ServerTimer.Elapsed += UpdateTimeRemaining;
             ServerTimer.Start();
+            
         }
 
 
@@ -34,7 +35,7 @@ namespace Boggle
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void ServerTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+        private static void UpdateTimeRemaining(object sender, System.Timers.ElapsedEventArgs e)
         {
             lock (sync)
             {
@@ -42,14 +43,14 @@ namespace Boggle
                 {
                     if (GameList[GameID].GameState == "active")
                     {
-                        if (GameList[GameID].TimeRemaining == 1)
+                        if (GameList[GameID].TimeLeft == 1)
                         {
                             GameList[GameID].GameState = "completed";
-                            GameList[GameID].TimeRemaining = 0;
+                            GameList[GameID].TimeLeft = 0;
                         }
                         else
                         {
-                            GameList[GameID].TimeRemaining -= 1;
+                            GameList[GameID].TimeLeft -= 1;
                         }
                     }
                 }
@@ -129,15 +130,15 @@ namespace Boggle
 
                     //Start new active game.
                     NewGame.GameState = "active";
-                    NewGame.GameBoard = Board.ToString();
+                    NewGame.Board = Board.ToString();
                     NewGame.Player1Token = CurrentPendingGame.Player1Token;
                     NewGame.Player2Token = Info.UserToken;
                     NewGame.TimeLimit = (Info.TimeLimit + CurrentPendingGame.TimeLimit) / 2;
-                    NewGame.TimeRemaining = NewGame.TimeLimit;
+                    NewGame.TimeLeft = NewGame.TimeLimit;
                     NewGame.Player1.Nickname = P1Nickname;
                     NewGame.Player1.Score = 0;
                     NewGame.Player1.WordsPlayed = new Dictionary<string, int>();
-                    NewGame.Player2.Nickname = Info.UserToken;
+                    NewGame.Player2.Nickname = UserIDs[Info.UserToken];
                     NewGame.Player2.Score = 0;
                     NewGame.Player2.WordsPlayed = new Dictionary<string, int>();
 
@@ -158,7 +159,6 @@ namespace Boggle
                 //If the pending game is empty.
                 else if (CurrentPendingGame.Player1Token == null)
                 {
-                    Console.WriteLine("Here");
                     //Inputs user data into the pending game.
                     CurrentPendingGame.GameState = "pending";
                     CurrentPendingGame.Player1Token = Info.UserToken;
@@ -206,49 +206,56 @@ namespace Boggle
                     SetStatus(Forbidden);
                     return Score;
                 }
-                if (GameList.Keys.Count.ToString() == GameID)
+                //Playing a word in a pending game.
+                if ((GameList.Keys.Count + 1).ToString() == GameID)
                 {
                     SetStatus(Conflict);
                     return Score;
                 }
-                if (!GameList.ContainsKey(Int32.Parse(GameID)) || UserIDs.ContainsKey(InputObject.UserToken))
+                //Invalid GameID
+                if (!GameList.TryGetValue(Int32.Parse(GameID), out CurrentGame) || !UserIDs.ContainsKey(InputObject.UserToken))
                 {
                     SetStatus(Forbidden);
                     return Score;
                 }
-
-                //GameList.TryGetValue(Int32.Parse(GameID), out CurrentGame);
-
-                else if (GameList[Int32.Parse(GameID)].Player1Token != InputObject.UserToken && GameList[Int32.Parse(GameID)].Player2Token != InputObject.UserToken)
+                else if (CurrentGame.Player1Token != InputObject.UserToken && CurrentGame.Player2Token != InputObject.UserToken)
                 {
                     SetStatus(Forbidden);
                     return Score;
                 }
-                
+                else if (CurrentGame.GameState != "active")
+                {
+                    SetStatus(Conflict);
+                    return Score;
+                }
                 else
                 {
                     CurrentGame = new Game();
                     GameList.TryGetValue(Int32.Parse(GameID), out CurrentGame);
                     string word = InputObject.Word.Trim();
 
-                    BoggleBoard Board = new BoggleBoard(CurrentGame.GameBoard);
+                    BoggleBoard Board = new BoggleBoard(CurrentGame.Board);
 
                     //If its player 1 playing the word.
                     if (CurrentGame.Player1Token == InputObject.UserToken)
                     {
-                        if (Board.CanBeFormed(word))
+                        if (word.Length < 3)
+                        {
+                            internalscore = 0;
+                        }
+                        else if (Board.CanBeFormed(word))
                         {
                             if (CurrentGame.Player1.WordsPlayed.ContainsKey(word))
                             {
                                 internalscore = 0;
                             }
-                            else if (word.Length <= 3)
-                            {
-                                internalscore = 0;
-                            }
-                            else if (word.Length > 3 && word.Length <= 5)
+                            else if (word.Length == 3 || word.Length == 4)
                             {
                                 internalscore = 1;
+                            }
+                            else if (word.Length == 5)
+                            {
+                                internalscore = 2;
                             }
                             else if (word.Length == 6)
                             {
@@ -262,31 +269,39 @@ namespace Boggle
                             {
                                 internalscore = 11;
                             }
-                            else
-                            {
-                                internalscore = -1;
-                            }
+                           
                             CurrentGame.Player1.WordsPlayed.Add(word, internalscore);
                             CurrentGame.Player1.Score += internalscore;
                         }
+                        else
+                        {
+                            internalscore = -1;
+                            CurrentGame.Player1.WordsPlayed.Add(word, internalscore);
+                            CurrentGame.Player1.Score += internalscore;
+                        }
+                        GameList[Int32.Parse(GameID)] = CurrentGame;
                     }
 
                     //If its player 2 playing the word.
                     if (CurrentGame.Player2Token == InputObject.UserToken)
                     {
-                        if (Board.CanBeFormed(word))
+                        if (word.Length < 3)
+                        {
+                            internalscore = 0;
+                        }
+                        else if (Board.CanBeFormed(word))
                         {
                             if (CurrentGame.Player2.WordsPlayed.ContainsKey(word))
                             {
                                 internalscore = 0;
                             }
-                            else if (word.Length <= 3)
-                            {
-                                internalscore = 0;
-                            }
-                            else if (word.Length > 3 && word.Length <= 5)
+                            else if (word.Length == 3 || word.Length == 4)
                             {
                                 internalscore = 1;
+                            }
+                            else if (word.Length == 5)
+                            {
+                                internalscore = 2;
                             }
                             else if (word.Length == 6)
                             {
@@ -300,13 +315,17 @@ namespace Boggle
                             {
                                 internalscore = 11;
                             }
-                            else
-                            {
-                                internalscore = -1;
-                            }
+                            
                             CurrentGame.Player2.WordsPlayed.Add(word, internalscore);
                             CurrentGame.Player2.Score += internalscore;
                         }
+                        else
+                        {
+                            internalscore = -1;
+                            CurrentGame.Player2.WordsPlayed.Add(word, internalscore);
+                            CurrentGame.Player2.Score += internalscore;
+                        }
+                        GameList[Int32.Parse(GameID)] = CurrentGame;
                     }
                 }
 
@@ -325,20 +344,27 @@ namespace Boggle
         {
             lock (sync)
             {
+                int InputID;
                 Game CurrentGame = new Game();
                 Game ReturnGame = new Game();
+                ReturnGame.Player1 = new Player();
+                ReturnGame.Player2 = new Player();
 
                 //If the game in question is our pending game.
-                if (GameList.Keys.Count.ToString() == GameID)
+                if ((GameList.Keys.Count + 1).ToString() == GameID)
                 {
                     SetStatus(OK);
                     CurrentGame.GameState = "pending";
                     return CurrentGame;
                 }
+                else if (!Int32.TryParse(GameID, out InputID))
+                {
+                    SetStatus(Forbidden);
+                    return null;
+                }
                 //If the game in question is a currently running game.
                 else if (GameList.TryGetValue(Int32.Parse(GameID), out CurrentGame))
                 {
-                    
                     //If the game is active
                     if (CurrentGame.GameState == "active")
                     {
@@ -346,15 +372,15 @@ namespace Boggle
 
                         if (isBrief == "yes")
                         {
-                            ReturnGame.TimeRemaining = CurrentGame.TimeRemaining;
+                            ReturnGame.TimeLeft = CurrentGame.TimeLeft;
                             ReturnGame.Player1.Score = CurrentGame.Player1.Score;
                             ReturnGame.Player2.Score = CurrentGame.Player2.Score;
                         }
                         else
                         {
-                            ReturnGame.GameBoard = CurrentGame.GameBoard;
+                            ReturnGame.Board = CurrentGame.Board;
                             ReturnGame.TimeLimit = CurrentGame.TimeLimit;
-                            ReturnGame.TimeRemaining = CurrentGame.TimeRemaining;
+                            ReturnGame.TimeLeft = CurrentGame.TimeLeft;
                             ReturnGame.Player1.Nickname = CurrentGame.Player1.Nickname;
                             ReturnGame.Player1.Score = CurrentGame.Player1.Score;
                             ReturnGame.Player2.Nickname = CurrentGame.Player2.Nickname;
@@ -369,15 +395,15 @@ namespace Boggle
 
                         if (isBrief == "yes")
                         {
-                            ReturnGame.TimeRemaining = 0;
+                            ReturnGame.TimeLeft = 0;
                             ReturnGame.Player1.Score = CurrentGame.Player1.Score;
                             ReturnGame.Player2.Score = CurrentGame.Player2.Score;
                         }
                         else
                         {
-                            ReturnGame.GameBoard = CurrentGame.GameBoard;
+                            ReturnGame.Board = CurrentGame.Board;
                             ReturnGame.TimeLimit = CurrentGame.TimeLimit;
-                            ReturnGame.TimeRemaining = CurrentGame.TimeRemaining;
+                            ReturnGame.TimeLeft = 0;
                             ReturnGame.Player1.Nickname = CurrentGame.Player1.Nickname;
                             ReturnGame.Player1.Score = CurrentGame.Player1.Score;
                             ReturnGame.Player1.WordsPlayed = CurrentGame.Player1.WordsPlayed;
