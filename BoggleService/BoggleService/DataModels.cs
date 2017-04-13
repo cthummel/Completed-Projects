@@ -109,10 +109,20 @@ namespace Boggle
         
         public int Score { get; set; }
         
-        public Dictionary<string, int> WordsPlayed { get; set; }
+        public List<WordScore> WordsPlayed { get; set; }
+    }
+    //public class WordList
+    //{
+    //    List<WordScore> WordsPlayed { get; set; }
+    //}
+
+    public class WordScore
+    {
+        public string Word { get; set; }
+        public int Score { get; set; }
+
     }
 
-   
 
 
 }

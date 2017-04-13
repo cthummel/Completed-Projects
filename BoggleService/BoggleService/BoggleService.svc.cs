@@ -137,10 +137,10 @@ namespace Boggle
                     NewGame.TimeLeft = NewGame.TimeLimit;
                     NewGame.Player1.Nickname = P1Nickname;
                     NewGame.Player1.Score = 0;
-                    NewGame.Player1.WordsPlayed = new Dictionary<string, int>();
+                    NewGame.Player1.WordsPlayed = new List<WordScore>();
                     NewGame.Player2.Nickname = UserIDs[Info.UserToken];
                     NewGame.Player2.Score = 0;
-                    NewGame.Player2.WordsPlayed = new Dictionary<string, int>();
+                    NewGame.Player2.WordsPlayed = new List<WordScore>();
 
                     //Add an empty pending game.
                     CurrentPendingGame.Player1Token = null;
@@ -245,11 +245,20 @@ namespace Boggle
                         }
                         else if (Board.CanBeFormed(word))
                         {
-                            if (CurrentGame.Player1.WordsPlayed.ContainsKey(word))
+                            foreach (WordScore obj in CurrentGame.Player1.WordsPlayed)
                             {
-                                internalscore = 0;
+                                if (obj.Word == word)
+                                {
+                                    internalscore = 0;
+                                    break;
+                                }
                             }
-                            else if (word.Length == 3 || word.Length == 4)
+
+                            //if (CurrentGame.Player1.WordsPlayed)
+                            //{
+                            //    internalscore = 0;
+                            //}
+                            if (word.Length == 3 || word.Length == 4)
                             {
                                 internalscore = 1;
                             }
@@ -269,14 +278,19 @@ namespace Boggle
                             {
                                 internalscore = 11;
                             }
-                           
-                            CurrentGame.Player1.WordsPlayed.Add(word, internalscore);
+                            WordScore CurrentPair = new WordScore();
+                            CurrentPair.Score = internalscore;
+                            CurrentPair.Word = word;
+                            CurrentGame.Player1.WordsPlayed.Add(CurrentPair);
                             CurrentGame.Player1.Score += internalscore;
                         }
                         else
                         {
                             internalscore = -1;
-                            CurrentGame.Player1.WordsPlayed.Add(word, internalscore);
+                            WordScore CurrentPair = new WordScore();
+                            CurrentPair.Score = internalscore;
+                            CurrentPair.Word = word;
+                            CurrentGame.Player1.WordsPlayed.Add(CurrentPair);
                             CurrentGame.Player1.Score += internalscore;
                         }
                         GameList[Int32.Parse(GameID)] = CurrentGame;
@@ -291,11 +305,15 @@ namespace Boggle
                         }
                         else if (Board.CanBeFormed(word))
                         {
-                            if (CurrentGame.Player2.WordsPlayed.ContainsKey(word))
+                            foreach (WordScore obj in CurrentGame.Player1.WordsPlayed)
                             {
-                                internalscore = 0;
+                                if (obj.Word == word)
+                                {
+                                    internalscore = 0;
+                                    break;
+                                }
                             }
-                            else if (word.Length == 3 || word.Length == 4)
+                            if (word.Length == 3 || word.Length == 4)
                             {
                                 internalscore = 1;
                             }
@@ -315,14 +333,19 @@ namespace Boggle
                             {
                                 internalscore = 11;
                             }
-                            
-                            CurrentGame.Player2.WordsPlayed.Add(word, internalscore);
+                            WordScore CurrentPair = new WordScore();
+                            CurrentPair.Score = internalscore;
+                            CurrentPair.Word = word;
+                            CurrentGame.Player2.WordsPlayed.Add(CurrentPair);
                             CurrentGame.Player2.Score += internalscore;
                         }
                         else
                         {
                             internalscore = -1;
-                            CurrentGame.Player2.WordsPlayed.Add(word, internalscore);
+                            WordScore CurrentPair = new WordScore();
+                            CurrentPair.Score = internalscore;
+                            CurrentPair.Word = word;
+                            CurrentGame.Player2.WordsPlayed.Add(CurrentPair);
                             CurrentGame.Player2.Score += internalscore;
                         }
                         GameList[Int32.Parse(GameID)] = CurrentGame;
@@ -389,13 +412,13 @@ namespace Boggle
 
                     }
                     //if the game is completed.
-                    else
+                    else if (CurrentGame.GameState == "completed")
                     {
                         ReturnGame.GameState = "completed";
 
                         if (isBrief == "yes")
                         {
-                            ReturnGame.TimeLeft = 0;
+                            ReturnGame.TimeLeft = CurrentGame.TimeLeft;
                             ReturnGame.Player1.Score = CurrentGame.Player1.Score;
                             ReturnGame.Player2.Score = CurrentGame.Player2.Score;
                         }
@@ -403,7 +426,7 @@ namespace Boggle
                         {
                             ReturnGame.Board = CurrentGame.Board;
                             ReturnGame.TimeLimit = CurrentGame.TimeLimit;
-                            ReturnGame.TimeLeft = 0;
+                            ReturnGame.TimeLeft = CurrentGame.TimeLeft;
                             ReturnGame.Player1.Nickname = CurrentGame.Player1.Nickname;
                             ReturnGame.Player1.Score = CurrentGame.Player1.Score;
                             ReturnGame.Player1.WordsPlayed = CurrentGame.Player1.WordsPlayed;
@@ -413,6 +436,7 @@ namespace Boggle
                         }
                     }
                     SetStatus(OK);
+                    return ReturnGame;
                 }
                 //Invalid Game ID case.
                 else
@@ -420,13 +444,8 @@ namespace Boggle
                     SetStatus(Forbidden);
                     return null;
                 }
-
-                return ReturnGame;
             }
         }
-
-        
-
 
         /// <summary>
         /// The most recent call to SetStatus determines the response code used when
