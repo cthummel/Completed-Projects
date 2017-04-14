@@ -206,13 +206,13 @@ namespace Boggle
                     SetStatus(Forbidden);
                     return Score;
                 }
-                //Playing a word in a pending game.
+                // Playing a word in a pending game.
                 if ((GameList.Keys.Count + 1).ToString() == GameID)
                 {
                     SetStatus(Conflict);
                     return Score;
                 }
-                //Invalid GameID
+                // Invalid GameID
                 if (!GameList.TryGetValue(Int32.Parse(GameID), out CurrentGame) || !UserIDs.ContainsKey(InputObject.UserToken))
                 {
                     SetStatus(Forbidden);
@@ -236,12 +236,18 @@ namespace Boggle
 
                     BoggleBoard Board = new BoggleBoard(CurrentGame.Board);
 
-                    //If its player 1 playing the word.
+                    // If its player 1 playing the word.
                     if (CurrentGame.Player1Token == InputObject.UserToken)
                     {
                         if (word.Length < 3)
                         {
                             internalscore = 0;
+
+                            // repeated code across branches, can be cleaned up later. this is to fix branching issues, will need to be done with player 2 as well
+                            WordScore CurrentPair = new WordScore();
+                            CurrentPair.Score = internalscore;
+                            CurrentPair.Word = word;
+                            CurrentGame.Player1.WordsPlayed.Add(CurrentPair);
                         }
                         else if (Board.CanBeFormed(word))
                         {
@@ -254,10 +260,6 @@ namespace Boggle
                                 }
                             }
 
-                            //if (CurrentGame.Player1.WordsPlayed)
-                            //{
-                            //    internalscore = 0;
-                            //}
                             if (word.Length == 3 || word.Length == 4)
                             {
                                 internalscore = 1;
@@ -302,6 +304,12 @@ namespace Boggle
                         if (word.Length < 3)
                         {
                             internalscore = 0;
+
+                            // repeated code across branches, can be cleaned up later. this is to fix branching issues, will need to be done with player 2 as well
+                            WordScore CurrentPair = new WordScore();
+                            CurrentPair.Score = internalscore;
+                            CurrentPair.Word = word;
+                            CurrentGame.Player2.WordsPlayed.Add(CurrentPair);
                         }
                         else if (Board.CanBeFormed(word))
                         {
