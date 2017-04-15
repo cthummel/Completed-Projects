@@ -60,7 +60,7 @@ namespace Boggle
         /// <summary>
         /// Creates a user for the Boggle game
         /// </summary>
-        public UserID CreateUser(NameInfo username)
+        public UserID CreateUser(NameInfo username, out HttpStatusCode status)
         {
             lock (sync)
             {
@@ -71,14 +71,14 @@ namespace Boggle
 
                 if (username.Nickname == null || username.Nickname.Trim().Length == 0)
                 {
-                    //SetStatus(Forbidden);
+                    status = Forbidden;
                     return null;
                 }
                 else
                 {
                     string userID = Guid.NewGuid().ToString();
                     UserIDs.Add(userID, username.Nickname.Trim());
-                    //SetStatus(Created);
+                    status = Created;
                     UserID ID = new UserID();
                     ID.UserToken = userID;
                     return ID;
@@ -89,7 +89,7 @@ namespace Boggle
         /// <summary>
         /// Invokes a user token to join the game
         /// </summary>
-        public GameIDReturn JoinGame(GameInfo Info)
+        public GameIDReturn JoinGame(GameInfo Info, out HttpStatusCode status)
         {
             lock (sync)
             {
@@ -100,18 +100,18 @@ namespace Boggle
                 //!UserIDs.ContainsKey(Info.UserToken) ||
                 if (Info.TimeLimit < 5 || Info.TimeLimit > 120)
                 {
-                    //SetStatus(Forbidden);
+                    status = Forbidden;
                     return ReturnInfo;
                 }
                 else if (!UserIDs.TryGetValue(Info.UserToken, out nickname))
                 {
-                    //SetStatus(Forbidden);
+                    status = Forbidden;
                     return ReturnInfo;
                 }
                 //If the same player tries to join the pending game against himself.
                 else if (CurrentPendingGame.Player1Token == Info.UserToken)
                 {
-                    //SetStatus(Conflict);
+                    status = Conflict;
                     return ReturnInfo;
                 }
                 //If the pending game has a player 1 waiting.
@@ -152,11 +152,11 @@ namespace Boggle
 
                     //ReturnInfo.GameID = (GameList.Keys.Count - 1).ToString();
                     ReturnInfo.GameID = (GameList.Keys.Count).ToString();
-                    //SetStatus(Created);
+                    status = Created;
                     return ReturnInfo;
                 }
                 //If the pending game is empty.
-                else if (CurrentPendingGame.Player1Token == null)
+                else
                 {
                     //Inputs user data into the pending game.
                     CurrentPendingGame.GameState = "pending";
@@ -167,30 +167,29 @@ namespace Boggle
                     //Returns info back to the user.
                     //ReturnInfo.GameID = GameList.Keys.Count.ToString();
                     ReturnInfo.GameID = (GameList.Keys.Count + 1).ToString();
-                    //SetStatus(Accepted);
+                    status = Accepted;
                     return ReturnInfo;
                 }
-                return ReturnInfo;
             }
         }
 
         /// <summary>
         /// Cancels a JoinGame request.
         /// </summary>
-        public void CancelJoinRequest(UserID UserToken)
+        public void CancelJoinRequest(UserID UserToken, out HttpStatusCode status)
         {
             if (!UserIDs.ContainsKey(UserToken.UserToken) || UserToken.UserToken != CurrentPendingGame.Player1Token)
             {
-                //SetStatus(Forbidden);
+                status = Forbidden;
             }
             else
             {
                 CurrentPendingGame.Player1Token = null;
-                //SetStatus(OK);
+                status = OK;
             }
         }
 
-        public ScoreReturn PlayWord(WordInfo InputObject, string GameID)
+        public ScoreReturn PlayWord(WordInfo InputObject, string GameID, out HttpStatusCode status)
         {
             lock (sync)
             {
@@ -202,29 +201,29 @@ namespace Boggle
                 //All the failure cases for bad input.
                 if (InputObject.Word == null || InputObject.Word.Trim().Length == 0)
                 {
-                    //SetStatus(Forbidden);
+                    status = Forbidden;
                     return Score;
                 }
                 // Playing a word in a pending game.
                 if ((GameList.Keys.Count + 1).ToString() == GameID)
                 {
-                    //SetStatus(Conflict);
+                    status = Conflict;
                     return Score;
                 }
                 // Invalid GameID
                 if (!GameList.TryGetValue(Int32.Parse(GameID), out CurrentGame) || !UserIDs.ContainsKey(InputObject.UserToken))
                 {
-                    //SetStatus(Forbidden);
+                    status = Forbidden;
                     return Score;
                 }
                 else if (CurrentGame.Player1Token != InputObject.UserToken && CurrentGame.Player2Token != InputObject.UserToken)
                 {
-                    //SetStatus(Forbidden);
+                    status = Forbidden;
                     return Score;
                 }
                 else if (CurrentGame.GameState != "active")
                 {
-                    //SetStatus(Conflict);
+                    status = Conflict;
                     return Score;
                 }
                 else
@@ -360,7 +359,7 @@ namespace Boggle
                 }
 
                 // Records the word as being played.
-                //SetStatus(OK);
+                status = OK;
                 Score.Score = internalscore;
                 return Score;
             }
@@ -370,7 +369,7 @@ namespace Boggle
         /// Returns game status information if the GameID is valid
         /// </summary>
         /// <param name="GameID"></param>
-        public Game GetGameStatus(string GameID, string isBrief)
+        public Game GetGameStatus(string GameID, string isBrief, out HttpStatusCode status)
         {
             lock (sync)
             {
@@ -383,13 +382,13 @@ namespace Boggle
                 //If the game in question is our pending game.
                 if ((GameList.Keys.Count + 1).ToString() == GameID)
                 {
-                    //SetStatus(OK);
+                    status = OK;
                     CurrentGame.GameState = "pending";
                     return CurrentGame;
                 }
                 else if (!Int32.TryParse(GameID, out InputID))
                 {
-                    //SetStatus(Forbidden);
+                    status = Forbidden;
                     return null;
                 }
                 //If the game in question is a currently running game.
@@ -442,13 +441,13 @@ namespace Boggle
                             ReturnGame.Player2.WordsPlayed = CurrentGame.Player2.WordsPlayed;
                         }
                     }
-                    //SetStatus(OK);
+                    status = OK;
                     return ReturnGame;
                 }
                 //Invalid Game ID case.
                 else
                 {
-                    //SetStatus(Forbidden);
+                    status = Forbidden;
                     return null;
                 }
             }
