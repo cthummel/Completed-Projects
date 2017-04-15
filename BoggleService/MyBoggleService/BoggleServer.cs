@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -63,6 +64,9 @@ namespace Boggle
             new ClientConnection(s);
         }
     }
+
+    r
+
 
     /// <summary>
     /// Represents a connection with a remote client.  Takes care of receiving and sending
@@ -135,24 +139,14 @@ namespace Boggle
         /// 
         /// </summary>
         /// <param name=""></param>
-        private void ParseMessage (StringBuilder message)
+        private void ParseMessage (string message)
         {
-
-            //In here we need to parse the incoming message to run whichever service they asked for. (Create User, JoinGame, etc.)
-            //// Echo any complete lines, after capitalizing them
-            //int lastNewline = -1;
-            //int start = 0;
-            //for (int i = 0; i < incoming.Length; i++)
-            //{
-            //    if (incoming[i] == '\n')
-            //    {
-            //        String line = incoming.ToString(start, i + 1 - start);
-            //        SendMessage(line.ToUpper());
-            //        lastNewline = i;
-            //        start = i + 1;
-            //    }
-            //}
-            //incoming.Remove(0, lastNewline + 1);
+            Regex parser = new Regex(RequestType);
+            MatchCollection matches = parser.Matches(message);
+            foreach (Match match in matches)
+            {
+                string type = match.Groups[0].ToString();
+            }
         }
 
         /// <summary>
@@ -167,27 +161,49 @@ namespace Boggle
             // Report that to the console and close our socket.
             if (bytesRead == 0)
             {
-                Console.WriteLine("Socket closed"); 
+                /Console.WriteLine("Socket closed"); 
+
+
                 socket.Close();
             }
+
+
 
             // Otherwise, decode and display the incoming bytes.  Then request more bytes.
             else
             {
-
-                // Convert the bytes into characters and appending to incoming
+/*                // Convert the bytes into characters and appending to incoming
                 int charsRead = decoder.GetChars(incomingBytes, 0, bytesRead, incomingChars, 0, false);
                 incoming.Append(incomingChars, 0, charsRead);
-                
+                Console.WriteLine(incoming);
 
-                ParseMessage(incoming);
+                //In here we need to parse the incoming message to run whichever service they asked for. (Create User, JoinGame, etc.)
+
+
+
+
+
+                //// Echo any complete lines, after capitalizing them
+                //int lastNewline = -1;
+                //int start = 0;
+                //for (int i = 0; i < incoming.Length; i++)
+                //{
+                //    if (incoming[i] == '\n')
+                //    {
+                //        String line = incoming.ToString(start, i + 1 - start);
+                //        SendMessage(line.ToUpper());
+                //        lastNewline = i;
+                //        start = i + 1;
+                //    }
+                //}
+                //incoming.Remove(0, lastNewline + 1);
 
                 //Need to reset incoming.
-                incoming = new StringBuilder();
+                //incoming = new StringBuilder();
 
                 // Ask for some more data
                 socket.BeginReceive(incomingBytes, 0, incomingBytes.Length,
-                    SocketFlags.None, MessageReceived, null);
+                    SocketFlags.None, MessageReceived, null); */
             } 
         }
 
