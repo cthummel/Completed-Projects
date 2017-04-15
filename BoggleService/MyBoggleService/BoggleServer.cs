@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -63,6 +64,9 @@ namespace Boggle
             new ClientConnection(s);
         }
     }
+
+    r
+
 
     /// <summary>
     /// Represents a connection with a remote client.  Takes care of receiving and sending
@@ -137,7 +141,12 @@ namespace Boggle
         /// <param name=""></param>
         private void ParseMessage (string message)
         {
-
+            Regex parser = new Regex(RequestType);
+            MatchCollection matches = parser.Matches(message);
+            foreach (Match match in matches)
+            {
+                string type = match.Groups[0].ToString();
+            }
         }
 
         /// <summary>
@@ -152,7 +161,9 @@ namespace Boggle
             // Report that to the console and close our socket.
             if (bytesRead == 0)
             {
-                Console.WriteLine("Socket closed"); 
+                /Console.WriteLine("Socket closed"); 
+
+
                 socket.Close();
             }
 
