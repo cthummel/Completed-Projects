@@ -49,30 +49,9 @@ namespace Boggle
         public string Word { get; set; }
     }
 
-    ///// <summary>
-    ///// Creates a PendingGame object
-    ///// </summary>
-    //public class PendingGame
-    //{
-    //    public PendingGame()
-    //    {
-    //        GameID = "1";
-    //        Player1Token = string.Empty;
-    //        TimeLimit = 0;
-    //    }
-
-    //    public string GameID { get; set; }
-    //    public string Player1Token { get; set; }
-    //    public int TimeLimit { get; set; }
-    //}
-
-    /// <summary>
-    /// Creates a Game object
-    /// </summary>
     [DataContract]
     public class Game
     {
-
         [DataMember]
         public string GameState { get; set; }
 
@@ -101,28 +80,18 @@ namespace Boggle
     /// <summary>
     /// Creates a Player object for use in the Game object. Holds individual player stats.
     /// </summary>
-    
     public class Player
     {
-        
         public string Nickname { get; set; }
         
         public int Score { get; set; }
         
         public List<WordScore> WordsPlayed { get; set; }
     }
-    //public class WordList
-    //{
-    //    List<WordScore> WordsPlayed { get; set; }
-    //}
 
     public class WordScore
     {
         public string Word { get; set; }
         public int Score { get; set; }
-
     }
-
-
-
 }

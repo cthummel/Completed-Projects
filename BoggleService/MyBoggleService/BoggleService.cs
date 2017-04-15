@@ -119,11 +119,11 @@ namespace Boggle
                     string P1Nickname;
                     UserIDs.TryGetValue(CurrentPendingGame.Player1Token, out P1Nickname);
 
-                    //Game NewPendingGame = new Game();
+                    // Game NewPendingGame = new Game();
                     BoggleBoard Board = new BoggleBoard();
                     string PendingGameID = GameList.Keys.Count.ToString();
 
-                    //Start new active game.
+                    // Start new active game.
                     NewGame.GameState = "active";
                     NewGame.Board = Board.ToString();
                     NewGame.Player1Token = CurrentPendingGame.Player1Token;

@@ -47,7 +47,7 @@
     <Compile Include="BoggleBoard.cs" />
     <Compile Include="BoggleService.cs" />
     <Compile Include="DataModels.cs" />
-    <Compile Include="MyBoggleService.cs" />
+    <Compile Include="BoggleServer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
