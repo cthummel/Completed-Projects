@@ -156,7 +156,7 @@ namespace Boggle
                     return ReturnInfo;
                 }
                 //If the pending game is empty.
-                else if (CurrentPendingGame.Player1Token == null)
+                else 
                 {
                     //Inputs user data into the pending game.
                     CurrentPendingGame.GameState = "pending";
@@ -170,7 +170,6 @@ namespace Boggle
                     //SetStatus(Accepted);
                     return ReturnInfo;
                 }
-                return ReturnInfo;
             }
         }
 

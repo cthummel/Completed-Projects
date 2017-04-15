@@ -183,13 +183,13 @@ namespace Boggle
                 // If there's not a send ongoing, start one.
                 if (!sendIsOngoing)
                 {
-                    Console.WriteLine("Appending a " + lines.Length + " char line, starting send mechanism");
+                    //Console.WriteLine("Appending a " + lines.Length + " char line, starting send mechanism");
                     sendIsOngoing = true;
                     SendBytes();
                 }
                 else
                 {
-                    Console.WriteLine("\tAppending a " + lines.Length + " char line, send mechanism already running");
+                    //Console.WriteLine("\tAppending a " + lines.Length + " char line, send mechanism already running");
                 }
             }
         }
