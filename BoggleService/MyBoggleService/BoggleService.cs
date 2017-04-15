@@ -94,10 +94,8 @@ namespace Boggle
             lock (sync)
             {
                 GameIDReturn ReturnInfo = new GameIDReturn();
-                //string ReturnInfo = string.Empty;
 
                 string nickname;
-                //!UserIDs.ContainsKey(Info.UserToken) ||
                 if (Info.TimeLimit < 5 || Info.TimeLimit > 120)
                 {
                     status = Forbidden;
@@ -148,9 +146,7 @@ namespace Boggle
 
                     //Send back information to client.
                     GameList.Add(GameList.Keys.Count + 1, NewGame);
-                    //GameList.Add(GameList.Keys.Count + 1, NewPendingGame);
 
-                    //ReturnInfo.GameID = (GameList.Keys.Count - 1).ToString();
                     ReturnInfo.GameID = (GameList.Keys.Count).ToString();
                     status = Created;
                     return ReturnInfo;
