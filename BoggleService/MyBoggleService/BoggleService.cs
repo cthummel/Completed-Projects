@@ -5,19 +5,19 @@ using System.Net;
 using System.Threading;
 using System.Diagnostics;
 
-using System.ServiceModel.Web;
+
 using static System.Net.HttpStatusCode;
 
 namespace Boggle
 {
-    public class BoggleService : IBoggleService
+    public class BoggleService
     {
         private readonly static Dictionary<string, string> UserIDs = new Dictionary<string, string>();
         private readonly static Dictionary<int, Game> GameList = new Dictionary<int, Game>();
         private static System.Timers.Timer ServerTimer = new System.Timers.Timer(1000);
         private static Game CurrentPendingGame = new Game();
         private static readonly object sync = new object();
-        
+
         static BoggleService()
         {
             CurrentPendingGame.GameState = "pending";
@@ -25,7 +25,7 @@ namespace Boggle
             CurrentPendingGame.TimeLimit = 0;
             ServerTimer.Elapsed += UpdateTimeRemaining;
             ServerTimer.Start();
-            
+
         }
 
 
@@ -71,14 +71,14 @@ namespace Boggle
 
                 if (username.Nickname == null || username.Nickname.Trim().Length == 0)
                 {
-                    SetStatus(Forbidden);
+                    //SetStatus(Forbidden);
                     return null;
                 }
                 else
                 {
                     string userID = Guid.NewGuid().ToString();
                     UserIDs.Add(userID, username.Nickname.Trim());
-                    SetStatus(Created);
+                    //SetStatus(Created);
                     UserID ID = new UserID();
                     ID.UserToken = userID;
                     return ID;
@@ -98,20 +98,20 @@ namespace Boggle
 
                 string nickname;
                 //!UserIDs.ContainsKey(Info.UserToken) ||
-                if ( Info.TimeLimit < 5 || Info.TimeLimit > 120)
+                if (Info.TimeLimit < 5 || Info.TimeLimit > 120)
                 {
-                    SetStatus(Forbidden);
+                    //SetStatus(Forbidden);
                     return ReturnInfo;
                 }
                 else if (!UserIDs.TryGetValue(Info.UserToken, out nickname))
                 {
-                    SetStatus(Forbidden);
+                    //SetStatus(Forbidden);
                     return ReturnInfo;
                 }
                 //If the same player tries to join the pending game against himself.
                 else if (CurrentPendingGame.Player1Token == Info.UserToken)
                 {
-                    SetStatus(Conflict);
+                    //SetStatus(Conflict);
                     return ReturnInfo;
                 }
                 //If the pending game has a player 1 waiting.
@@ -152,7 +152,7 @@ namespace Boggle
 
                     //ReturnInfo.GameID = (GameList.Keys.Count - 1).ToString();
                     ReturnInfo.GameID = (GameList.Keys.Count).ToString();
-                    SetStatus(Created);
+                    //SetStatus(Created);
                     return ReturnInfo;
                 }
                 //If the pending game is empty.
@@ -162,12 +162,12 @@ namespace Boggle
                     CurrentPendingGame.GameState = "pending";
                     CurrentPendingGame.Player1Token = Info.UserToken;
                     CurrentPendingGame.TimeLimit = Info.TimeLimit;
-                    
+
 
                     //Returns info back to the user.
                     //ReturnInfo.GameID = GameList.Keys.Count.ToString();
                     ReturnInfo.GameID = (GameList.Keys.Count + 1).ToString();
-                    SetStatus(Accepted);
+                    //SetStatus(Accepted);
                     return ReturnInfo;
                 }
                 return ReturnInfo;
@@ -181,12 +181,12 @@ namespace Boggle
         {
             if (!UserIDs.ContainsKey(UserToken.UserToken) || UserToken.UserToken != CurrentPendingGame.Player1Token)
             {
-                SetStatus(Forbidden);
+                //SetStatus(Forbidden);
             }
             else
             {
                 CurrentPendingGame.Player1Token = null;
-                SetStatus(OK);
+                //SetStatus(OK);
             }
         }
 
@@ -202,29 +202,29 @@ namespace Boggle
                 //All the failure cases for bad input.
                 if (InputObject.Word == null || InputObject.Word.Trim().Length == 0)
                 {
-                    SetStatus(Forbidden);
+                    //SetStatus(Forbidden);
                     return Score;
                 }
                 // Playing a word in a pending game.
                 if ((GameList.Keys.Count + 1).ToString() == GameID)
                 {
-                    SetStatus(Conflict);
+                    //SetStatus(Conflict);
                     return Score;
                 }
                 // Invalid GameID
                 if (!GameList.TryGetValue(Int32.Parse(GameID), out CurrentGame) || !UserIDs.ContainsKey(InputObject.UserToken))
                 {
-                    SetStatus(Forbidden);
+                    //SetStatus(Forbidden);
                     return Score;
                 }
                 else if (CurrentGame.Player1Token != InputObject.UserToken && CurrentGame.Player2Token != InputObject.UserToken)
                 {
-                    SetStatus(Forbidden);
+                    //SetStatus(Forbidden);
                     return Score;
                 }
                 else if (CurrentGame.GameState != "active")
                 {
-                    SetStatus(Conflict);
+                    //SetStatus(Conflict);
                     return Score;
                 }
                 else
@@ -360,7 +360,7 @@ namespace Boggle
                 }
 
                 // Records the word as being played.
-                SetStatus(OK);
+                //SetStatus(OK);
                 Score.Score = internalscore;
                 return Score;
             }
@@ -383,13 +383,13 @@ namespace Boggle
                 //If the game in question is our pending game.
                 if ((GameList.Keys.Count + 1).ToString() == GameID)
                 {
-                    SetStatus(OK);
+                    //SetStatus(OK);
                     CurrentGame.GameState = "pending";
                     return CurrentGame;
                 }
                 else if (!Int32.TryParse(GameID, out InputID))
                 {
-                    SetStatus(Forbidden);
+                    //SetStatus(Forbidden);
                     return null;
                 }
                 //If the game in question is a currently running game.
@@ -442,37 +442,37 @@ namespace Boggle
                             ReturnGame.Player2.WordsPlayed = CurrentGame.Player2.WordsPlayed;
                         }
                     }
-                    SetStatus(OK);
+                    //SetStatus(OK);
                     return ReturnGame;
                 }
                 //Invalid Game ID case.
                 else
                 {
-                    SetStatus(Forbidden);
+                    //SetStatus(Forbidden);
                     return null;
                 }
             }
         }
+    }
+    //    /// <summary>
+    //    /// The most recent call to SetStatus determines the response code used when
+    //    /// an http response is sent.
+    //    /// </summary>
+    //    /// <param name="status"></param>
+    //    private static void SetStatus(HttpStatusCode status)
+    //    {
+    //        WebOperationContext.Current.OutgoingResponse.StatusCode = status;
+    //    }
 
-        /// <summary>
-        /// The most recent call to SetStatus determines the response code used when
-        /// an http response is sent.
-        /// </summary>
-        /// <param name="status"></param>
-        private static void SetStatus(HttpStatusCode status)
-        {
-            WebOperationContext.Current.OutgoingResponse.StatusCode = status;
-        }
-
-        /// <summary>
-        /// Returns a Stream version of index.html.
-        /// </summary>
-        /// <returns></returns>
-        public Stream API()
-        {
-            SetStatus(OK);
-            WebOperationContext.Current.OutgoingResponse.ContentType = "text/html";
-            return File.OpenRead(AppDomain.CurrentDomain.BaseDirectory + "index.html");
-        }
-    } 
+    //    /// <summary>
+    //    /// Returns a Stream version of index.html.
+    //    /// </summary>
+    //    /// <returns></returns>
+    //    public Stream API()
+    //    {
+    //        SetStatus(OK);
+    //        WebOperationContext.Current.OutgoingResponse.ContentType = "text/html";
+    //        return File.OpenRead(AppDomain.CurrentDomain.BaseDirectory + "index.html");
+    //    }
+    //}
 }
