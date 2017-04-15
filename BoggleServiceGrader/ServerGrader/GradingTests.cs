@@ -62,7 +62,6 @@ namespace ServerGrader
             }
         }
 
-
         /// <summary>
         /// Given a board configuration, returns all the valid words.
         /// </summary>
@@ -275,7 +274,6 @@ namespace ServerGrader
             }
         }
 
-
         // Null player name
         [TestMethod]
         public void MakeUser1()
@@ -304,7 +302,6 @@ namespace ServerGrader
             string player = MakeUser("Player").Result;
             Assert.IsTrue(player.Length > 0);
         }
-
 
         // Bad UserID
         [TestMethod]
@@ -411,8 +408,6 @@ namespace ServerGrader
             Assert.AreNotEqual(game1, game2);
         }
 
-
-
         // Can't cancel with a bad UserID
         [TestMethod]
         public void TestCancelGame1()
@@ -476,7 +471,6 @@ namespace ServerGrader
             CancelGame(player1, OK).Wait();
             JoinGame(player1, 10, Accepted).Wait();
         }
-
 
         // Word can't be played in pending game
         [TestMethod]
@@ -1081,8 +1075,6 @@ namespace ServerGrader
             Assert.AreEqual(0, timeLeft);
         }
 
-
-
         // Simulates a full game
         public string SimulateGame(out List<string> p1Words, out List<string> p2Words, AutoResetEvent resetEvent)
         {
@@ -1132,7 +1124,6 @@ namespace ServerGrader
             return game2;
         }
 
-
         // Play one game with correct scores
         public void Play(AutoResetEvent resetEvent)
         {
@@ -1169,7 +1160,6 @@ namespace ServerGrader
             Assert.AreEqual(total1, score1);
             Assert.AreEqual(total2, score2);
         }
-
 
         // Play one game with correct scores
         [TestMethod]

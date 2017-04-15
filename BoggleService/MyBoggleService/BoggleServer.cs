@@ -8,7 +8,7 @@ using System.Net.Sockets;
 
 namespace Boggle
 {
-    class MyBoggleService
+    class BoggleServer
     {
         /// <summary>
         /// Launches a MyBoggleService on port 60000.  Keeps the main
@@ -17,20 +17,19 @@ namespace Boggle
         /// <param name="args"></param>
         static void Main(string[] args)
         {
-            new MyBoggleService(60000);
+            new BoggleServer(60000);
             // This is our way of preventing the main thread from
             // exiting while the server is in use
             Console.ReadLine();
         }
         
-
         // Listens for incoming connection requests
         private TcpListener server;
 
         /// <summary>
         /// Creates a SimpleChatServer that listens for connection requests on port 4000.
         /// </summary>
-        public MyBoggleService(int port)
+        public BoggleServer(int port)
         {
             // A TcpListener listens for incoming connection requests
             server = new TcpListener(IPAddress.Any, port);
@@ -133,6 +132,15 @@ namespace Boggle
         }
 
         /// <summary>
+        /// 
+        /// </summary>
+        /// <param name=""></param>
+        private void ParseMessage (string message)
+        {
+
+        }
+
+        /// <summary>
         /// Called when some data has been received.
         /// </summary>
         private void MessageReceived(IAsyncResult result)
@@ -144,14 +152,16 @@ namespace Boggle
             // Report that to the console and close our socket.
             if (bytesRead == 0)
             {
-                Console.WriteLine("Socket closed");
+                Console.WriteLine("Socket closed"); 
                 socket.Close();
             }
+
+
 
             // Otherwise, decode and display the incoming bytes.  Then request more bytes.
             else
             {
-                // Convert the bytes into characters and appending to incoming
+/*                // Convert the bytes into characters and appending to incoming
                 int charsRead = decoder.GetChars(incomingBytes, 0, bytesRead, incomingChars, 0, false);
                 incoming.Append(incomingChars, 0, charsRead);
                 Console.WriteLine(incoming);
@@ -182,8 +192,8 @@ namespace Boggle
 
                 // Ask for some more data
                 socket.BeginReceive(incomingBytes, 0, incomingBytes.Length,
-                    SocketFlags.None, MessageReceived, null);
-            }
+                    SocketFlags.None, MessageReceived, null); */
+            } 
         }
 
         /// <summary>
