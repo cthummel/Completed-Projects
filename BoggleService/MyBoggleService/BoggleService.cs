@@ -4,8 +4,6 @@ using System.IO;
 using System.Net;
 using System.Threading;
 using System.Diagnostics;
-
-
 using static System.Net.HttpStatusCode;
 
 namespace Boggle
@@ -27,7 +25,6 @@ namespace Boggle
             ServerTimer.Start();
 
         }
-
 
         /// <summary>
         /// Server side timer ticks every second and updates time remaining on all games.
@@ -55,7 +52,6 @@ namespace Boggle
                 }
             }
         }
-
 
         /// <summary>
         /// Creates a user for the Boggle game
@@ -453,25 +449,4 @@ namespace Boggle
             }
         }
     }
-    //    /// <summary>
-    //    /// The most recent call to SetStatus determines the response code used when
-    //    /// an http response is sent.
-    //    /// </summary>
-    //    /// <param name="status"></param>
-    //    private static void SetStatus(HttpStatusCode status)
-    //    {
-    //        WebOperationContext.Current.OutgoingResponse.StatusCode = status;
-    //    }
-
-    //    /// <summary>
-    //    /// Returns a Stream version of index.html.
-    //    /// </summary>
-    //    /// <returns></returns>
-    //    public Stream API()
-    //    {
-    //        SetStatus(OK);
-    //        WebOperationContext.Current.OutgoingResponse.ContentType = "text/html";
-    //        return File.OpenRead(AppDomain.CurrentDomain.BaseDirectory + "index.html");
-    //    }
-    //}
 }
