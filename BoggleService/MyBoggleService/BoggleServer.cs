@@ -135,9 +135,24 @@ namespace Boggle
         /// 
         /// </summary>
         /// <param name=""></param>
-        private void ParseMessage (string message)
+        private void ParseMessage (StringBuilder message)
         {
 
+            //In here we need to parse the incoming message to run whichever service they asked for. (Create User, JoinGame, etc.)
+            //// Echo any complete lines, after capitalizing them
+            //int lastNewline = -1;
+            //int start = 0;
+            //for (int i = 0; i < incoming.Length; i++)
+            //{
+            //    if (incoming[i] == '\n')
+            //    {
+            //        String line = incoming.ToString(start, i + 1 - start);
+            //        SendMessage(line.ToUpper());
+            //        lastNewline = i;
+            //        start = i + 1;
+            //    }
+            //}
+            //incoming.Remove(0, lastNewline + 1);
         }
 
         /// <summary>
@@ -156,43 +171,23 @@ namespace Boggle
                 socket.Close();
             }
 
-
-
             // Otherwise, decode and display the incoming bytes.  Then request more bytes.
             else
             {
-/*                // Convert the bytes into characters and appending to incoming
+
+                // Convert the bytes into characters and appending to incoming
                 int charsRead = decoder.GetChars(incomingBytes, 0, bytesRead, incomingChars, 0, false);
                 incoming.Append(incomingChars, 0, charsRead);
-                Console.WriteLine(incoming);
+                
 
-                //In here we need to parse the incoming message to run whichever service they asked for. (Create User, JoinGame, etc.)
-
-
-
-
-
-                //// Echo any complete lines, after capitalizing them
-                //int lastNewline = -1;
-                //int start = 0;
-                //for (int i = 0; i < incoming.Length; i++)
-                //{
-                //    if (incoming[i] == '\n')
-                //    {
-                //        String line = incoming.ToString(start, i + 1 - start);
-                //        SendMessage(line.ToUpper());
-                //        lastNewline = i;
-                //        start = i + 1;
-                //    }
-                //}
-                //incoming.Remove(0, lastNewline + 1);
+                ParseMessage(incoming);
 
                 //Need to reset incoming.
-                //incoming = new StringBuilder();
+                incoming = new StringBuilder();
 
                 // Ask for some more data
                 socket.BeginReceive(incomingBytes, 0, incomingBytes.Length,
-                    SocketFlags.None, MessageReceived, null); */
+                    SocketFlags.None, MessageReceived, null);
             } 
         }
 
