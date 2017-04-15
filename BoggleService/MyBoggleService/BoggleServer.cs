@@ -124,6 +124,15 @@ namespace Boggle
         }
 
         /// <summary>
+        /// 
+        /// </summary>
+        /// <param name=""></param>
+        private void ParseMessage (string message)
+        {
+
+        }
+
+        /// <summary>
         /// Called when some data has been received.
         /// </summary>
         private void MessageReceived(IAsyncResult result)
@@ -139,10 +148,12 @@ namespace Boggle
                 socket.Close();
             }
 
+
+
             // Otherwise, decode and display the incoming bytes.  Then request more bytes.
             else
             {
-                // Convert the bytes into characters and appending to incoming
+/*                // Convert the bytes into characters and appending to incoming
                 int charsRead = decoder.GetChars(incomingBytes, 0, bytesRead, incomingChars, 0, false);
                 incoming.Append(incomingChars, 0, charsRead);
                 //Console.WriteLine(incoming);
@@ -164,8 +175,8 @@ namespace Boggle
 
                 // Ask for some more data
                 socket.BeginReceive(incomingBytes, 0, incomingBytes.Length,
-                    SocketFlags.None, MessageReceived, null);
-            }
+                    SocketFlags.None, MessageReceived, null); */
+            } 
         }
 
         /// <summary>
