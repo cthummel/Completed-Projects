@@ -169,14 +169,14 @@ namespace Boggle
             else
             {
                 // Convert the bytes into characters and appending to incoming
-                int charsRead = decoder.GetChars(incomingBytes, 0, bytesRead, incomingChars, 0, false);
+                int charsRead = decoder.GetChars(incomingBytes, 0, bytesRead, incomingChars, 0, false); // add another?
                 incoming.Append(incomingChars, 0, charsRead);
                 Console.WriteLine(incoming);
 
                 Regex parser = new Regex(RequestType);
-                if (parser.IsMatch(incoming.ToString()))
+                if (Regex.IsMatch(incoming.ToString(), RequestType))
                 {
-                    Match match = parser.Match(incoming.ToString());
+                    Match match = Regex.Match(incoming.ToString(), RequestType);
                     int groupCount = match.Groups.Count;
 
                     // make into switch statement later?
@@ -185,21 +185,24 @@ namespace Boggle
                         // Check that the whole get arrived
                         if (groupCount >= 5)
                         {
+                      //      socket.Close();
                             ParseMessage(incoming.ToString());
                         }
                     }
                     else
                     {
-                   //     if ()
-                    }
-                    
+                        int messageByteSize = Int32.Parse((Regex.Match(incoming.ToString(), ContentLength)).Groups[2].ToString());
+                        {
+
+                        }
+                    }                    
            
            
                 }
 
 
-                socket.BeginReceive(incomingBytes, 0, incomingBytes.Length, SocketFlags.None, MessageReceived, null);
-
+                //  socket.BeginReceive(incomingBytes, 0, incomingBytes.Length, SocketFlags.None, MessageReceived, null);
+                socket.Close();
 
 
 
