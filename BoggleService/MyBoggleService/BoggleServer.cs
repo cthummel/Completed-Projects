@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Net;
 using System.Net.Sockets;
+using Newtonsoft.Json;
 
 namespace Boggle
 {
@@ -137,17 +138,114 @@ namespace Boggle
         }
 
         /// <summary>
-        /// 
+        /// Given the proper parameters read from the input, it runs the correct method in our boggleserver and sends the response message.
+        /// This is essentially covering the functionality of IBoggleService from before.
         /// </summary>
-        /// <param name=""></param>
-        private void ParseMessage (string message)
+        /// <param name="Type"></param>
+        /// <param name="GameID"></param>
+        /// <param name="IsBrief"></param>
+        /// <param name="content"></param>
+        private void ParseMessage (string Type, string Url, string GameID, string IsBrief, dynamic content)
         {
-            Regex parser = new Regex(RequestType);
-            
-            Match matches = parser.Match(message);
-            
-            string type = matches.Groups[0].ToString();
+            HttpStatusCode status;
+            string ReturnMessage;
 
+            //Each method we call will return the object we need to encode 
+            if (Type == "POST")
+            {
+                if (Url == "users")
+                {
+                    
+                }
+                else if (Url == "games")
+                {
+
+                }
+
+            }
+            else if (Type == "PUT")
+            {
+                if (Url == "games")
+                {
+
+                }
+                else
+                {
+
+                }
+
+            }
+            //Runs a GET request on the server.
+            else
+            {
+
+            }
+
+        }
+
+        /// <summary>
+        /// Given a status code, compiles and then sends the proper response back to the client.
+        /// </summary>
+        /// <param name="status"></param>
+        /// <param name="content"></param>
+        private void CompileMessage(HttpStatusCode status, dynamic content)
+        {
+            StringBuilder message = new StringBuilder("HTTP/1.1 ");
+
+            //If our response doesnt need to send back a JSON object then we should just send back the status code.
+            //This only happens after a cancel game request.
+            if (content == null)
+            {
+                if (status == HttpStatusCode.Forbidden)
+                {
+                    message.Append("403 Forbidden\r\n");
+                    message.Append("content-type:application/json;charset=utf-8 \r\n");
+                    message.Append("content-length:0");
+                    message.Append("\r\n");
+                }
+                else if (status == HttpStatusCode.OK)
+                {
+                    message.Append("200 OK\r\n");
+                    message.Append("content-type:application/json;charset=utf-8 \r\n");
+                    message.Append("content-length:0");
+                    message.Append("\r\n");
+                }
+            }
+            else
+            {
+                string convertedcontent = JsonConvert.SerializeObject(content);
+                int contentlength = encoding.GetByteCount(convertedcontent);
+
+                if (status == HttpStatusCode.Forbidden)
+                {
+                    message.Append("403 Forbidden\r\n");
+                    message.Append("content-type:application/json;charset=utf-8 \r\n");
+                    message.Append("content-length:" + contentlength);
+                    message.Append("\r\n");
+                    message.Append(convertedcontent);
+                    message.Append("\r\n");
+                }
+                else if (status == HttpStatusCode.Conflict)
+                {
+
+                }
+                else if (status == HttpStatusCode.Created)
+                {
+
+                }
+                else if (status == HttpStatusCode.Accepted)
+                {
+
+                }
+                else if (status == HttpStatusCode.OK)
+                {
+                    
+                }
+
+            }
+
+            //Send the message we compiled.
+            SendMessage(message.ToString());
         }
 
         /// <summary>
@@ -176,29 +274,22 @@ namespace Boggle
                 incoming.Append(incomingChars, 0, charsRead);
                 Console.WriteLine(incoming);
 
-                Regex parser = new Regex(RequestType);
-                if (parser.IsMatch(incoming.ToString()))
+                //Checks what kind of request was made.
+                if (Regex.IsMatch(incoming.ToString(), RequestType))
                 {
-                    Match match = parser.Match(incoming.ToString());
-                    int groupCount = match.Groups.Count;
+                    Match match = Regex.Match(incoming.ToString(), RequestType);
+                    string request = match.Groups[1].ToString();
 
-                    // make into switch statement later?
-                    if (match.Groups[1].ToString() == "GET")
+                    //If the user has given us a JSON object we need to make sure we get it all.
+                    if (Regex.IsMatch(incoming.ToString(), ContentLength) && request != "GET")
                     {
-                        // Check that the whole get arrived
-                        if (groupCount >= 5)
-                        {
-                            ParseMessage(incoming.ToString());
-                        }
+                        Match ContentMatch = Regex.Match(incoming.ToString(), ContentLength);
+                        int BodyLength = Int32.Parse(ContentMatch.Groups[2].ToString());
                     }
-                    else
-                    {
-                   //     if ()
-                    }
-                    
-           
-           
+
                 }
+           
+                
 
 
                 socket.BeginReceive(incomingBytes, 0, incomingBytes.Length, SocketFlags.None, MessageReceived, null);
