@@ -63,7 +63,7 @@ namespace Boggle
 
             // We create a new ClientConnection, which will take care of communicating with
             // the remote client.
-            new ClientConnection(s);
+            new ClientConnection(s, InternalBoggleServer);
         }
     }
 
@@ -82,12 +82,13 @@ namespace Boggle
         private static System.Text.UTF8Encoding encoding = new System.Text.UTF8Encoding();
 
 
-        private const string RequestType = @"(POST|PUT|GET) (\/BoggleService\.svc\/)(games|users)(\/\d*)?(\?Brief=)?([a-zA-Z]*)?";
+        private const string RequestType = @"(POST|PUT|GET) (\/BoggleService\.svc\/)(games|users)\/(\d*)?(\?Brief=)?([a-zA-Z]*)?";
         private const string HostName = @"(Host:) (localhost:60000)";
         private const string AcceptType = @"(Accept:) (application/json)";
         private const string ContentLength = @"(Content-Length:) (\d*)";
         private const string ContentType = @"(Content-Type:) (application/json)";
 
+        private BoggleService server;
 
         // Buffer size for reading incoming bytes
         private const int BUFFER_SIZE = 1024;
@@ -122,12 +123,14 @@ namespace Boggle
         /// <summary>
         /// Creates a ClientConnection from the socket, then begins communicating with it.
         /// </summary>
-        public ClientConnection(Socket s)
+        public ClientConnection(Socket s, BoggleService Server)
         {
             // Record the socket and clear incoming
             socket = s;
             incoming = new StringBuilder();
             outgoing = new StringBuilder();
+
+            server = Server;
 
             // Send a welcome message to the remote client
             SendMessage("Welcome!\r\n");
@@ -148,7 +151,7 @@ namespace Boggle
         private void ParseMessage (string Type, string Url, string GameID, string IsBrief, dynamic content)
         {
             HttpStatusCode status;
-            string ReturnMessage;
+            
 
             //Each method we call will return the object we need to encode 
             if (Type == "POST")
@@ -178,7 +181,9 @@ namespace Boggle
             //Runs a GET request on the server.
             else
             {
-
+                Game CurrentGame = new Game();
+                CurrentGame = server.GetGameStatus(GameID, IsBrief, out status);
+                CompileMessage(status, CurrentGame);
             }
 
         }
@@ -199,17 +204,14 @@ namespace Boggle
                 if (status == HttpStatusCode.Forbidden)
                 {
                     message.Append("403 Forbidden\r\n");
-                    message.Append("content-type:application/json;charset=utf-8 \r\n");
-                    message.Append("content-length:0");
-                    message.Append("\r\n");
                 }
                 else if (status == HttpStatusCode.OK)
                 {
                     message.Append("200 OK\r\n");
-                    message.Append("content-type:application/json;charset=utf-8 \r\n");
-                    message.Append("content-length:0");
-                    message.Append("\r\n");
                 }
+                message.Append("content-type:application/json;charset=utf-8 \r\n");
+                message.Append("content-length:0 \r\n");
+                message.Append("\r\n");
             }
             else
             {
@@ -219,28 +221,37 @@ namespace Boggle
                 if (status == HttpStatusCode.Forbidden)
                 {
                     message.Append("403 Forbidden\r\n");
-                    message.Append("content-type:application/json;charset=utf-8 \r\n");
-                    message.Append("content-length:" + contentlength);
-                    message.Append("\r\n");
-                    message.Append(convertedcontent);
-                    message.Append("\r\n");
                 }
                 else if (status == HttpStatusCode.Conflict)
                 {
-
+                    message.Append("409 Conflict\r\n");
                 }
                 else if (status == HttpStatusCode.Created)
                 {
-
+                    message.Append("201 Created\r\n");
                 }
                 else if (status == HttpStatusCode.Accepted)
                 {
-
+                    message.Append("202 Accepted\r\n");
                 }
                 else if (status == HttpStatusCode.OK)
                 {
-                    
+                    message.Append("200 OK");
                 }
+                //message.Append("content-type:application/json;charset=utf-8 \r\n");
+                //message.Append("content-length:" + contentlength + "\r\n");
+                //message.Append("\r\n");
+                //message.Append(convertedcontent + "\r\n");
+                //message.Append("\r\n");
+                message.AppendLine();
+                message.Append("content-type:application/json;charset=utf-8");
+                message.AppendLine();
+                message.Append("content-length:" + contentlength + "\r\n");
+                message.AppendLine();
+                message.Append(convertedcontent + "\r\n");
+                message.AppendLine();
+
+
 
             }
 
@@ -260,7 +271,7 @@ namespace Boggle
             // Report that to the console and close our socket.
             if (bytesRead == 0)
             {
-                // Console.WriteLine("Socket closed"); 
+                Console.WriteLine("Socket closed"); 
 
 
                 socket.Close();
@@ -279,12 +290,18 @@ namespace Boggle
                 {
                     Match match = Regex.Match(incoming.ToString(), RequestType);
                     string request = match.Groups[1].ToString();
+                    string url = match.Groups[3].ToString();
+                    string GameID = match.Groups[4].ToString();
 
                     //If the user has given us a JSON object we need to make sure we get it all.
                     if (Regex.IsMatch(incoming.ToString(), ContentLength) && request != "GET")
                     {
                         Match ContentMatch = Regex.Match(incoming.ToString(), ContentLength);
                         int BodyLength = Int32.Parse(ContentMatch.Groups[2].ToString());
+                    }
+                    if (request == "GET")
+                    {
+                        ParseMessage(request, url, GameID, "no", null);
                     }
 
                 }
