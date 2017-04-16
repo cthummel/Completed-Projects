@@ -27,6 +27,7 @@ namespace Boggle
         // Listens for incoming connection requests
         private TcpListener server;
 
+        private BoggleService InternalBoggleServer;
         /// <summary>
         /// Creates a SimpleChatServer that listens for connection requests on port 4000.
         /// </summary>
@@ -34,7 +35,7 @@ namespace Boggle
         {
             // A TcpListener listens for incoming connection requests
             server = new TcpListener(IPAddress.Any, port);
-
+            InternalBoggleServer = new BoggleService();
             // Start the TcpListener
             server.Start();
 
@@ -65,7 +66,7 @@ namespace Boggle
         }
     }
 
-    r
+    
 
 
     /// <summary>
@@ -142,11 +143,11 @@ namespace Boggle
         private void ParseMessage (string message)
         {
             Regex parser = new Regex(RequestType);
-            MatchCollection matches = parser.Matches(message);
-            foreach (Match match in matches)
-            {
-                string type = match.Groups[0].ToString();
-            }
+            
+            Match matches = parser.Match(message);
+            
+            string type = matches.Groups[0].ToString();
+
         }
 
         /// <summary>
@@ -161,7 +162,7 @@ namespace Boggle
             // Report that to the console and close our socket.
             if (bytesRead == 0)
             {
-                /Console.WriteLine("Socket closed"); 
+                Console.WriteLine("Socket closed"); 
 
 
                 socket.Close();
