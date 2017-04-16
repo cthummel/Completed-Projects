@@ -151,30 +151,32 @@ namespace Boggle
         private void ParseMessage (string Type, string Url, string GameID, string IsBrief, dynamic content)
         {
             HttpStatusCode status;
-            
 
             //Each method we call will return the object we need to encode 
             if (Type == "POST")
             {
                 if (Url == "users")
                 {
-                    
+                    UserID ReturnID = server.CreateUser(content, out status);
+                    CompileMessage(status, ReturnID);
                 }
                 else if (Url == "games")
                 {
-
+                    GameIDReturn IDReturn = server.JoinGame(content, out status);
+                    CompileMessage(status, IDReturn);
                 }
-
             }
             else if (Type == "PUT")
             {
                 if (Url == "games")
                 {
-
+                    server.CancelJoinRequest(content, out status);
+                    CompileMessage(status, null);
                 }
                 else
                 {
-
+                    ScoreReturn Score = server.PlayWord(content, GameID, out status);
+                    CompileMessage(status, Score);
                 }
 
             }
@@ -209,9 +211,9 @@ namespace Boggle
                 {
                     message.Append("200 OK\r\n");
                 }
-                message.Append("content-type:application/json;charset=utf-8 \r\n");
-                message.Append("content-length:0 \r\n");
-                message.Append("\r\n");
+                message.Append("content-type: application/json; charset=utf-8 \r\n");
+                message.Append("content-length: 0 \r\n");
+                //message.Append("\r\n");
             }
             else
             {
@@ -242,19 +244,6 @@ namespace Boggle
                 message.Append("content-length: " + contentlength + " \r\n");
                 message.Append("\r\n");
                 message.Append(convertedcontent);
-                //message.Append("\r\n");
-
-
-                //message.AppendLine();
-                //message.Append("content-type:application/json;charset=utf-8");
-                //message.AppendLine();
-                //message.Append("content-length:" + contentlength);
-                //message.AppendLine();
-                //message.Append(convertedcontent);
-                //message.AppendLine();
-
-
-
             }
 
             //Send the message we compiled.
