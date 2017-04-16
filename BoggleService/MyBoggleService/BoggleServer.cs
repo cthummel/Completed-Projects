@@ -205,30 +205,26 @@ namespace Boggle
             {
                 if (status == HttpStatusCode.Forbidden)
                 {
-                    message.Append("403 Forbidden\r\n");
+                    message.Append("403 FORBIDDEN \r\n");
                 }
                 else if (status == HttpStatusCode.OK)
                 {
-                    message.Append("200 OK\r\n");
+                    message.Append("200 OK \r\n");
+                }
+                else if (status == HttpStatusCode.Conflict)
+                {
+                    message.Append("409 CONFLICT \r\n");
                 }
                 message.Append("content-type: application/json; charset=utf-8 \r\n");
                 message.Append("content-length: 0 \r\n");
-                //message.Append("\r\n");
+                message.Append("\r\n");
             }
             else
             {
                 string convertedcontent = JsonConvert.SerializeObject(content);
                 int contentlength = encoding.GetByteCount(convertedcontent);
 
-                if (status == HttpStatusCode.Forbidden)
-                {
-                    message.Append("403 FORBIDDEN \r\n");
-                }
-                else if (status == HttpStatusCode.Conflict)
-                {
-                    message.Append("409 CONFLICT \r\n");
-                }
-                else if (status == HttpStatusCode.Created)
+                if (status == HttpStatusCode.Created)
                 {
                     message.Append("201 CREATED \r\n");
                 }
@@ -285,10 +281,18 @@ namespace Boggle
                     string GameID = match.Groups[4].ToString();
 
                     //If the user has given us a JSON object we need to make sure we get it all.
-                    if (Regex.IsMatch(incoming.ToString(), ContentLength) && request != "GET")
+                    if (Regex.IsMatch(incoming.ToString(), ContentLength))
                     {
                         Match ContentMatch = Regex.Match(incoming.ToString(), ContentLength);
                         int BodyLength = Int32.Parse(ContentMatch.Groups[2].ToString());
+
+                        //Now we need to extract the JSON object and deserialize it.
+
+
+                        //For example, this line will deserialize the string called JSONOBJECT into a UserID object.
+                        //dynamic content = JsonConvert.DeserializeObject<UserID>(JSONOBJECT);
+
+
                     }
                     if (request == "GET")
                     {
