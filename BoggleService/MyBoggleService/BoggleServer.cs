@@ -162,49 +162,78 @@ namespace Boggle
             // Report that to the console and close our socket.
             if (bytesRead == 0)
             {
-                Console.WriteLine("Socket closed"); 
+                // Console.WriteLine("Socket closed"); 
 
 
                 socket.Close();
             }
 
-
-
             // Otherwise, decode and display the incoming bytes.  Then request more bytes.
             else
             {
-/*                // Convert the bytes into characters and appending to incoming
+                // Convert the bytes into characters and appending to incoming
                 int charsRead = decoder.GetChars(incomingBytes, 0, bytesRead, incomingChars, 0, false);
                 incoming.Append(incomingChars, 0, charsRead);
                 Console.WriteLine(incoming);
+
+                Regex parser = new Regex(RequestType);
+                if (parser.IsMatch(incoming.ToString()))
+                {
+                    Match match = parser.Match(incoming.ToString());
+                    int groupCount = match.Groups.Count;
+
+                    // make into switch statement later?
+                    if (match.Groups[1].ToString() == "GET")
+                    {
+                        // Check that the whole get arrived
+                        if (groupCount >= 5)
+                        {
+                            ParseMessage(incoming.ToString());
+                        }
+                    }
+                    else
+                    {
+                   //     if ()
+                    }
+                    
+           
+           
+                }
+
+
+                socket.BeginReceive(incomingBytes, 0, incomingBytes.Length, SocketFlags.None, MessageReceived, null);
+
+
+
+
 
                 //In here we need to parse the incoming message to run whichever service they asked for. (Create User, JoinGame, etc.)
 
 
 
+                /*
 
+                                //// Echo any complete lines, after capitalizing them
+                                //int lastNewline = -1;
+                                //int start = 0;
+                                //for (int i = 0; i < incoming.Length; i++)
+                                //{
+                                //    if (incoming[i] == '\n')
+                                //    {
+                                //        String line = incoming.ToString(start, i + 1 - start);
+                                //        SendMessage(line.ToUpper());
+                                //        lastNewline = i;
+                                //        start = i + 1;
+                                //    }
+                                //}
+                                //incoming.Remove(0, lastNewline + 1);
 
-                //// Echo any complete lines, after capitalizing them
-                //int lastNewline = -1;
-                //int start = 0;
-                //for (int i = 0; i < incoming.Length; i++)
-                //{
-                //    if (incoming[i] == '\n')
-                //    {
-                //        String line = incoming.ToString(start, i + 1 - start);
-                //        SendMessage(line.ToUpper());
-                //        lastNewline = i;
-                //        start = i + 1;
-                //    }
-                //}
-                //incoming.Remove(0, lastNewline + 1);
+                                // call parsemessage around here
 
-                //Need to reset incoming.
-                //incoming = new StringBuilder();
+                                //Need to reset incoming.
+                                //incoming = new StringBuilder();
 
-                // Ask for some more data
-                socket.BeginReceive(incomingBytes, 0, incomingBytes.Length,
-                    SocketFlags.None, MessageReceived, null); */
+                            */
             } 
         }
 
