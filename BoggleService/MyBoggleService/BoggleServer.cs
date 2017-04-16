@@ -133,7 +133,7 @@ namespace Boggle
             server = Server;
 
             // Send a welcome message to the remote client
-            SendMessage("Welcome!\r\n");
+            //SendMessage("Welcome!\r\n");
 
             // Ask the socket to call MessageReceive as soon as up to 1024 bytes arrive.
             socket.BeginReceive(incomingBytes, 0, incomingBytes.Length,
@@ -220,36 +220,38 @@ namespace Boggle
 
                 if (status == HttpStatusCode.Forbidden)
                 {
-                    message.Append("403 Forbidden\r\n");
+                    message.Append("403 FORBIDDEN \r\n");
                 }
                 else if (status == HttpStatusCode.Conflict)
                 {
-                    message.Append("409 Conflict\r\n");
+                    message.Append("409 CONFLICT \r\n");
                 }
                 else if (status == HttpStatusCode.Created)
                 {
-                    message.Append("201 Created\r\n");
+                    message.Append("201 CREATED \r\n");
                 }
                 else if (status == HttpStatusCode.Accepted)
                 {
-                    message.Append("202 Accepted\r\n");
+                    message.Append("202 ACCEPTED \r\n");
                 }
                 else if (status == HttpStatusCode.OK)
                 {
-                    message.Append("200 OK");
+                    message.Append("200 OK \r\n");
                 }
-                //message.Append("content-type:application/json;charset=utf-8 \r\n");
-                //message.Append("content-length:" + contentlength + "\r\n");
+                message.Append("content-type: application/json; charset=utf-8 \r\n");
+                message.Append("content-length: " + contentlength + " \r\n");
+                message.Append("\r\n");
+                message.Append(convertedcontent);
                 //message.Append("\r\n");
-                //message.Append(convertedcontent + "\r\n");
-                //message.Append("\r\n");
-                message.AppendLine();
-                message.Append("content-type:application/json;charset=utf-8");
-                message.AppendLine();
-                message.Append("content-length:" + contentlength + "\r\n");
-                message.AppendLine();
-                message.Append(convertedcontent + "\r\n");
-                message.AppendLine();
+
+
+                //message.AppendLine();
+                //message.Append("content-type:application/json;charset=utf-8");
+                //message.AppendLine();
+                //message.Append("content-length:" + contentlength);
+                //message.AppendLine();
+                //message.Append(convertedcontent);
+                //message.AppendLine();
 
 
 
@@ -355,17 +357,17 @@ namespace Boggle
             {
                 // Append the message to the outgoing lines
                 outgoing.Append(lines);
-
+                Console.WriteLine(outgoing);
                 // If there's not a send ongoing, start one.
                 if (!sendIsOngoing)
                 {
-                    //Console.WriteLine("Appending a " + lines.Length + " char line, starting send mechanism");
+                    Console.WriteLine("Appending a " + lines.Length + " char line, starting send mechanism");
                     sendIsOngoing = true;
                     SendBytes();
                 }
                 else
                 {
-                    //Console.WriteLine("\tAppending a " + lines.Length + " char line, send mechanism already running");
+                    Console.WriteLine("\tAppending a " + lines.Length + " char line, send mechanism already running");
                 }
             }
         }
