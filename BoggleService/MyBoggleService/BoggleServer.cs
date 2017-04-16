@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Net;
 using System.Net.Sockets;
+using Newtonsoft.Json;
 
 namespace Boggle
 {
@@ -27,6 +28,7 @@ namespace Boggle
         // Listens for incoming connection requests
         private TcpListener server;
 
+        private BoggleService InternalBoggleServer;
         /// <summary>
         /// Creates a SimpleChatServer that listens for connection requests on port 4000.
         /// </summary>
@@ -34,7 +36,7 @@ namespace Boggle
         {
             // A TcpListener listens for incoming connection requests
             server = new TcpListener(IPAddress.Any, port);
-
+            InternalBoggleServer = new BoggleService();
             // Start the TcpListener
             server.Start();
 
@@ -61,9 +63,11 @@ namespace Boggle
 
             // We create a new ClientConnection, which will take care of communicating with
             // the remote client.
-            new ClientConnection(s);
+            new ClientConnection(s, InternalBoggleServer);
         }
     }
+
+    
 
 
     /// <summary>
@@ -78,12 +82,13 @@ namespace Boggle
         private static System.Text.UTF8Encoding encoding = new System.Text.UTF8Encoding();
 
 
-        private const string RequestType = @"(POST|PUT|GET) (\/BoggleService\.svc\/)(games|users)(\/\d*)?(\?Brief=)?([a-zA-Z]*)?";
+        private const string RequestType = @"(POST|PUT|GET) (\/BoggleService\.svc\/)(games|users)\/(\d*)?(\?Brief=)?([a-zA-Z]*)?";
         private const string HostName = @"(Host:) (localhost:60000)";
         private const string AcceptType = @"(Accept:) (application/json)";
         private const string ContentLength = @"(Content-Length:) (\d*)";
         private const string ContentType = @"(Content-Type:) (application/json)";
 
+        private BoggleService server;
 
         // Buffer size for reading incoming bytes
         private const int BUFFER_SIZE = 1024;
@@ -118,15 +123,17 @@ namespace Boggle
         /// <summary>
         /// Creates a ClientConnection from the socket, then begins communicating with it.
         /// </summary>
-        public ClientConnection(Socket s)
+        public ClientConnection(Socket s, BoggleService Server)
         {
             // Record the socket and clear incoming
             socket = s;
             incoming = new StringBuilder();
             outgoing = new StringBuilder();
 
+            server = Server;
+
             // Send a welcome message to the remote client
-            SendMessage("Welcome!\r\n");
+            //SendMessage("Welcome!\r\n");
 
             // Ask the socket to call MessageReceive as soon as up to 1024 bytes arrive.
             socket.BeginReceive(incomingBytes, 0, incomingBytes.Length,
@@ -134,17 +141,109 @@ namespace Boggle
         }
 
         /// <summary>
-        /// 
+        /// Given the proper parameters read from the input, it runs the correct method in our boggleserver and sends the response message.
+        /// This is essentially covering the functionality of IBoggleService from before.
         /// </summary>
-        /// <param name=""></param>
-        private void ParseMessage (string message)
+        /// <param name="Type"></param>
+        /// <param name="GameID"></param>
+        /// <param name="IsBrief"></param>
+        /// <param name="content"></param>
+        private void ParseMessage (string Type, string Url, string GameID, string IsBrief, dynamic content)
         {
-            Regex parser = new Regex(RequestType);
-            MatchCollection matches = parser.Matches(message);
-            foreach (Match match in matches)
+            HttpStatusCode status;
+
+            //Each method we call will return the object we need to encode 
+            if (Type == "POST")
             {
-                string type = match.Groups[0].ToString();
+                if (Url == "users")
+                {
+                    UserID ReturnID = server.CreateUser(content, out status);
+                    CompileMessage(status, ReturnID);
+                }
+                else if (Url == "games")
+                {
+                    GameIDReturn IDReturn = server.JoinGame(content, out status);
+                    CompileMessage(status, IDReturn);
+                }
             }
+            else if (Type == "PUT")
+            {
+                if (Url == "games")
+                {
+                    server.CancelJoinRequest(content, out status);
+                    CompileMessage(status, null);
+                }
+                else
+                {
+                    ScoreReturn Score = server.PlayWord(content, GameID, out status);
+                    CompileMessage(status, Score);
+                }
+
+            }
+            //Runs a GET request on the server.
+            else
+            {
+                Game CurrentGame = new Game();
+                CurrentGame = server.GetGameStatus(GameID, IsBrief, out status);
+                CompileMessage(status, CurrentGame);
+            }
+
+        }
+
+        /// <summary>
+        /// Given a status code, compiles and then sends the proper response back to the client.
+        /// </summary>
+        /// <param name="status"></param>
+        /// <param name="content"></param>
+        private void CompileMessage(HttpStatusCode status, dynamic content)
+        {
+            StringBuilder message = new StringBuilder("HTTP/1.1 ");
+
+            //If our response doesnt need to send back a JSON object then we should just send back the status code.
+            //This only happens after a cancel game request.
+            if (content == null)
+            {
+                if (status == HttpStatusCode.Forbidden)
+                {
+                    message.Append("403 FORBIDDEN \r\n");
+                }
+                else if (status == HttpStatusCode.OK)
+                {
+                    message.Append("200 OK \r\n");
+                }
+                else if (status == HttpStatusCode.Conflict)
+                {
+                    message.Append("409 CONFLICT \r\n");
+                }
+                message.Append("content-type: application/json; charset=utf-8 \r\n");
+                message.Append("content-length: 0 \r\n");
+                message.Append("\r\n");
+            }
+            else
+            {
+                string convertedcontent = JsonConvert.SerializeObject(content);
+                int contentlength = encoding.GetByteCount(convertedcontent);
+
+                if (status == HttpStatusCode.Created)
+                {
+                    message.Append("201 CREATED \r\n");
+                }
+                else if (status == HttpStatusCode.Accepted)
+                {
+                    message.Append("202 ACCEPTED \r\n");
+                }
+                else if (status == HttpStatusCode.OK)
+                {
+                    message.Append("200 OK \r\n");
+                }
+                message.Append("content-type: application/json; charset=utf-8 \r\n");
+                message.Append("content-length: " + contentlength + " \r\n");
+                message.Append("\r\n");
+                message.Append(convertedcontent);
+            }
+
+            //Send the message we compiled.
+            SendMessage(message.ToString());
         }
 
         /// <summary>
@@ -159,7 +258,7 @@ namespace Boggle
             // Report that to the console and close our socket.
             if (bytesRead == 0)
             {
-                // Console.WriteLine("Socket closed"); 
+                Console.WriteLine("Socket closed"); 
 
 
                 socket.Close();
@@ -169,40 +268,44 @@ namespace Boggle
             else
             {
                 // Convert the bytes into characters and appending to incoming
-                int charsRead = decoder.GetChars(incomingBytes, 0, bytesRead, incomingChars, 0, false); // add another?
+                int charsRead = decoder.GetChars(incomingBytes, 0, bytesRead, incomingChars, 0, false);
                 incoming.Append(incomingChars, 0, charsRead);
                 Console.WriteLine(incoming);
 
-                Regex parser = new Regex(RequestType);
+                //Checks what kind of request was made.
                 if (Regex.IsMatch(incoming.ToString(), RequestType))
                 {
                     Match match = Regex.Match(incoming.ToString(), RequestType);
-                    int groupCount = match.Groups.Count;
+                    string request = match.Groups[1].ToString();
+                    string url = match.Groups[3].ToString();
+                    string GameID = match.Groups[4].ToString();
 
-                    // make into switch statement later?
-                    if (match.Groups[1].ToString() == "GET")
+                    //If the user has given us a JSON object we need to make sure we get it all.
+                    if (Regex.IsMatch(incoming.ToString(), ContentLength))
                     {
-                        // Check that the whole get arrived
-                        if (groupCount >= 5)
-                        {
-                      //      socket.Close();
-                            ParseMessage(incoming.ToString());
-                        }
+                        Match ContentMatch = Regex.Match(incoming.ToString(), ContentLength);
+                        int BodyLength = Int32.Parse(ContentMatch.Groups[2].ToString());
+
+                        //Now we need to extract the JSON object and deserialize it.
+
+
+                        //For example, this line will deserialize the string called JSONOBJECT into a UserID object.
+                        //dynamic content = JsonConvert.DeserializeObject<UserID>(JSONOBJECT);
+
+
                     }
-                    else
+                    if (request == "GET")
                     {
-                        int messageByteSize = Int32.Parse((Regex.Match(incoming.ToString(), ContentLength)).Groups[2].ToString());
-                        {
+                        ParseMessage(request, url, GameID, "no", null);
+                    }
 
-                        }
-                    }                    
-           
-           
                 }
+           
+                
 
 
-                //  socket.BeginReceive(incomingBytes, 0, incomingBytes.Length, SocketFlags.None, MessageReceived, null);
-                socket.Close();
+                socket.BeginReceive(incomingBytes, 0, incomingBytes.Length, SocketFlags.None, MessageReceived, null);
+
 
 
 
@@ -247,17 +350,17 @@ namespace Boggle
             {
                 // Append the message to the outgoing lines
                 outgoing.Append(lines);
-
+                Console.WriteLine(outgoing);
                 // If there's not a send ongoing, start one.
                 if (!sendIsOngoing)
                 {
-                    //Console.WriteLine("Appending a " + lines.Length + " char line, starting send mechanism");
+                    Console.WriteLine("Appending a " + lines.Length + " char line, starting send mechanism");
                     sendIsOngoing = true;
                     SendBytes();
                 }
                 else
                 {
-                    //Console.WriteLine("\tAppending a " + lines.Length + " char line, send mechanism already running");
+                    Console.WriteLine("\tAppending a " + lines.Length + " char line, send mechanism already running");
                 }
             }
         }
