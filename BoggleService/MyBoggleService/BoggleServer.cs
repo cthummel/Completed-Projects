@@ -279,41 +279,111 @@ namespace Boggle
                     string request = match.Groups[1].ToString();
                     string url = match.Groups[3].ToString();
                     string GameID = match.Groups[4].ToString();
+                    string IsBrief = match.Groups[6].ToString();
+                    dynamic content = null;
+                    int BodyLength = 0;
 
                     //If the user has given us a JSON object we need to make sure we get it all.
                     if (Regex.IsMatch(incoming.ToString(), ContentLength))
                     {
                         Match ContentMatch = Regex.Match(incoming.ToString(), ContentLength);
-                        int BodyLength = Int32.Parse(ContentMatch.Groups[2].ToString());
+                        BodyLength = Int32.Parse(ContentMatch.Groups[2].ToString());
                         Match bodymatch = Regex.Match(incoming.ToString(), ContentBody);
                         string ResponseBody = bodymatch.Value;
-                        string IsBrief = match.Groups[6].ToString();
+                        NameInfo info = JsonConvert.DeserializeObject<NameInfo>(ResponseBody);
 
+                        //Havent recieved all the bytes
+                        //if (encoding.GetBytes(ResponseBody).Length != BodyLength)
+                        //{
+                        //    socket.BeginReceive(incomingBytes, 0, incomingBytes.Length, SocketFlags.None, MessageReceived, null);
+                        //}
                         
-                        dynamic content = JsonConvert.DeserializeObject<NameInfo>(ResponseBody);
+                        //{
+                            if (request == "POST" && url == "users")
+                            {
+                                if (BodyLength == 0)
+                                {
+                                    content = new NameInfo();
+                                }
+                                else
+                                {
+                                    content = JsonConvert.DeserializeObject<NameInfo>(ResponseBody);
+                                }
+                                
+                            }
+                            else if (request == "POST" && url == "games")
+                            {
+                                if (BodyLength == 0)
+                                {
+                                    content = new GameInfo();
+                                }
+                                else
+                                {
+                                    content = JsonConvert.DeserializeObject<GameInfo>(ResponseBody);
+                                }
+                                
+                            }
+                            else if (request == "PUT" && url == "games")
+                            {
+                                if (BodyLength == 0)
+                                {
+                                    content = new UserID();
+                                }
+                                else
+                                {
+                                    content = JsonConvert.DeserializeObject<UserID>(ResponseBody);
+                                }
+                                
+                            }
+                            else if (request == "PUT" && url != "games")
+                            {
+                                if (BodyLength == 0)
+                                {
+                                    content = new WordInfo();
+                                }
+                                else
+                                {
+                                    content = JsonConvert.DeserializeObject<WordInfo>(ResponseBody);
+                                }
+                            }
+                        if (encoding.GetBytes(ResponseBody).Length != BodyLength -2)
+                        {
+                            socket.BeginReceive(incomingBytes, 0, incomingBytes.Length, SocketFlags.None, MessageReceived, null);
+                        }
+                        else
+                        {
+                            ParseMessage(request, url, GameID, IsBrief, content);
+                        }
+                        
+                        //}
+                    }
+                    else
+                    {
+                        if (request == "POST" && url == "users")
+                        {
+                            content = new NameInfo();
+                        }
+                        else if (request == "POST" && url == "games")
+                        {
 
+                        }
+                        else if (request == "PUT" && url == "games")
+                        {
+
+                        }
+                        else if (request == "PUT" && url != "games")
+                        {
+
+                        }
+                    }
+                    //if (request == "GET")
+                    //{
                         ParseMessage(request, url, GameID, IsBrief, content);
-                        //Now we need to extract the JSON object and deserialize it.
-
-                        //For example, this line will deserialize the string called JSONOBJECT into a UserID object.
-                        //dynamic content = JsonConvert.DeserializeObject<UserID>(JSONOBJECT);
-                    }
-
-                /*    if (request == "GET")
-                    {
-                        ParseMessage(request, url, GameID, "no", null);
-                    }
-                    else if (request == "PUT")
-                    {
-
-                    }
-                    else if (request == "POST")
-                    {
-
-                    } */
-                 
+                    //}
+                    
                 }
            
+
                 socket.BeginReceive(incomingBytes, 0, incomingBytes.Length, SocketFlags.None, MessageReceived, null);
 
 
