@@ -285,16 +285,23 @@ namespace Boggle
                         Match ContentMatch = Regex.Match(incoming.ToString(), ContentLength);
                         int BodyLength = Int32.Parse(ContentMatch.Groups[2].ToString());
 
+                        if (BodyLength == incoming.ToString().Length)
+                        {
+
+                        }
+
                         //Now we need to extract the JSON object and deserialize it.
 
                         //For example, this line will deserialize the string called JSONOBJECT into a UserID object.
                         //dynamic content = JsonConvert.DeserializeObject<UserID>(JSONOBJECT);
                     }
 
-                /*    if (request == "GET")
+                    if (request == "GET")
                     {
                         ParseMessage(request, url, GameID, "no", null);
                     }
+
+                    
                     else if (request == "PUT")
                     {
 
@@ -302,7 +309,7 @@ namespace Boggle
                     else if (request == "POST")
                     {
 
-                    } */
+                    }
                  
                 }
            
