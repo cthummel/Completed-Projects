@@ -279,7 +279,6 @@ namespace Boggle
                     string url = match.Groups[3].ToString();
                     string GameID = match.Groups[4].ToString();
 
-                    // the problem is that it never gets into this block on get
                     if (request == "GET")
                     {
                         ParseMessage(request, url, GameID, "no", "");
