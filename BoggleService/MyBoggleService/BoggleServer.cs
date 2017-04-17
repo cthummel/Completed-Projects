@@ -305,7 +305,7 @@ namespace Boggle
                         else if (request == "PUT" && url == "games/{GameID}")
                         {
                             content = JsonConvert.DeserializeObject<WordInfo>(ResponseBody);
-                        }
+                        } 
 
                         // Invokes the methods in BoggleService after parsing
                         ParseMessage(request, url, GameID, IsBrief, content);
