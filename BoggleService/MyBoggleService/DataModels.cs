@@ -89,9 +89,6 @@ namespace Boggle
         public List<WordScore> WordsPlayed { get; set; }
     }
 
-    /// <summary>
-    /// Word-score pairings, collectected in one object
-    /// </summary>
     public class WordScore
     {
         public string Word { get; set; }

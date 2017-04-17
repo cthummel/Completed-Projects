@@ -104,6 +104,7 @@ namespace Boggle
             }
         }
 
+
         /// <summary>
         /// Returns the 16 letters that make up this board.  It is formed
         /// by appending the first row to the second row to the third row
@@ -152,6 +153,7 @@ namespace Boggle
             // If no starting point worked, return false.
             return false;
         }
+
 
         /// <summary>
         /// Reports whether the provided word can be formed by tracking through
