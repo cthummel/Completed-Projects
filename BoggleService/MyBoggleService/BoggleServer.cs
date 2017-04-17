@@ -82,11 +82,12 @@ namespace Boggle
         private static System.Text.UTF8Encoding encoding = new System.Text.UTF8Encoding();
 
 
-        private const string RequestType = @"(POST|PUT|GET) (\/BoggleService\.svc\/)(games|users)\/?(\d*)?(\?Brief=)?([a-zA-Z]*)?";
+        private const string RequestType = @"(POST|PUT|GET) (\/BoggleService\.svc\/)(games|users)\/?(\d*)?\/?(\?Brief=)?([a-zA-Z]*)?";
         private const string HostName = @"(Host:) (localhost:60000)";
         private const string AcceptType = @"(Accept:) (application/json)";
-        private const string ContentLength = @"(Content-Length:) (\d*)";
+        private const string ContentLength = @"(content-length:) (\d*)";
         private const string ContentType = @"(Content-Type:) (application/json)";
+        private const string ContentBody = @"{.*}";
 
         private BoggleService server;
 
@@ -284,24 +285,24 @@ namespace Boggle
                     {
                         Match ContentMatch = Regex.Match(incoming.ToString(), ContentLength);
                         int BodyLength = Int32.Parse(ContentMatch.Groups[2].ToString());
+                        Match bodymatch = Regex.Match(incoming.ToString(), ContentBody);
+                        string ResponseBody = bodymatch.Value;
+                        string IsBrief = match.Groups[6].ToString();
 
-                        if (BodyLength == incoming.ToString().Length)
-                        {
+                        
+                        dynamic content = JsonConvert.DeserializeObject<NameInfo>(ResponseBody);
 
-                        }
-
+                        ParseMessage(request, url, GameID, IsBrief, content);
                         //Now we need to extract the JSON object and deserialize it.
 
                         //For example, this line will deserialize the string called JSONOBJECT into a UserID object.
                         //dynamic content = JsonConvert.DeserializeObject<UserID>(JSONOBJECT);
                     }
 
-                    if (request == "GET")
+                /*    if (request == "GET")
                     {
                         ParseMessage(request, url, GameID, "no", null);
                     }
-
-                    
                     else if (request == "PUT")
                     {
 
@@ -309,7 +310,7 @@ namespace Boggle
                     else if (request == "POST")
                     {
 
-                    }
+                    } */
                  
                 }
            
