@@ -278,50 +278,49 @@ namespace Boggle
                     string request = match.Groups[1].ToString();
                     string url = match.Groups[3].ToString();
                     string GameID = match.Groups[4].ToString();
-                    dynamic content;
+                    dynamic messageContent = "";
 
-                    // If the user has given us a JSON object we need to make sure we get it all.
+                    //If the user has given us a JSON object we need to make sure we get it all.
                     if (Regex.IsMatch(incoming.ToString(), ContentLength))
                     {
                         Match ContentMatch = Regex.Match(incoming.ToString(), ContentLength);
                         int BodyLength = Int32.Parse(ContentMatch.Groups[2].ToString());
 
-                        // caught the whole message
+                       // caught the whole message
                         if (BodyLength == incoming.ToString().Length)
                         {
+                            // deserialize the body of the message
+                        //    messageContent = JsonConvert.DeserializeObject(incoming.ToString().Substring(incoming.Length - BodyLength));
+
                             // Now we need to extract the JSON object and deserialize it.
                             // For example, this line will deserialize the string called JSONOBJECT into a UserID object.
-                            dynamic content = JsonConvert.DeserializeObject<UserID>(JSONOBJECT);
+                            // dynamic content = JsonConvert.DeserializeObject<UserID>(JSONOBJECT);
+                            Console.WriteLine(incoming);
                         }
                     }
 
+                
                     if (request == "GET")
+                    {
+                        ParseMessage(request, url, GameID, "no", null);
+                    }
+
+                    socket.BeginReceive(incomingBytes, 0, incomingBytes.Length, SocketFlags.None, MessageReceived, null);
+
+                    /* 
+                    if (request == "POST")
                     {
                         ParseMessage(request, url, GameID, "no", null);
                     }
 
                     if (request == "POST")
                     {
-                        ParseMessage(request, url, GameID, "no", content);
+                        ParseMessage(request, url, GameID, "no", null);
                     }
+                    */
 
-                    if (request == "PUT")
-                    {
-                        ParseMessage(request, url, GameID, "no", content);
-                    }
+
                 }
-
-                // Check for more incoming data
-                socket.BeginReceive(incomingBytes, 0, incomingBytes.Length, SocketFlags.None, MessageReceived, null);
-
-                // In here we need to parse the incoming message to run whichever service they asked for. (Create User, JoinGame, etc.)
-
-
-
-
-
-
-
             } 
         }
 
