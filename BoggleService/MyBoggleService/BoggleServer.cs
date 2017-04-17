@@ -314,7 +314,7 @@ namespace Boggle
            
                 socket.BeginReceive(incomingBytes, 0, incomingBytes.Length, SocketFlags.None, MessageReceived, null);
 
-                // Reset incoming string?
+                // Reset incoming string
             } 
         }
 
