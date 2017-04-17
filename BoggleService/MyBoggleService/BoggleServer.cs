@@ -180,6 +180,7 @@ namespace Boggle
                 }
 
             }
+
             //Runs a GET request on the server.
             else
             {
@@ -259,8 +260,6 @@ namespace Boggle
             if (bytesRead == 0)
             {
                 Console.WriteLine("Socket closed"); 
-
-
                 socket.Close();
             }
 
@@ -288,31 +287,30 @@ namespace Boggle
 
                         //Now we need to extract the JSON object and deserialize it.
 
-
                         //For example, this line will deserialize the string called JSONOBJECT into a UserID object.
                         //dynamic content = JsonConvert.DeserializeObject<UserID>(JSONOBJECT);
-
-
                     }
-                    if (request == "GET")
+
+                /*    if (request == "GET")
                     {
                         ParseMessage(request, url, GameID, "no", null);
                     }
+                    else if (request == "PUT")
+                    {
 
+                    }
+                    else if (request == "POST")
+                    {
+
+                    } */
+                 
                 }
            
-                
-
-
                 socket.BeginReceive(incomingBytes, 0, incomingBytes.Length, SocketFlags.None, MessageReceived, null);
 
 
 
-
-
                 //In here we need to parse the incoming message to run whichever service they asked for. (Create User, JoinGame, etc.)
-
-
 
                 /*
 
