@@ -24,7 +24,7 @@ namespace Boggle
             // exiting while the server is in use
             Console.ReadLine();
         }
-        
+
         // Listens for incoming connection requests
         private TcpListener server;
 
@@ -67,7 +67,7 @@ namespace Boggle
         }
     }
 
-    
+
 
 
     /// <summary>
@@ -81,11 +81,10 @@ namespace Boggle
         // encoded into a single byte.  The rest of the Unicode characters can take from 2 to 4 bytes to encode.
         private static System.Text.UTF8Encoding encoding = new System.Text.UTF8Encoding();
 
-
         private const string RequestType = @"(POST|PUT|GET) (\/BoggleService\.svc\/)(games|users)\/?(\d*)?\/?(\?Brief=)?([a-zA-Z]*)?";
         private const string HostName = @"(Host:) (localhost:60000)";
         private const string AcceptType = @"(Accept:) (application/json)";
-        private const string ContentLength = @"(content-length:) (\d*)";
+        private const string ContentLength = @"(Content-Length:) (\d*)";
         private const string ContentType = @"(Content-Type:) (application/json)";
         private const string ContentBody = @"{.*}";
 
@@ -149,7 +148,7 @@ namespace Boggle
         /// <param name="GameID"></param>
         /// <param name="IsBrief"></param>
         /// <param name="content"></param>
-        private void ParseMessage (string Type, string Url, string GameID, string IsBrief, dynamic content)
+        private void ParseMessage(string Type, string Url, string GameID, string IsBrief, dynamic content)
         {
             HttpStatusCode status;
 
@@ -260,7 +259,7 @@ namespace Boggle
             // Report that to the console and close our socket.
             if (bytesRead == 0)
             {
-                Console.WriteLine("Socket closed"); 
+                Console.WriteLine("Socket closed");
                 socket.Close();
             }
 
@@ -272,108 +271,55 @@ namespace Boggle
                 incoming.Append(incomingChars, 0, charsRead);
                 Console.WriteLine(incoming);
 
-                //Checks what kind of request was made.
+                // Checks what kind of request was made.
                 if (Regex.IsMatch(incoming.ToString(), RequestType))
                 {
                     Match match = Regex.Match(incoming.ToString(), RequestType);
                     string request = match.Groups[1].ToString();
                     string url = match.Groups[3].ToString();
                     string GameID = match.Groups[4].ToString();
-                    string IsBrief = match.Groups[6].ToString();
-                    dynamic content = null;
-                    int BodyLength = 0;
 
-                    //If the user has given us a JSON object we need to make sure we get it all.
+                    // If the user has given us a JSON object we need to make sure we get it all.
                     if (Regex.IsMatch(incoming.ToString(), ContentLength))
                     {
                         Match ContentMatch = Regex.Match(incoming.ToString(), ContentLength);
-                        BodyLength = Int32.Parse(ContentMatch.Groups[2].ToString());
+                        int BodyLength = Int32.Parse(ContentMatch.Groups[2].ToString());
                         Match bodymatch = Regex.Match(incoming.ToString(), ContentBody);
-                        string ResponseBody = bodymatch.Value;
-                        NameInfo info = JsonConvert.DeserializeObject<NameInfo>(ResponseBody);
+                        if (BodyLength == bodymatch.ToString().Length)
+                        {
 
-                        //Basically we didnt actually need the parser function. COuld have just done it all here. my bad.
-                        if (request == "POST" && url == "users")
-                        {
-                            content = JsonConvert.DeserializeObject<NameInfo>(ResponseBody);
-                        }
-                        else if (request == "POST" && url == "games")
-                        {
-                            content = JsonConvert.DeserializeObject<GameInfo>(ResponseBody);
-                        }
-                        else if (request == "PUT" && url == "games")
-                        {
-                            content = JsonConvert.DeserializeObject<UserID>(ResponseBody);
-                        }
-                        else if (request == "PUT" && url != "games")
-                        {
-                            content = JsonConvert.DeserializeObject<WordInfo>(ResponseBody);
-                        }
+                            string ResponseBody = bodymatch.Value;
+                            string IsBrief = match.Groups[6].ToString();
+                            dynamic content = "";
 
-                        //Checks to see if we are missing anything.
-                        if (encoding.GetBytes(ResponseBody).Length != BodyLength - 2)
-                        {
-                            socket.BeginReceive(incomingBytes, 0, incomingBytes.Length, SocketFlags.None, MessageReceived, null);
-                        }
-                        else
-                        {
+                            if (request == "POST" && url == "users")
+                            {
+                                content = JsonConvert.DeserializeObject<NameInfo>(ResponseBody);
+                            }
+                            else if (request == "POST" && url == "games")
+                            {
+                                content = JsonConvert.DeserializeObject<GameInfo>(ResponseBody);
+                            }
+                            else if (request == "PUT" && url == "games")
+                            {
+                                content = JsonConvert.DeserializeObject<UserID>(ResponseBody);
+                            }
+                            else if (request == "PUT" && url == "games/{GameID}")
+                            {
+                                content = JsonConvert.DeserializeObject<WordInfo>(ResponseBody);
+                            }
+
+                            // Invokes the methods in BoggleService after parsing
                             ParseMessage(request, url, GameID, IsBrief, content);
-                        }
 
-
-                    }
-                    else
-                    {
-                        if (request == "POST" && url == "users")
-                        {
-                            content = new NameInfo();
+                            // Reset incoming 
+                            incoming = new StringBuilder();
                         }
-                        else if (request == "POST" && url == "games")
-                        {
-                            content = new GameInfo();
-                        }
-                        else if (request == "PUT" && url == "games")
-                        {
-                            content = new UserID();
-                        }
-                        else if (request == "PUT" && url != "games")
-                        {
-                            content = new WordInfo();
-                        }
-
-                        ParseMessage(request, url, GameID, IsBrief, content);
                     }
                 }
+
                 socket.BeginReceive(incomingBytes, 0, incomingBytes.Length, SocketFlags.None, MessageReceived, null);
-
-
-
-                //In here we need to parse the incoming message to run whichever service they asked for. (Create User, JoinGame, etc.)
-
-                /*
-
-                                //// Echo any complete lines, after capitalizing them
-                                //int lastNewline = -1;
-                                //int start = 0;
-                                //for (int i = 0; i < incoming.Length; i++)
-                                //{
-                                //    if (incoming[i] == '\n')
-                                //    {
-                                //        String line = incoming.ToString(start, i + 1 - start);
-                                //        SendMessage(line.ToUpper());
-                                //        lastNewline = i;
-                                //        start = i + 1;
-                                //    }
-                                //}
-                                //incoming.Remove(0, lastNewline + 1);
-
-                                // call parsemessage around here
-
-                                //Need to reset incoming.
-                                //incoming = new StringBuilder();
-
-                            */
-            } 
+            }
         }
 
         /// <summary>
