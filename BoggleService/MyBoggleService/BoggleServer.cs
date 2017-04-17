@@ -253,7 +253,7 @@ namespace Boggle
         private void MessageReceived(IAsyncResult result)
         {
             // Figure out how many bytes have come in
-            int bytesRead = socket.EndReceive(result);
+             int bytesRead = socket.EndReceive(result);
 
             // If no bytes were received, it means the client closed its side of the socket.
             // Report that to the console and close our socket.
@@ -278,6 +278,13 @@ namespace Boggle
                     string request = match.Groups[1].ToString();
                     string url = match.Groups[3].ToString();
                     string GameID = match.Groups[4].ToString();
+
+                    // the problem is that it never gets into this block on get
+                    if (request == "GET")
+                    {
+                        ParseMessage(request, url, GameID, "no", "");
+                        return;
+                    }
 
                     // If the user has given us a JSON object we need to make sure we get it all.
                     if (Regex.IsMatch(incoming.ToString(), ContentLength))
@@ -314,10 +321,10 @@ namespace Boggle
 
                             // Reset incoming 
                             incoming = new StringBuilder();
+                            return;
                         }
                     }
                 }
-
                 socket.BeginReceive(incomingBytes, 0, incomingBytes.Length, SocketFlags.None, MessageReceived, null);
             }
         }
@@ -387,6 +394,8 @@ namespace Boggle
         /// </summary>
         private void MessageSent(IAsyncResult result)
         {
+            // issue here is with the socket!
+             
             // Find out how many bytes were actually sent
             int bytesSent = socket.EndSend(result);
             Console.WriteLine("\t" + bytesSent + " bytes were successfully sent");
@@ -397,6 +406,7 @@ namespace Boggle
                 // The socket has been closed
                 if (bytesSent == 0)
                 {
+
                     socket.Close();
                     Console.WriteLine("Socket closed");
                 }
