@@ -95,18 +95,18 @@ namespace Boggle
                 if (Info.TimeLimit < 5 || Info.TimeLimit > 120)
                 {
                     status = Forbidden;
-                    return ReturnInfo;
+                    return null;
                 }
                 else if (!UserIDs.TryGetValue(Info.UserToken, out nickname))
                 {
                     status = Forbidden;
-                    return ReturnInfo;
+                    return null;
                 }
                 //If the same player tries to join the pending game against himself.
                 else if (CurrentPendingGame.Player1Token == Info.UserToken)
                 {
                     status = Conflict;
-                    return ReturnInfo;
+                    return null;
                 }
                 //If the pending game has a player 1 waiting.
                 else if (CurrentPendingGame.Player1Token != null)
@@ -194,29 +194,29 @@ namespace Boggle
                 if (InputObject.Word == null || InputObject.Word.Trim().Length == 0)
                 {
                     status = Forbidden;
-                    return Score;
+                    return null;
                 }
                 // Playing a word in a pending game.
                 if ((GameList.Keys.Count + 1).ToString() == GameID)
                 {
                     status = Conflict;
-                    return Score;
+                    return null;
                 }
                 // Invalid GameID
                 if (!GameList.TryGetValue(Int32.Parse(GameID), out CurrentGame) || !UserIDs.ContainsKey(InputObject.UserToken))
                 {
                     status = Forbidden;
-                    return Score;
+                    return null;
                 }
                 else if (CurrentGame.Player1Token != InputObject.UserToken && CurrentGame.Player2Token != InputObject.UserToken)
                 {
                     status = Forbidden;
-                    return Score;
+                    return null;
                 }
                 else if (CurrentGame.GameState != "active")
                 {
                     status = Conflict;
-                    return Score;
+                    return null;
                 }
                 else
                 {

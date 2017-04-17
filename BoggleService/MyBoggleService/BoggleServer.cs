@@ -168,12 +168,12 @@ namespace Boggle
             }
             else if (Type == "PUT")
             {
-                if (Url == "games")
+                if (Url == "games" && GameID == string.Empty)
                 {
                     server.CancelJoinRequest(content, out status);
                     CompileMessage(status, null);
                 }
-                else
+                else 
                 {
                     ScoreReturn Score = server.PlayWord(content, GameID, out status);
                     CompileMessage(status, Score);
@@ -300,11 +300,11 @@ namespace Boggle
                             {
                                 content = JsonConvert.DeserializeObject<GameInfo>(ResponseBody);
                             }
-                            else if (request == "PUT" && url == "games")
+                            else if (request == "PUT" && url == "games" && GameID == string.Empty)
                             {
                                 content = JsonConvert.DeserializeObject<UserID>(ResponseBody);
                             }
-                            else if (request == "PUT" && url == "games/{GameID}")
+                            else if (request == "PUT" && url == "games" && GameID != string.Empty)
                             {
                                 content = JsonConvert.DeserializeObject<WordInfo>(ResponseBody);
                             }
