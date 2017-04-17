@@ -292,7 +292,7 @@ namespace Boggle
                         string ResponseBody = bodymatch.Value;
                         NameInfo info = JsonConvert.DeserializeObject<NameInfo>(ResponseBody);
 
-
+                        //Basically we didnt actually need the parser function. COuld have just done it all here. my bad.
                         if (request == "POST" && url == "users")
                         {
                             content = JsonConvert.DeserializeObject<NameInfo>(ResponseBody);
@@ -309,6 +309,8 @@ namespace Boggle
                         {
                             content = JsonConvert.DeserializeObject<WordInfo>(ResponseBody);
                         }
+
+                        //Checks to see if we are missing anything.
                         if (encoding.GetBytes(ResponseBody).Length != BodyLength - 2)
                         {
                             socket.BeginReceive(incomingBytes, 0, incomingBytes.Length, SocketFlags.None, MessageReceived, null);
@@ -319,7 +321,6 @@ namespace Boggle
                         }
 
 
-                        //}
                     }
                     else
                     {
