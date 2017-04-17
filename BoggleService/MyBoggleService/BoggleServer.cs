@@ -82,7 +82,7 @@ namespace Boggle
         private static System.Text.UTF8Encoding encoding = new System.Text.UTF8Encoding();
 
 
-        private const string RequestType = @"(POST|PUT|GET) (\/BoggleService\.svc\/)(games|users)\/(\d*)?(\?Brief=)?([a-zA-Z]*)?";
+        private const string RequestType = @"(POST|PUT|GET) (\/BoggleService\.svc\/)(games|users)\/?(\d*)?(\?Brief=)?([a-zA-Z]*)?";
         private const string HostName = @"(Host:) (localhost:60000)";
         private const string AcceptType = @"(Accept:) (application/json)";
         private const string ContentLength = @"(Content-Length:) (\d*)";
