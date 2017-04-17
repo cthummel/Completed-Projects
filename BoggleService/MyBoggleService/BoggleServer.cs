@@ -292,61 +292,24 @@ namespace Boggle
                         string ResponseBody = bodymatch.Value;
                         NameInfo info = JsonConvert.DeserializeObject<NameInfo>(ResponseBody);
 
-                        //Havent recieved all the bytes
-                        //if (encoding.GetBytes(ResponseBody).Length != BodyLength)
-                        //{
-                        //    socket.BeginReceive(incomingBytes, 0, incomingBytes.Length, SocketFlags.None, MessageReceived, null);
-                        //}
-                        
-                        //{
-                            if (request == "POST" && url == "users")
-                            {
-                                if (BodyLength == 0)
-                                {
-                                    content = new NameInfo();
-                                }
-                                else
-                                {
-                                    content = JsonConvert.DeserializeObject<NameInfo>(ResponseBody);
-                                }
-                                
-                            }
-                            else if (request == "POST" && url == "games")
-                            {
-                                if (BodyLength == 0)
-                                {
-                                    content = new GameInfo();
-                                }
-                                else
-                                {
-                                    content = JsonConvert.DeserializeObject<GameInfo>(ResponseBody);
-                                }
-                                
-                            }
-                            else if (request == "PUT" && url == "games")
-                            {
-                                if (BodyLength == 0)
-                                {
-                                    content = new UserID();
-                                }
-                                else
-                                {
-                                    content = JsonConvert.DeserializeObject<UserID>(ResponseBody);
-                                }
-                                
-                            }
-                            else if (request == "PUT" && url != "games")
-                            {
-                                if (BodyLength == 0)
-                                {
-                                    content = new WordInfo();
-                                }
-                                else
-                                {
-                                    content = JsonConvert.DeserializeObject<WordInfo>(ResponseBody);
-                                }
-                            }
-                        if (encoding.GetBytes(ResponseBody).Length != BodyLength -2)
+
+                        if (request == "POST" && url == "users")
+                        {
+                            content = JsonConvert.DeserializeObject<NameInfo>(ResponseBody);
+                        }
+                        else if (request == "POST" && url == "games")
+                        {
+                            content = JsonConvert.DeserializeObject<GameInfo>(ResponseBody);
+                        }
+                        else if (request == "PUT" && url == "games")
+                        {
+                            content = JsonConvert.DeserializeObject<UserID>(ResponseBody);
+                        }
+                        else if (request == "PUT" && url != "games")
+                        {
+                            content = JsonConvert.DeserializeObject<WordInfo>(ResponseBody);
+                        }
+                        if (encoding.GetBytes(ResponseBody).Length != BodyLength - 2)
                         {
                             socket.BeginReceive(incomingBytes, 0, incomingBytes.Length, SocketFlags.None, MessageReceived, null);
                         }
@@ -354,7 +317,8 @@ namespace Boggle
                         {
                             ParseMessage(request, url, GameID, IsBrief, content);
                         }
-                        
+
+
                         //}
                     }
                     else
@@ -365,25 +329,20 @@ namespace Boggle
                         }
                         else if (request == "POST" && url == "games")
                         {
-
+                            content = new GameInfo();
                         }
                         else if (request == "PUT" && url == "games")
                         {
-
+                            content = new UserID();
                         }
                         else if (request == "PUT" && url != "games")
                         {
-
+                            content = new WordInfo();
                         }
-                    }
-                    //if (request == "GET")
-                    //{
-                        ParseMessage(request, url, GameID, IsBrief, content);
-                    //}
-                    
-                }
-           
 
+                        ParseMessage(request, url, GameID, IsBrief, content);
+                    }
+                }
                 socket.BeginReceive(incomingBytes, 0, incomingBytes.Length, SocketFlags.None, MessageReceived, null);
 
 
