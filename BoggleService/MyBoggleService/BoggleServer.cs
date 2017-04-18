@@ -136,9 +136,6 @@ namespace Boggle
 
             server = Server;
 
-            // Send a welcome message to the remote client
-            SendMessage("Welcome!\r\n");
-
             // Ask the socket to call MessageReceive as soon as up to 1024 bytes arrive.
             socket.BeginReceive(incomingBytes, 0, incomingBytes.Length, SocketFlags.None, MessageReceived, null);
         }
