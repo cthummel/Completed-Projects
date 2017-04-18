@@ -10,6 +10,10 @@ using Newtonsoft.Json;
 
 namespace Boggle
 {
+    /// <summary>
+    /// A Boggle Server, by which a remote client can access the methods in BoggleService.cs,
+    /// by way of the Boggle API
+    /// </summary>
     class BoggleServer
     {
         /// <summary>
@@ -20,6 +24,7 @@ namespace Boggle
         static void Main(string[] args)
         {
             new BoggleServer(60000);
+
             // This is our way of preventing the main thread from
             // exiting while the server is in use
             Console.ReadLine();
@@ -67,9 +72,6 @@ namespace Boggle
         }
     }
 
-
-
-
     /// <summary>
     /// Represents a connection with a remote client.  Takes care of receiving and sending
     /// information to that client according to the protocol.
@@ -81,6 +83,7 @@ namespace Boggle
         // encoded into a single byte.  The rest of the Unicode characters can take from 2 to 4 bytes to encode.
         private static System.Text.UTF8Encoding encoding = new System.Text.UTF8Encoding();
 
+        // Regex keys for matching things in the message
         private const string RequestType = @"(POST|PUT|GET) (\/BoggleService\.svc\/)(games|users)\/?(\d*)?\/?(\?Brief=)?([a-zA-Z]*)?";
         private const string HostName = @"(Host:) (localhost:60000)";
         private const string AcceptType = @"(Accept:) (application/json)";
@@ -88,6 +91,7 @@ namespace Boggle
         private const string ContentType = @"(Content-Type:) (application/json)";
         private const string ContentBody = @"{.*}";
 
+        // Create the service
         private BoggleService server;
 
         // Buffer size for reading incoming bytes
@@ -133,15 +137,14 @@ namespace Boggle
             server = Server;
 
             // Send a welcome message to the remote client
-            //SendMessage("Welcome!\r\n");
+            SendMessage("Welcome!\r\n");
 
             // Ask the socket to call MessageReceive as soon as up to 1024 bytes arrive.
-            socket.BeginReceive(incomingBytes, 0, incomingBytes.Length,
-                                SocketFlags.None, MessageReceived, null);
+            socket.BeginReceive(incomingBytes, 0, incomingBytes.Length, SocketFlags.None, MessageReceived, null);
         }
 
         /// <summary>
-        /// Given the proper parameters read from the input, it runs the correct method in our boggleserver and sends the response message.
+        /// Given the proper parameters, it runs the correct method in our BoggleServer and sends the response message.
         /// This is essentially covering the functionality of IBoggleService from before.
         /// </summary>
         /// <param name="Type"></param>
@@ -152,14 +155,17 @@ namespace Boggle
         {
             HttpStatusCode status;
 
-            //Each method we call will return the object we need to encode 
+            // Each method we call should return the object we to JSON encoded
+
             if (Type == "POST")
             {
+                // CreateUser
                 if (Url == "users")
                 {
                     UserID ReturnID = server.CreateUser(content, out status);
                     CompileMessage(status, ReturnID);
                 }
+                // JoinGame
                 else if (Url == "games")
                 {
                     GameIDReturn IDReturn = server.JoinGame(content, out status);
@@ -168,27 +174,26 @@ namespace Boggle
             }
             else if (Type == "PUT")
             {
+                // CancelJoinRequest
                 if (Url == "games" && GameID == string.Empty)
                 {
                     server.CancelJoinRequest(content, out status);
                     CompileMessage(status, null);
                 }
+                // PlayWord
                 else 
                 {
                     ScoreReturn Score = server.PlayWord(content, GameID, out status);
                     CompileMessage(status, Score);
                 }
-
             }
-
-            //Runs a GET request on the server.
+            // GetGameStatus
             else
             {
                 Game CurrentGame = new Game();
                 CurrentGame = server.GetGameStatus(GameID, IsBrief, out status);
                 CompileMessage(status, CurrentGame);
             }
-
         }
 
         /// <summary>
@@ -200,50 +205,58 @@ namespace Boggle
         {
             StringBuilder message = new StringBuilder("HTTP/1.1 ");
 
-            //If our response doesnt need to send back a JSON object then we should just send back the status code.
-            //This only happens after a cancel game request.
+            // If there doesn't need to be a JSON object, just return the status
             if (content == null)
             {
+                // Forbidden
                 if (status == HttpStatusCode.Forbidden)
                 {
                     message.Append("403 FORBIDDEN \r\n");
                 }
+                // OK
                 else if (status == HttpStatusCode.OK)
                 {
                     message.Append("200 OK \r\n");
                 }
+                // Conflict
                 else if (status == HttpStatusCode.Conflict)
                 {
                     message.Append("409 CONFLICT \r\n");
                 }
+                // Finish by appending the message headers
                 message.Append("content-type: application/json; charset=utf-8 \r\n");
                 message.Append("content-length: 0 \r\n");
                 message.Append("\r\n");
             }
+            // Create the JSON object to be returned
             else
             {
-                string convertedcontent = JsonConvert.SerializeObject(content);
-                int contentlength = encoding.GetByteCount(convertedcontent);
+                string convertedContent = JsonConvert.SerializeObject(content);
+                int contentLength = encoding.GetByteCount(convertedContent);
 
+                // Created
                 if (status == HttpStatusCode.Created)
                 {
                     message.Append("201 CREATED \r\n");
                 }
+                // Accepted
                 else if (status == HttpStatusCode.Accepted)
                 {
                     message.Append("202 ACCEPTED \r\n");
                 }
+                // OK
                 else if (status == HttpStatusCode.OK)
                 {
                     message.Append("200 OK \r\n");
                 }
+                // Finish by appending the message headers
                 message.Append("content-type: application/json; charset=utf-8 \r\n");
-                message.Append("content-length: " + contentlength + " \r\n");
+                message.Append("content-length: " + contentLength + " \r\n");
                 message.Append("\r\n");
-                message.Append(convertedcontent);
+                message.Append(convertedContent);
             }
 
-            //Send the message we compiled.
+            // Send the message we compiled.
             SendMessage(message.ToString());
         }
 
@@ -263,7 +276,7 @@ namespace Boggle
                 socket.Close();
             }
 
-            // Otherwise, decode and display the incoming bytes.  Then request more bytes.
+            // Otherwise, decode and display the incoming bytes. Then request more bytes.
             else
             {
                 // Convert the bytes into characters and appending to incoming
@@ -274,56 +287,76 @@ namespace Boggle
                 // Checks what kind of request was made.
                 if (Regex.IsMatch(incoming.ToString(), RequestType))
                 {
+                    // Splits the message headers into different variables
                     Match match = Regex.Match(incoming.ToString(), RequestType);
                     string request = match.Groups[1].ToString();
                     string url = match.Groups[3].ToString();
-                    string GameID = match.Groups[4].ToString();
+                    string gameID = match.Groups[4].ToString();
 
+                    // "GET" gets handled separately, because it has no body
                     if (request == "GET")
                     {
-                        ParseMessage(request, url, GameID, "no", "");
+                        ParseMessage(request, url, gameID, "no", "");
                         return;
                     }
 
                     // If the user has given us a JSON object we need to make sure we get it all.
                     if (Regex.IsMatch(incoming.ToString(), ContentLength))
                     {
-                        Match ContentMatch = Regex.Match(incoming.ToString(), ContentLength);
-                        int BodyLength = Int32.Parse(ContentMatch.Groups[2].ToString());
-                        Match bodymatch = Regex.Match(incoming.ToString(), ContentBody);
-                        if (BodyLength == bodymatch.ToString().Length)
-                        {
+                        // Filtering for the contentLength message header
+                        Match contentMatch = Regex.Match(incoming.ToString(), ContentLength);
 
+                        // Number of bytes in the message body
+                        int bodyLength = Int32.Parse(contentMatch.Groups[2].ToString());
+
+                        // Filtering for the message body
+                        Match bodymatch = Regex.Match(incoming.ToString(), ContentBody);
+
+                        // Determines if the full message has been received
+                        if (bodyLength == bodymatch.ToString().Length)
+                        {
+                            // The main text of a message
                             string ResponseBody = bodymatch.Value;
+
+                            // Marker for GetGameStatus
                             string IsBrief = match.Groups[6].ToString();
+
+                            // Variable to hold deserialized JSON objects
                             dynamic content = "";
 
+                            // Deserialize the JSON object in the message body based on the request type
+
+                            // CreateUser
                             if (request == "POST" && url == "users")
                             {
                                 content = JsonConvert.DeserializeObject<NameInfo>(ResponseBody);
                             }
+                            // JoinGame
                             else if (request == "POST" && url == "games")
                             {
                                 content = JsonConvert.DeserializeObject<GameInfo>(ResponseBody);
                             }
-                            else if (request == "PUT" && url == "games" && GameID == string.Empty)
+                            // CancelJoinRequest
+                            else if (request == "PUT" && url == "games" && gameID == string.Empty)
                             {
                                 content = JsonConvert.DeserializeObject<UserID>(ResponseBody);
                             }
-                            else if (request == "PUT" && url == "games" && GameID != string.Empty)
+                            // PlayWord
+                            else if (request == "PUT" && url == "games" && gameID != string.Empty)
                             {
                                 content = JsonConvert.DeserializeObject<WordInfo>(ResponseBody);
                             }
-
                             // Invokes the methods in BoggleService after parsing
-                            ParseMessage(request, url, GameID, IsBrief, content);
+                            ParseMessage(request, url, gameID, IsBrief, content);
 
-                            // Reset incoming 
+                            // Reset the incoming block of bytes
                             incoming = new StringBuilder();
+
                             return;
                         }
                     }
                 }
+                // Ask for more bytes
                 socket.BeginReceive(incomingBytes, 0, incomingBytes.Length, SocketFlags.None, MessageReceived, null);
             }
         }
@@ -339,6 +372,7 @@ namespace Boggle
                 // Append the message to the outgoing lines
                 outgoing.Append(lines);
                 Console.WriteLine(outgoing);
+
                 // If there's not a send ongoing, start one.
                 if (!sendIsOngoing)
                 {
@@ -364,22 +398,18 @@ namespace Boggle
             if (pendingIndex < pendingBytes.Length)
             {
                 Console.WriteLine("\tSending " + (pendingBytes.Length - pendingIndex) + " bytes");
-                socket.BeginSend(pendingBytes, pendingIndex, pendingBytes.Length - pendingIndex,
-                                 SocketFlags.None, MessageSent, null);
+                socket.BeginSend(pendingBytes, pendingIndex, pendingBytes.Length - pendingIndex, SocketFlags.None, MessageSent, null);
             }
-
-            // If we're not currently dealing with a block of bytes, make a new block of bytes
-            // out of outgoing and start sending that.
+            // If we're not currently dealing with a block of bytes, 
+            // make a new block of bytes out of outgoing and start sending that.
             else if (outgoing.Length > 0)
             {
                 pendingBytes = encoding.GetBytes(outgoing.ToString());
                 pendingIndex = 0;
                 Console.WriteLine("\tConverting " + outgoing.Length + " chars into " + pendingBytes.Length + " bytes, sending them");
                 outgoing.Clear();
-                socket.BeginSend(pendingBytes, 0, pendingBytes.Length,
-                                 SocketFlags.None, MessageSent, null);
+                socket.BeginSend(pendingBytes, 0, pendingBytes.Length, SocketFlags.None, MessageSent, null);
             }
-
             // If there's nothing to send, shut down for the time being.
             else
             {
@@ -392,9 +422,7 @@ namespace Boggle
         /// Called when a message has been successfully sent
         /// </summary>
         private void MessageSent(IAsyncResult result)
-        {
-            // issue here is with the socket!
-             
+        {             
             // Find out how many bytes were actually sent
             int bytesSent = socket.EndSend(result);
             Console.WriteLine("\t" + bytesSent + " bytes were successfully sent");
@@ -405,11 +433,9 @@ namespace Boggle
                 // The socket has been closed
                 if (bytesSent == 0)
                 {
-
                     socket.Close();
                     Console.WriteLine("Socket closed");
                 }
-
                 // Update the pendingIndex and keep trying
                 else
                 {
