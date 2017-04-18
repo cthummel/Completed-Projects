@@ -278,6 +278,8 @@ namespace Boggle
                     string request = match.Groups[1].ToString();
                     string url = match.Groups[3].ToString();
                     string GameID = match.Groups[4].ToString();
+                    string IsBrief = match.Groups[6].ToString();
+                    dynamic content = "";
 
                     // If the user has given us a JSON object we need to make sure we get it all.
                     if (Regex.IsMatch(incoming.ToString(), ContentLength))
@@ -289,8 +291,8 @@ namespace Boggle
                         {
 
                             string ResponseBody = bodymatch.Value;
-                            string IsBrief = match.Groups[6].ToString();
-                            dynamic content = "";
+                            //string IsBrief = match.Groups[6].ToString();
+                            
 
                             if (request == "POST" && url == "users")
                             {
@@ -315,6 +317,10 @@ namespace Boggle
                             // Reset incoming 
                             incoming = new StringBuilder();
                         }
+                    }
+                    if (request == "GET")
+                    {
+                        ParseMessage(request, url, GameID, IsBrief, content);
                     }
                 }
 
