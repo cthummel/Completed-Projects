@@ -289,11 +289,12 @@ namespace Boggle
                     string request = match.Groups[1].ToString();
                     string url = match.Groups[3].ToString();
                     string gameID = match.Groups[4].ToString();
+                    string IsBrief = match.Groups[6].ToString();
 
                     // "GET" gets handled separately, because it has no body
                     if (request == "GET")
                     {
-                        ParseMessage(request, url, gameID, "no", "");
+                        ParseMessage(request, url, gameID, IsBrief, "");
                         return;
                     }
 
@@ -316,7 +317,7 @@ namespace Boggle
                             string ResponseBody = bodymatch.Value;
 
                             // Marker for GetGameStatus
-                            string IsBrief = match.Groups[6].ToString();
+                            
 
                             // Variable to hold deserialized JSON objects
                             dynamic content = "";
