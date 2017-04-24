@@ -72,7 +72,6 @@ namespace CustomNetworking
         {
             socket = s;
             encoding = e;
-            // TODO: Complete implementation of StringSocket
         }
 
         /// <summary>
@@ -117,7 +116,11 @@ namespace CustomNetworking
         /// </summary>
         public void BeginSend(String s, SendCallback callback, object payload)
         {
-            // TODO: Implement BeginSend
+            // lock (sendLock)
+
+
+
+
         }
 
         /// <summary>
@@ -160,6 +163,7 @@ namespace CustomNetworking
         /// </summary>
         public void BeginReceive(ReceiveCallback callback, object payload, int length = 0)
         {
+            // lock (receiveLock)
             // TODO: Implement BeginReceive
         }
 
