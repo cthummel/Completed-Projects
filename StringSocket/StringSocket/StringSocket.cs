@@ -62,6 +62,16 @@ namespace CustomNetworking
         // Encoding used for sending and receiving
         private Encoding encoding;
 
+        private Queue<ReceiveCallback> RecieveQueue;
+
+        private Queue<SendCallback> SendQueue;
+
+        //
+        private StringBuilder incoming, outgoing;
+
+        //For locking sending/reading mechanisms from the socket.
+        private readonly object sendSync = new object();
+
         /// <summary>
         /// Creates a StringSocket from a regular Socket, which should already be connected.  
         /// The read and write methods of the regular Socket must not be called after the
@@ -72,6 +82,10 @@ namespace CustomNetworking
         {
             socket = s;
             encoding = e;
+            incoming = new StringBuilder();
+            outgoing = new StringBuilder();
+            RecieveQueue = new Queue<ReceiveCallback>();
+            SendQueue = new Queue<SendCallback>();
         }
 
         /// <summary>
@@ -117,9 +131,9 @@ namespace CustomNetworking
         public void BeginSend(String s, SendCallback callback, object payload)
         {
             // lock (sendLock)
+            //socket.BeginSend();
 
-
-
+            
 
         }
 
@@ -165,6 +179,11 @@ namespace CustomNetworking
         {
             // lock (receiveLock)
             // TODO: Implement BeginReceive
+            //socket.BeginReceive();
+            while(RecieveQueue.Count != 0)
+            {
+
+            }
         }
 
         /// <summary>
