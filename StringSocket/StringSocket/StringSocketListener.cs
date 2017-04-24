@@ -40,7 +40,7 @@ namespace CustomNetworking
 
         /// <summary>
         /// Begins listening asynchonously for an incoming socket reqest.  When a
-        /// StringSocket is established, invokes the callback wih the StringSocket
+        /// StringSocket is established, invokes the callback with the StringSocket
         /// and the payload as parameters.
         /// </summary>
         public void BeginAcceptStringSocket(StringSocketCallback callback, object payload)

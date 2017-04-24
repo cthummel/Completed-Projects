@@ -63,10 +63,10 @@ namespace CustomNetworking
         private Encoding encoding;
 
         // Lock for BeginSend
-        private Object sendLock = new Object();
+        private object sendLock = new object();
 
         // Lock for BeginReceive
-        private Object receiveLock = new object();
+        private object receiveLock = new object();
 
         // Text that has been received from the client but not yet dealt with
         private StringBuilder incoming;
@@ -75,6 +75,13 @@ namespace CustomNetworking
         private StringBuilder outgoing;
 
 
+        private Decoder decoder;
+
+        // Buffer size for reading incoming bytes
+        private const int BUFFER_SIZE = 1024;
+        // Buffers that will contain incoming bytes and characters
+        private byte[] incomingBytes = new byte[BUFFER_SIZE];
+        private char[] incomingChars = new char[BUFFER_SIZE];
 
         // Records whether an asynchronous send attempt is ongoing
         private bool sendIsOngoing = false;
@@ -88,6 +95,13 @@ namespace CustomNetworking
         private int pendingIndex = 0;
 
 
+        private Queue<ReceiveCallback> RecieveQueue;
+
+        private Queue<SendCallback> SendQueue;
+
+       
+        
+
         /// <summary>
         /// Creates a StringSocket from a regular Socket, which should already be connected.  
         /// The read and write methods of the regular Socket must not be called after the
@@ -98,6 +112,11 @@ namespace CustomNetworking
         {
             socket = s;
             encoding = e;
+            incoming = new StringBuilder();
+            outgoing = new StringBuilder();
+            RecieveQueue = new Queue<ReceiveCallback>();
+            SendQueue = new Queue<SendCallback>();
+            decoder = encoding.GetDecoder();
         }
 
         /// <summary>
