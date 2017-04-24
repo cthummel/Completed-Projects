@@ -212,7 +212,7 @@ namespace CustomNetworking
         {
      //       lock (receiveLock)
             {
-                callback("", payload);
+                callback("cats", payload);
             }
         }
 
@@ -259,16 +259,28 @@ namespace CustomNetworking
                         String line = incoming.ToString(start, i + 1 - start);
 
 
-                        SendMessage(line.ToUpper());
+                        //SendMessage(line.ToUpper());
+                        
                         lastNewline = i;
                         start = i + 1;
                     }
                 }
+                
+                //Add the call back
+                //callback(line, payload);
+
                 incoming.Remove(0, lastNewline + 1);
 
                 // Ask for some more data
-                socket.BeginReceive(incomingBytes, 0, incomingBytes.Length,
+
+
+                //Looks for more bytes if we have pending Recieve callbacks.
+                while (RecieveQueue.Count != 0)
+                {
+                    socket.BeginReceive(incomingBytes, 0, incomingBytes.Length,
                     SocketFlags.None, MessageReceived, null);
+                }
+                
             }
         }
 
