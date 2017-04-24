@@ -161,10 +161,11 @@ namespace CustomNetworking
         /// </summary>
         public void BeginSend(String s, SendCallback callback, object payload)
         {
-     //       lock (sendLock)
+    //       lock (sendLock)
             {
                 callback(true, payload);
             }
+        //    socket.BeginSend("af", callback, payload); add to 5 params
 
 
             
