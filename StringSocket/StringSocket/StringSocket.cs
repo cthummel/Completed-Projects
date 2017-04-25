@@ -53,7 +53,6 @@ namespace CustomNetworking
     /// failed in the attempt, it invokes the callback.  The parameters to the callback are
     /// a string and the payload.  The string is the requested string (with the newline removed).
     /// </summary>
-
     public class StringSocket : IDisposable
     {
         // Underlying socket
@@ -61,6 +60,8 @@ namespace CustomNetworking
 
         // Encoding used for sending and receiving
         private Encoding encoding;
+
+        // Below here is our additions
 
         // Lock for BeginSend
         private object sendLock = new object();
@@ -74,11 +75,11 @@ namespace CustomNetworking
         // Text that needs to be sent to the client but which we have not yet started sending
         private StringBuilder outgoing;
 
-
         private Decoder decoder;
 
         // Buffer size for reading incoming bytes
         private const int BUFFER_SIZE = 1024;
+
         // Buffers that will contain incoming bytes and characters
         private byte[] incomingBytes = new byte[BUFFER_SIZE];
         private char[] incomingChars = new char[BUFFER_SIZE];
@@ -94,14 +95,14 @@ namespace CustomNetworking
         private byte[] pendingBytes = new byte[0];
         private int pendingIndex = 0;
 
-
-        private Queue<ReceiveCallback> RecieveQueue;
-
+        // For holding callbacks
+        private Queue<ReceiveCallback> ReceiveQueue;
         private Queue<SendCallback> SendQueue;
 
-       
-        
+        private Queue<object> PayLoadQueue;
+        private Queue<int> Length;
 
+      
         /// <summary>
         /// Creates a StringSocket from a regular Socket, which should already be connected.  
         /// The read and write methods of the regular Socket must not be called after the
@@ -114,7 +115,7 @@ namespace CustomNetworking
             encoding = e;
             incoming = new StringBuilder();
             outgoing = new StringBuilder();
-            RecieveQueue = new Queue<ReceiveCallback>();
+            ReceiveQueue = new Queue<ReceiveCallback>();
             SendQueue = new Queue<SendCallback>();
             decoder = encoding.GetDecoder();
         }
@@ -161,14 +162,11 @@ namespace CustomNetworking
         /// </summary>
         public void BeginSend(String s, SendCallback callback, object payload)
         {
-    //       lock (sendLock)
+        //      lock (sendLock)
             {
-                callback(true, payload);
+                callback(false, payload);
             }
-        //    socket.BeginSend("af", callback, payload); add to 5 params
-
-
-            
+        //      socket.BeginSend("af", callback, payload); add to 5 params    
         }
 
         /// <summary>
@@ -211,9 +209,9 @@ namespace CustomNetworking
         /// </summary>
         public void BeginReceive(ReceiveCallback callback, object payload, int length = 0)
         {
-     //       lock (receiveLock)
+            lock (receiveLock)
             {
-                callback("", payload);
+                callback("This is a t", payload);
             }
         }
 
@@ -225,6 +223,11 @@ namespace CustomNetworking
             Shutdown(SocketShutdown.Both);
             Close();
         }
+
+
+        // ********************** Everything below this point was imported from 11
+
+
 
         /// <summary>
         /// Called when some data has been received.
@@ -241,14 +244,13 @@ namespace CustomNetworking
                 Console.WriteLine("Socket closed");
                 socket.Close();
             }
-
             // Otherwise, decode and display the incoming bytes.  Then request more bytes.
             else
             {
                 // Convert the bytes into characters and appending to incoming
                 int charsRead = decoder.GetChars(incomingBytes, 0, bytesRead, incomingChars, 0, false);
                 incoming.Append(incomingChars, 0, charsRead);
-                //Console.WriteLine(incoming);
+                // Console.WriteLine(incoming);
 
                 // Echo any complete lines, after capitalizing them
                 int lastNewline = -1;
@@ -258,8 +260,6 @@ namespace CustomNetworking
                     if (incoming[i] == '\n')
                     {
                         String line = incoming.ToString(start, i + 1 - start);
-
-
                         SendMessage(line.ToUpper());
                         lastNewline = i;
                         start = i + 1;
@@ -351,7 +351,6 @@ namespace CustomNetworking
                     socket.Close();
                     Console.WriteLine("Socket closed");
                 }
-
                 // Update the pendingIndex and keep trying
                 else
                 {
