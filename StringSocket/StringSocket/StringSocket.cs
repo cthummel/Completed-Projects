@@ -55,6 +55,8 @@ namespace CustomNetworking
     /// </summary>
     public class StringSocket : IDisposable
     {
+
+       
         // Underlying socket
         private Socket socket;
 
@@ -162,7 +164,12 @@ namespace CustomNetworking
         /// </summary>
         public void BeginSend(String s, SendCallback callback, object payload)
         {
-        //      lock (sendLock)
+            
+
+            //      lock (sendLock)
+            SendQueue.Enqueue(callback);
+
+            SendMessage(s);
             {
                 callback(false, payload);
             }
@@ -209,8 +216,11 @@ namespace CustomNetworking
         /// </summary>
         public void BeginReceive(ReceiveCallback callback, object payload, int length = 0)
         {
+            ReceiveQueue.Enqueue(callback);
+
             lock (receiveLock)
             {
+                
                 callback("This is a t", payload);
             }
         }
@@ -250,7 +260,7 @@ namespace CustomNetworking
                 // Convert the bytes into characters and appending to incoming
                 int charsRead = decoder.GetChars(incomingBytes, 0, bytesRead, incomingChars, 0, false);
                 incoming.Append(incomingChars, 0, charsRead);
-                // Console.WriteLine(incoming);
+                Console.WriteLine(incoming);
 
                 // Echo any complete lines, after capitalizing them
                 int lastNewline = -1;
@@ -260,7 +270,8 @@ namespace CustomNetworking
                     if (incoming[i] == '\n')
                     {
                         String line = incoming.ToString(start, i + 1 - start);
-                        SendMessage(line.ToUpper());
+                        //SendMessage(line.ToUpper());
+                        
                         lastNewline = i;
                         start = i + 1;
                     }
