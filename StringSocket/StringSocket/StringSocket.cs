@@ -94,7 +94,8 @@ namespace CustomNetworking
         private Queue<ReceiveCallback> ReceiveQueue;
         private Queue<SendCallback> SendQueue;
 
-        private Queue<object> PayLoadQueue;
+        private Queue<object> SendPayLoadQueue;
+        private Queue<object> ReceivePayLoadQueue;
         private Queue<int> LengthQueue;
       
         /// <summary>
@@ -112,7 +113,8 @@ namespace CustomNetworking
        //   outgoing = new StringBuilder();
             ReceiveQueue = new Queue<ReceiveCallback>();
             SendQueue = new Queue<SendCallback>();
-            PayLoadQueue = new Queue<object>();
+            SendPayLoadQueue = new Queue<object>();
+            ReceivePayLoadQueue = new Queue<object>();
             LengthQueue = new Queue<int>();
         }
 
@@ -156,12 +158,18 @@ namespace CustomNetworking
         /// </summary>
         public void BeginReceive(ReceiveCallback callback, object payload, int length = 0)
         {
-     //       lock (receiveLock)
+            //Only locking here to make sure that the callback and its payload will always stay together. 
+            //If there is no lock then its possible that another entry could messup our order in the queue.
+            lock (receiveLock)
             {
+                
                 ReceiveQueue.Enqueue(callback);
-                PayLoadQueue.Enqueue(payload);
+                ReceivePayLoadQueue.Enqueue(payload);
                 LengthQueue.Enqueue(length);
-           //     socket.BeginReceive(incomingBytes, 0, incomingBytes.Length, SocketFlags.None, ReceiveAsync, null);
+
+                
+                //Since we know we have a request for a string we can begin looking for it.
+                socket.BeginReceive(incomingBytes, 0, incomingBytes.Length, SocketFlags.None, ReceiveAsync, null);
             }
         }
 
@@ -172,30 +180,36 @@ namespace CustomNetworking
         {
             // Figure out how many bytes have come in
             int bytesRead = socket.EndReceive(result);
-            
-                // Convert the bytes into characters and appending to incoming
-                 int charsRead = decoder.GetChars(incomingBytes, 0, bytesRead, incomingChars, 0, false);
-                 incomingString.Append(incomingChars, 0, charsRead);
 
-                int lastNewline = -1;
-                int start = 0;
-                for (int i = 0; i < incomingString.Length; i++)
-                {
-                    if (incomingString[i] == '\n')
-                    {
-                        String line = incomingString.ToString(start, i + 1 - start);
-                         lastNewline = i;
-                         start = i + 1;
-                    }
-                }
-                ReceiveQueue.Dequeue();
-                incomingString.Remove(0, lastNewline + 1);
+            // Convert the bytes into characters and appending to incoming
+            int charsRead = decoder.GetChars(incomingBytes, 0, bytesRead, incomingChars, 0, false);
+            incomingString.Append(incomingChars, 0, charsRead);
 
-                if (ReceiveQueue.Count != 0)
+            int lastNewline = -1;
+            int start = 0;
+            for (int i = 0; i < incomingString.Length; i++)
+            {
+                if (incomingString[i] == '\n')
                 {
-               //     socket.BeginReceive(incomingBytes, 0, incomingBytes.Length, SocketFlags.None, ReceiveAsync, null);
-                    
+                    String line = incomingString.ToString(start, i - start);
+
+                    //Pops the callback off the queue and gives it the proper line and payload.
+                    ReceiveCallback returncallback = ReceiveQueue.Dequeue();
+                    object returnpayload = ReceivePayLoadQueue.Dequeue();
+                    returncallback(line, returnpayload);
+
+                    lastNewline = i;
+                    start = i + 1;
                 }
+            }
+            //ReceiveQueue.Dequeue();
+            incomingString.Remove(0, lastNewline + 1);
+
+            //If the recieve queue has more callbacks in it then it needs to keep reading until all the recieve calls are complete.
+            if (ReceiveQueue.Count != 0)
+            {
+                socket.BeginReceive(incomingBytes, 0, incomingBytes.Length, SocketFlags.None, ReceiveAsync, null);
+            }
         }
 
         /// <summary>
@@ -228,9 +242,10 @@ namespace CustomNetworking
             {
                 byte[] stringBytes = encoding.GetBytes(s);
                 SendQueue.Enqueue(callback);
-                PayLoadQueue.Enqueue(payload);
+                SendPayLoadQueue.Enqueue(payload);
 
-                SendQueue.Dequeue();
+                SendCallback returncallback = SendQueue.Dequeue();
+                object returnpayload = SendPayLoadQueue.Dequeue();
 
                 object outgoingPayload = new Tuple<byte[], SendCallback, object>(stringBytes, callback, payload);
                 socket.BeginSend(stringBytes, 0, stringBytes.Length, SocketFlags.None, SendAsync, outgoingPayload);
