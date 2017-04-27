@@ -78,6 +78,7 @@ namespace CustomNetworking
         // private int pendingIndex = 0;
         // For holding callbacks
         private Queue<ReceiveCallback> ReceiveQueue;
+        private Queue<Tuple<string, ReceiveCallback, object>> CompleteQueue;
         private Queue<SendCallback> SendQueue;
         private Queue<object> SendPayLoadQueue;
         private Queue<object> ReceivePayLoadQueue;
@@ -100,6 +101,7 @@ namespace CustomNetworking
             SendPayLoadQueue = new Queue<object>();
             ReceivePayLoadQueue = new Queue<object>();
             LengthQueue = new Queue<int>();
+            CompleteQueue = new Queue<Tuple<string, ReceiveCallback, object>>();
         }
         /// <summary>
         /// We can read a string from the StringSocket by doing
@@ -190,10 +192,11 @@ namespace CustomNetworking
 
                         Task task = new Task(() => returncallback(line, returnpayload));
                         task.Start();
-                        
-                        
-                        
+
                         //returncallback(line, returnpayload);
+
+
+                        //CompleteQueue.Enqueue(new Tuple<string, ReceiveCallback, object>(line, returncallback, returnpayload));
 
                     }
 
