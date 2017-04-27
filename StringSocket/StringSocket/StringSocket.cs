@@ -266,7 +266,9 @@ namespace CustomNetworking
                 byte[] stringBytes = internalPayload.Item1;
                 SendCallback callback = internalPayload.Item2;
                 object outgoingPayload = internalPayload.Item3;
-                callback(true, outgoingPayload);
+                Task task = new Task(() => callback(true, outgoingPayload));
+                task.Start();
+                
             }
         }
         /// <summary>
