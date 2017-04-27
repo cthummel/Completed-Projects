@@ -1,26 +1,22 @@
 ﻿// Written by Joe Zachary for CS 3500, November 2012
 // Revised by Joe Zachary April 2016
 // Revised extensively by Joe Zachary April 2017
-
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Net.Sockets;
 using System.Threading;
-
 namespace CustomNetworking
 {
     /// <summary>
     /// The type of delegate that is called when a StringSocket send has completed.
     /// </summary>
     public delegate void SendCallback(bool wasSent, object payload);
-
     /// <summary>
     /// The type of delegate that is called when a receive has completed.
     /// </summary>
     public delegate void ReceiveCallback(String s, object payload);
-
     /// <summary> 
     /// A StringSocket is a wrapper around a Socket.  It provides methods that
     /// asynchronously read lines of text (strings terminated by newlines) and 
@@ -57,47 +53,33 @@ namespace CustomNetworking
     {
         // Underlying socket
         private Socket socket;
-
         // Encoding used for sending and receiving
         private Encoding encoding;
-
         private Decoder decoder;
-
         // Lock for BeginSend
         private object sendLock = new object();
-
         // Lock for BeginReceive
         private object receiveLock = new object();
-
         // Text that has been received from the client but not yet dealt with
         private StringBuilder incomingString;
-
-        // Text that needs to be sent to the client but which we have not yet started sending
-        private StringBuilder outgoing;
-
         // Buffer size for reading incoming bytes
         private const int BUFFER_SIZE = 1024;
-
         // Buffers that will contain incoming bytes and characters
         private byte[] incomingBytes = new byte[BUFFER_SIZE];
         private char[] incomingChars = new char[BUFFER_SIZE];
-
         // Records whether an asynchronous send attempt is ongoing
         // Private bool sendIsOngoing = false;
-
         // Bytes that we are actively trying to send, along with the
         // index of the leftmost byte whose send has not yet been completed
         private byte[] pendingBytes = new byte[0];
         // private int pendingIndex = 0;
-
         // For holding callbacks
         private Queue<ReceiveCallback> ReceiveQueue;
         private Queue<SendCallback> SendQueue;
-
         private Queue<object> SendPayLoadQueue;
         private Queue<object> ReceivePayLoadQueue;
         private Queue<int> LengthQueue;
-      
+
         /// <summary>
         /// Creates a StringSocket from a regular Socket, which should already be connected.  
         /// The read and write methods of the regular Socket must not be called after the
@@ -110,14 +92,12 @@ namespace CustomNetworking
             encoding = e;
             decoder = encoding.GetDecoder();
             incomingString = new StringBuilder();
-       //   outgoing = new StringBuilder();
             ReceiveQueue = new Queue<ReceiveCallback>();
             SendQueue = new Queue<SendCallback>();
             SendPayLoadQueue = new Queue<object>();
             ReceivePayLoadQueue = new Queue<object>();
             LengthQueue = new Queue<int>();
         }
-
         /// <summary>
         /// We can read a string from the StringSocket by doing
         /// 
@@ -158,21 +138,19 @@ namespace CustomNetworking
         /// </summary>
         public void BeginReceive(ReceiveCallback callback, object payload, int length = 0)
         {
-            //Only locking here to make sure that the callback and its payload will always stay together. 
-            //If there is no lock then its possible that another entry could messup our order in the queue.
+            // Only locking here to make sure that the callback and its payload will always stay together. 
+            // If there is no lock then its possible that another entry could messup our order in the queue.
             lock (receiveLock)
             {
-                
                 ReceiveQueue.Enqueue(callback);
                 ReceivePayLoadQueue.Enqueue(payload);
                 LengthQueue.Enqueue(length);
-
-                
-                //Since we know we have a request for a string we can begin looking for it.
-                socket.BeginReceive(incomingBytes, 0, incomingBytes.Length, SocketFlags.None, ReceiveAsync, null);
             }
-        }
+            //Since we know we have a request for a string we can begin looking for it.
+            socket.BeginReceive(incomingBytes, 0, incomingBytes.Length, SocketFlags.None, ReceiveAsync, null);
 
+
+        }
         /// <summary>
         /// Called when some data has been received.
         /// </summary>
@@ -180,11 +158,9 @@ namespace CustomNetworking
         {
             // Figure out how many bytes have come in
             int bytesRead = socket.EndReceive(result);
-
             // Convert the bytes into characters and appending to incoming
             int charsRead = decoder.GetChars(incomingBytes, 0, bytesRead, incomingChars, 0, false);
             incomingString.Append(incomingChars, 0, charsRead);
-
             int lastNewline = -1;
             int start = 0;
             for (int i = 0; i < incomingString.Length; i++)
@@ -192,26 +168,22 @@ namespace CustomNetworking
                 if (incomingString[i] == '\n')
                 {
                     String line = incomingString.ToString(start, i - start);
-
-                    //Pops the callback off the queue and gives it the proper line and payload.
+                    // Pops the callback off the queue and gives it the proper line and payload.
                     ReceiveCallback returncallback = ReceiveQueue.Dequeue();
                     object returnpayload = ReceivePayLoadQueue.Dequeue();
                     returncallback(line, returnpayload);
-
                     lastNewline = i;
                     start = i + 1;
                 }
             }
             //ReceiveQueue.Dequeue();
             incomingString.Remove(0, lastNewline + 1);
-
             //If the recieve queue has more callbacks in it then it needs to keep reading until all the recieve calls are complete.
             if (ReceiveQueue.Count != 0)
             {
                 socket.BeginReceive(incomingBytes, 0, incomingBytes.Length, SocketFlags.None, ReceiveAsync, null);
             }
         }
-
         /// <summary>
         /// We can write a string to a StringSocket ss by doing
         /// 
@@ -238,32 +210,32 @@ namespace CustomNetworking
         /// </summary>
         public void BeginSend(String s, SendCallback callback, object payload)
         {
+            byte[] stringBytes = encoding.GetBytes(s);
             lock (sendLock)
             {
-                byte[] stringBytes = encoding.GetBytes(s);
                 SendQueue.Enqueue(callback);
                 SendPayLoadQueue.Enqueue(payload);
-
                 SendCallback returncallback = SendQueue.Dequeue();
                 object returnpayload = SendPayLoadQueue.Dequeue();
-
                 object outgoingPayload = new Tuple<byte[], SendCallback, object>(stringBytes, callback, payload);
                 socket.BeginSend(stringBytes, 0, stringBytes.Length, SocketFlags.None, SendAsync, outgoingPayload);
             }
-        }
 
+        }
         /// <summary>
         /// Called when a message has been successfully sent
         /// </summary>
         private void SendAsync(IAsyncResult result)
         {
-            var internalPayload = (Tuple<byte[], SendCallback, object>)result.AsyncState;
-            byte[] stringBytes = internalPayload.Item1;
-            SendCallback callback = internalPayload.Item2;
-            object outgoingPayload = internalPayload.Item3;
-            callback(true, outgoingPayload);
+            lock (sendLock)
+            {
+                var internalPayload = (Tuple<byte[], SendCallback, object>)result.AsyncState;
+                byte[] stringBytes = internalPayload.Item1;
+                SendCallback callback = internalPayload.Item2;
+                object outgoingPayload = internalPayload.Item3;
+                callback(true, outgoingPayload);
+            }
         }
-
         /// <summary>
         /// Shuts down this StringSocket.
         /// </summary>
@@ -271,7 +243,6 @@ namespace CustomNetworking
         {
             socket.Shutdown(mode);
         }
-
         /// <summary>
         /// Closes this StringSocket.
         /// </summary>
@@ -279,7 +250,7 @@ namespace CustomNetworking
         {
             socket.Close();
         }
-        
+
         /// <summary>
         /// Frees resources associated with this StringSocket.
         /// </summary>
