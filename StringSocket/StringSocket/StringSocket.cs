@@ -64,6 +64,9 @@ namespace CustomNetworking
         private StringBuilder incomingString;
         // Buffer size for reading incoming bytes
         private const int BUFFER_SIZE = 1024;
+
+        private bool ReceiveOngoing = false;
+
         // Buffers that will contain incoming bytes and characters
         private byte[] incomingBytes = new byte[BUFFER_SIZE];
         private char[] incomingChars = new char[BUFFER_SIZE];
@@ -147,8 +150,13 @@ namespace CustomNetworking
                 //LengthQueue.Enqueue(length);
 
             }
-             //Since we know we have a request for a string we can begin looking for it.
-             socket.BeginReceive(incomingBytes, 0, incomingBytes.Length, SocketFlags.None, ReceiveAsync, null);
+            if (ReceiveOngoing == false)
+            {
+                ReceiveOngoing = true;
+                //Since we know we have a request for a string we can begin looking for it.
+                socket.BeginReceive(incomingBytes, 0, incomingBytes.Length, SocketFlags.None, ReceiveAsync, null);
+            }
+             
 
 
         }
@@ -175,13 +183,17 @@ namespace CustomNetworking
                     // Pops the callback off the queue and gives it the proper line and payload.
 
 
-                    lock (ReceiveQueue)
+                    lock (receiveLock)
                     {
                         ReceiveCallback returncallback = ReceiveQueue.Dequeue();
                         object returnpayload = ReceivePayLoadQueue.Dequeue();
 
+                        Task task = new Task(() => returncallback(line, returnpayload));
+                        task.Start();
                         
-                        returncallback(line, returnpayload);
+                        
+                        
+                        //returncallback(line, returnpayload);
 
                     }
 
@@ -195,6 +207,10 @@ namespace CustomNetworking
             if (ReceiveQueue.Count != 0)
             {
                 socket.BeginReceive(incomingBytes, 0, incomingBytes.Length, SocketFlags.None, ReceiveAsync, null);
+            }
+            else
+            {
+                ReceiveOngoing = false;
             }
         }
 
