@@ -148,8 +148,6 @@ namespace CustomNetworking
             }
             //Since we know we have a request for a string we can begin looking for it.
             socket.BeginReceive(incomingBytes, 0, incomingBytes.Length, SocketFlags.None, ReceiveAsync, null);
-
-
         }
         /// <summary>
         /// Called when some data has been received.
@@ -169,16 +167,20 @@ namespace CustomNetworking
                 {
                     String line = incomingString.ToString(start, i - start);
                     // Pops the callback off the queue and gives it the proper line and payload.
-                    ReceiveCallback returncallback = ReceiveQueue.Dequeue();
-                    object returnpayload = ReceivePayLoadQueue.Dequeue();
-                    returncallback(line, returnpayload);
+            //        lock (receiveLock)
+                    {
+                        ReceiveCallback returncallback = ReceiveQueue.Dequeue();
+                        object returnpayload = ReceivePayLoadQueue.Dequeue();
+                        returncallback(line, returnpayload);
+                    }
                     lastNewline = i;
                     start = i + 1;
                 }
             }
-            //ReceiveQueue.Dequeue();
+
+            // ReceiveQueue.Dequeue();
             incomingString.Remove(0, lastNewline + 1);
-            //If the recieve queue has more callbacks in it then it needs to keep reading until all the recieve calls are complete.
+            // If the recieve queue has more callbacks in it then it needs to keep reading until all the recieve calls are complete.
             if (ReceiveQueue.Count != 0)
             {
                 socket.BeginReceive(incomingBytes, 0, incomingBytes.Length, SocketFlags.None, ReceiveAsync, null);
@@ -217,11 +219,12 @@ namespace CustomNetworking
                 SendPayLoadQueue.Enqueue(payload);
                 SendCallback returncallback = SendQueue.Dequeue();
                 object returnpayload = SendPayLoadQueue.Dequeue();
+
                 object outgoingPayload = new Tuple<byte[], SendCallback, object>(stringBytes, callback, payload);
                 socket.BeginSend(stringBytes, 0, stringBytes.Length, SocketFlags.None, SendAsync, outgoingPayload);
-            }
-
+            }   
         }
+
         /// <summary>
         /// Called when a message has been successfully sent
         /// </summary>
