@@ -78,7 +78,6 @@ namespace CustomNetworking
         // private int pendingIndex = 0;
         // For holding callbacks
         private Queue<ReceiveCallback> ReceiveQueue;
-        private Queue<Tuple<string, ReceiveCallback, object>> CompleteQueue;
         private Queue<SendCallback> SendQueue;
         private Queue<object> SendPayLoadQueue;
         private Queue<object> ReceivePayLoadQueue;
@@ -101,7 +100,6 @@ namespace CustomNetworking
             SendPayLoadQueue = new Queue<object>();
             ReceivePayLoadQueue = new Queue<object>();
             LengthQueue = new Queue<int>();
-            CompleteQueue = new Queue<Tuple<string, ReceiveCallback, object>>();
         }
         /// <summary>
         /// We can read a string from the StringSocket by doing
@@ -152,6 +150,7 @@ namespace CustomNetworking
                 //LengthQueue.Enqueue(length);
 
             }
+            
             if (ReceiveOngoing == false)
             {
                 ReceiveOngoing = true;
@@ -194,11 +193,8 @@ namespace CustomNetworking
                         task.Start();
 
                         //returncallback(line, returnpayload);
-
-
-                        //CompleteQueue.Enqueue(new Tuple<string, ReceiveCallback, object>(line, returncallback, returnpayload));
-
                     }
+                    
 
                     lastNewline = i;
                     start = i + 1;
@@ -243,9 +239,10 @@ namespace CustomNetworking
         /// </summary>
         public void BeginSend(String s, SendCallback callback, object payload)
         {
-            byte[] stringBytes = encoding.GetBytes(s);
-            //lock (sendLock)
+           
+            lock (sendLock)
             {
+                byte[] stringBytes = encoding.GetBytes(s);
                 //SendQueue.Enqueue(callback);
                 //SendPayLoadQueue.Enqueue(payload);
                 //SendCallback returncallback = SendQueue.Dequeue();
@@ -266,6 +263,7 @@ namespace CustomNetworking
                 byte[] stringBytes = internalPayload.Item1;
                 SendCallback callback = internalPayload.Item2;
                 object outgoingPayload = internalPayload.Item3;
+
                 Task task = new Task(() => callback(true, outgoingPayload));
                 task.Start();
                 
